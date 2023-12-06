@@ -1,0 +1,107 @@
+(define
+  (problem overcooked2-tutorial)
+  (:domain overcooked2)
+  (:objects
+    tomato1 tomato2 tomato3 tomato4 tomato5 tomato6 tomato7 - tomato
+    lettuce1 lettuce2 lettuce3 lettuce4 lettuce5 lettuce6 lettuce7 - lettuce
+    cucumber1 cucumber2 cucumber3 cucumber4 cucumber5 cucumber6 cucumber7 - cucumber
+    
+    plate1 plate2 plate3 plate4 plate5 plate6 plate7 - plate
+    
+    knife1 knife2 - knife
+    
+    tomato-dispenser lettuce-dispenser cucumber-dispenser plate-storage countertop5 countertop6 countertop7 - countertop
+    ; fridge - location
+    counter1 - counter
+
+    cook1 cook2 - cook
+    client1 client2 client3 client4 - client
+    )
+  
+  (:htn
+    :parameters ()
+    :subtasks (and
+      (order1 (order-lettuce-salad client1))
+      (order2 (order-lettuce-tomato-salad client2))
+      (order3 (order-lettuce-tomato-cucumber-salad client3))
+      (order4 (order-lettuce-tomato-cucumber-salad client4))
+      (order5 (order-lettuce-tomato-salad client2))
+      (order6 (order-lettuce-salad client3))
+      (order7 (order-lettuce-tomato-salad client1))
+    )
+    :constraints (and
+      (hold-during order1 0 20  )
+      (hold-during order2 10 40 )
+      (hold-during order3 15 55 )
+      (hold-during order4 20 60 )
+      (hold-during order5 40 60 )
+      (hold-during order6 40 70 )
+    )
+  )
+
+  (:init
+    (at tomato1 tomato-dispenser)
+    (at tomato2 tomato-dispenser)
+    (at tomato3 tomato-dispenser)
+    (at tomato4 tomato-dispenser)
+    (at tomato5 tomato-dispenser)
+    (at tomato6 tomato-dispenser)
+    (at tomato7 tomato-dispenser)
+    (at lettuce1 lettuce-dispenser)
+    (at lettuce2 lettuce-dispenser)
+    (at lettuce3 lettuce-dispenser)
+    (at lettuce4 lettuce-dispenser)
+    (at lettuce5 lettuce-dispenser)
+    (at lettuce6 lettuce-dispenser)
+    (at lettuce7 lettuce-dispenser)
+    (at cucumber1 cucumber-dispenser)
+    (at cucumber2 cucumber-dispenser)
+    (at cucumber3 cucumber-dispenser)
+    (at cucumber4 cucumber-dispenser)
+    (at cucumber5 cucumber-dispenser)
+    (at cucumber6 cucumber-dispenser)
+    (at cucumber7 cucumber-dispenser)
+    (at plate1 plate-storage)
+    (at plate2 plate-storage)
+    (at plate3 plate-storage)
+    (at plate4 plate-storage)
+    (at plate5 plate-storage)
+    (at plate6 plate-storage)
+    (at plate7 plate-storage)
+    (at cook1 counter1)
+    (at cook2 counter1)
+    (at client1 counter1)
+    (at client2 counter1)
+    (at client3 counter1)
+    (at client4 counter1)
+    (= (distance tomato-dispenser lettuce-dispenser) 1)
+    (= (distance lettuce-dispenser tomato-dispenser) 1)
+    (= (distance tomato-dispenser plate-storage) 2)
+    (= (distance plate-storage tomato-dispenser) 2)
+    (= (distance countertop2 cucumber-dispenser) 1)
+    (= (distance cucumber-dispenser countertop2) 3)
+    (= (distance plate-storage counter1) 2)
+    (= (distance counter1 plate-storage) 2)
+    (= (distance countertop2 counter1) 2)
+    (= (distance counter1 countertop2) 2)
+
+    (= (distance counter1 countertop3) 3)
+    (= (distance countertop3 counter1) 3)
+    (= (distance counter1 countertop4) 3)
+    (= (distance countertop4 counter1) 3)
+
+    (= (distance knife1 countertop3) 3)
+    (= (distance countertop3 knife1) 3)
+    (= (distance knife2 countertop3) 3)
+    (= (distance countertop3 knife2) 3)
+    (= (distance knife1 countertop4) 3)
+    (= (distance countertop4 knife1) 3)
+    (= (distance knife2 countertop4) 3)
+    (= (distance countertop4 knife2) 3)
+
+    (= (choptime tomato) 5)
+    (= (choptime lettuce) 5)
+    (= (choptime cucumber) 5)
+    (= (puttime) 1)
+  )
+)

@@ -1,0 +1,106 @@
+(define
+  (problem overcooked2-tutorial)
+  (:domain overcooked2)
+  (:objects
+    fish1 fish2 fish3 fish4 fish5 fish6 fish7 - fish
+    rize1 rize2 rize3 rize4 rize5 rize6 rize7 - rize
+    nori1 nori2 nori3 nori4 nori5 nori6 nori7 - nori
+    
+    plate1 plate2 plate3 plate4 plate5 plate6 plate7 - plate
+    
+    knife1 knife2 - knife
+    
+    fish-dispenser rize-dispenser nori-dispenser plate-storage countertop5 countertop6 countertop7 - countertop
+    ; fridge - location
+    counter1 - counter
+
+    cook1 cook2 - cook
+    client1 client2 client3 client4 - client
+    )
+  
+  (:htn
+    :parameters ()
+    :subtasks (and
+      (order1 (order-fish-sushi client1))
+      (order2 (order-fish-sushi client2))
+      (order3 (order-fish-sushi client3))
+      (order4 (order-fish-sushi client4))
+      (order5 (order-fish-sushi client2))
+      (order6 (order-fish-sushi client3))
+      (order7 (order-fish-sushi client1))
+    )
+    :constraints (and
+      (hold-during 0 40 order1)
+      (hold-during 10 50 order2)
+      (hold-during 15 55 order3)
+      (hold-during 25 65 order4)
+      (hold-during 40 80 order5)
+      (hold-during 40 80 order6)
+    )
+  )
+
+  (:init
+    (at fish1 fish-dispenser)
+    (at fish2 fish-dispenser)
+    (at fish3 fish-dispenser)
+    (at fish4 fish-dispenser)
+    (at fish5 fish-dispenser)
+    (at fish6 fish-dispenser)
+    (at fish7 fish-dispenser)
+    (at rize1 rize-dispenser)
+    (at rize2 rize-dispenser)
+    (at rize3 rize-dispenser)
+    (at rize4 rize-dispenser)
+    (at rize5 rize-dispenser)
+    (at rize6 rize-dispenser)
+    (at rize7 rize-dispenser)
+    (at nori1 nori-dispenser)
+    (at nori2 nori-dispenser)
+    (at nori3 nori-dispenser)
+    (at nori4 nori-dispenser)
+    (at nori5 nori-dispenser)
+    (at nori6 nori-dispenser)
+    (at nori7 nori-dispenser)
+    (at plate1 plate-storage)
+    (at plate2 plate-storage)
+    (at plate3 plate-storage)
+    (at plate4 plate-storage)
+    (at plate5 plate-storage)
+    (at plate6 plate-storage)
+    (at plate7 plate-storage)
+    (at cook1 counter1)
+    (at cook2 counter1)
+    (at client1 counter1)
+    (at client2 counter1)
+    (at client3 counter1)
+    (at client4 counter1)
+    (= (distance fish-dispenser rize-dispenser) 1)
+    (= (distance rize-dispenser fish-dispenser) 1)
+    (= (distance fish-dispenser plate-storage) 2)
+    (= (distance plate-storage fish-dispenser) 2)
+    (= (distance countertop2 nori-dispenser) 1)
+    (= (distance nori-dispenser countertop2) 3)
+    (= (distance plate-storage counter1) 2)
+    (= (distance counter1 plate-storage) 2)
+    (= (distance countertop2 counter1) 2)
+    (= (distance counter1 countertop2) 2)
+
+    (= (distance counter1 countertop3) 3)
+    (= (distance countertop3 counter1) 3)
+    (= (distance counter1 countertop4) 3)
+    (= (distance countertop4 counter1) 3)
+
+    (= (distance knife1 countertop3) 3)
+    (= (distance countertop3 knife1) 3)
+    (= (distance knife2 countertop3) 3)
+    (= (distance countertop3 knife2) 3)
+    (= (distance knife1 countertop4) 3)
+    (= (distance countertop4 knife1) 3)
+    (= (distance knife2 countertop4) 3)
+    (= (distance countertop4 knife2) 3)
+
+    (= (choptime fish) 5)
+    (= (boiltime rize) 10)
+    (= (puttime) 1)
+  )
+)

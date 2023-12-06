@@ -1,0 +1,460 @@
+(define 
+  (domain overcooked2)
+  (:requirements 
+    :typing
+    :durative-actions
+	  :negative-preconditions
+    :timed-initial-literals
+    :existential-preconditions
+    :hierarchy
+    :numeric-fluents
+    :method-constraints)
+
+  (:types
+    person carryable location - object
+    tableware ingredient - carryable
+    cook client - person
+    nori choppable boilable fryable - ingredient
+    shrimp fish lettuce tomato cucumber - choppable
+    rice - boilable
+    knife pot pan oven fryer - tool
+    plate - tableware
+    tool counter countertop - location
+
+    ; salad - dish
+    ; lettuce-salad lettuce-tomato-salad lettuce-tomato-cucumber-salad - salad
+  )
+
+  (:predicates
+    (path ?l1 ?l2 - location)
+    (chopped ?x - choppable)
+    (boiled ?x - boilable)
+    (fried ?x - fryable)
+    (processing ?y - tool ?x - ingredient)
+    (working ?z - cook ?y - tool ?x - ingredient)
+    (at ?x - object ?y - location)
+    (on ?x - ingredient ?t - tableware)
+    (carry ?y - person ?x - carryable)
+  )
+
+  (:functions
+    (distance ?x ?y - location)
+    (choptime ?x - choppable)
+    (boiltime ?x - boilable)
+    (puttime)
+  )
+
+  (:task order-lettuce-salad :parameters (?c - client))
+  (:task order-lettuce-tomato-salad :parameters (?c - client))
+  (:task order-lettuce-tomato-cucumber-salad :parameters (?c - client))
+  (:task order-fish-sashimi :parameters (?c - client))
+  (:task order-shrimp-sashimi :parameters (?c - client))
+  (:task order-fish-sushi :parameters (?c - client))
+  (:task order-cucumber-sushi :parameters (?c - client))
+  (:task order-assorted-sushi :parameters (?c - client))
+  (:task deliver :parameters (?c - cook ?t - tableware ?cl - client))
+  (:task get :parameters (?c - cook ?o - carryable))
+  (:task get-to :parameters (?c - cook ?l - location))
+  (:task chop :parameters (?c - cook ?i - choppable))
+  (:task boil :parameters (?c - cook ?i - boilable))
+  (:task arrange :parameters (?c - cook ?i - ingredient ?t - tableware))
+
+;;;;;;; BEGIN RECIPES ;;;;;;;;
+
+  ;;; SALADS ;;;
+
+  (:method make-lettuce-salad
+    :parameters (?cl - client ?ck - cook ?l - lettuce ?p - plate)
+    :task (order-lettuce-salad ?cl)
+    :ordered-subtasks (and
+      (get ?ck ?l)
+      (chop ?ck ?l)
+      (arrange ?ck ?l ?p)
+      (deliver ?ck ?p ?cl)
+    )
+  )
+
+  (:method make-lettuce-tomato-salad
+    :parameters (?cl - client ?ck - cook ?l - lettuce ?t - tomato ?p - plate)
+    :task (order-lettuce-tomato-salad ?cl)
+    :subtasks (and
+      (get-lettuce (get ?ck ?l))
+      (chop-lettuce (chop ?ck ?l))
+      (arrange-lettuce (arrange ?ck ?l ?p))
+      (get-tomato (get ?ck ?t))
+      (chop-tomato (chop ?ck ?t))
+      (arrange-tomato (arrange ?ck ?t ?p))
+      (deliver-plate (deliver ?ck ?p ?cl))
+    )
+    ; Individual Components can be done in any order, but must be done before delivery
+    :ordering (and
+      (< get-lettuce chop-lettuce)
+      (< chop-lettuce arrange-lettuce)
+      (< get-tomato chop-tomato)
+      (< chop-tomato arrange-tomato)
+      (< arrange-lettuce deliver-plate)
+      (< arrange-tomato deliver-plate)
+    )
+  )
+
+  ; Partial order plan for lettuce-tomato-cucumber-salad
+  (:method make-lettuce-tomato-cucumber-salad
+    :parameters (?cl - client ?ck - cook ?l - lettuce ?t - tomato ?cu - cucumber ?p - plate)
+    :task (order-lettuce-tomato-cucumber-salad ?cl)
+    :subtasks (and
+      (get-lettuce (get ?ck ?l))
+      (chop-lettuce (chop ?ck ?l))
+      (arrange-lettuce (arrange ?ck ?l ?p))
+      (get-tomato (get ?ck ?t))
+      (chop-tomato (chop ?ck ?t))
+      (arrange-tomato (arrange ?ck ?t ?p))
+      (get-cucumber (get ?ck ?cu))
+      (chop-cucumber (chop ?ck ?cu))
+      (arrange-cucumber (arrange ?ck ?cu ?p))
+      (deliver-plate (deliver ?ck ?p ?cl))
+    )
+    ; Individual Components can be done in any order, but must be done before delivery
+    :ordering (and
+      (< get-lettuce chop-lettuce)
+      (< chop-lettuce arrange-lettuce)
+      (< get-tomato chop-tomato)
+      (< chop-tomato arrange-tomato)
+      (< get-cucumber chop-cucumber)
+      (< chop-cucumber arrange-cucumber)
+      (< arrange-lettuce deliver-plate)
+      (< arrange-tomato deliver-plate)
+      (< arrange-cucumber deliver-plate)
+    )
+  )
+
+  ;;; SUSHI and SASHIMI ;;;
+
+  ; total order plan for fish-sashimi
+  (:method make-fish-sashimi
+    :parameters (?cl - client ?ck - cook ?f - fish ?p - plate)
+    :task (order-fish-sashimi ?cl)
+    :ordered-subtasks (and
+      (get-fish (get ?ck ?f))
+      (chop-fish (chop ?ck ?f))
+      (arrange-fish (arrange ?ck ?f ?p))
+      (deliver-plate (deliver ?ck ?p ?cl))
+    )
+  )
+
+  ; total order plan for shrimp-sashimi
+  (:method make-shrimp-sashimi
+    :parameters (?cl - client ?ck - cook ?s - shrimp ?p - plate)
+    :task (order-shrimp-sashimi ?cl)
+    :ordered-subtasks (and
+      (get-shrimp (get ?ck ?s))
+      (chop-shrimp (chop ?ck ?s))
+      (arrange-shrimp (arrange ?ck ?s ?p))
+      (deliver-plate (deliver ?ck ?p ?cl))
+    )
+  )
+
+  ; Partial order plan for fish-sushi
+  (:method make-fish-sushi
+    :parameters (?cl - client ?ck - cook ?n - nori ?r - rice ?f - fish ?p - plate)
+    :task (order-fish-sushi ?cl)
+    :subtasks (and
+      (get-nori (get ?ck ?n))
+      (arrange-nori (arrange ?ck ?n ?p))
+      (get-rice (get ?ck ?r))
+      (boil-rice (boil ?ck ?r))
+      (arrange-rice (arrange ?ck ?r ?p))
+      (get-fish (get ?ck ?f))
+      (chop-fish (chop ?ck ?f))
+      (arrange-fish (arrange ?ck ?f ?p))
+      (deliver-plate (deliver ?ck ?p ?cl))
+    )
+    ; Individual components can be prepared, but not arranged in any order
+    :ordering (and
+      (< get-nori arrange-nori)
+      (< get-rice boil-rice)
+      (< boil-rice arrange-rice)
+      (< get-fish chop-fish)
+      (< chop-fish arrange-fish)
+      (< arrange-nori arrange-rice)
+      (< arrange-rice arrange-fish)
+      (< arrange-fish deliver-plate)
+    )
+  )
+
+  ; Partial order plan for cucumber-sushi
+  (:method make-cucumber-sushi
+    :parameters (?cl - client ?ck - cook ?n - nori ?r - rice ?cu - cucumber ?p - plate)
+    :task (order-cucumber-sushi ?cl)
+    :subtasks (and
+      (get-nori (get ?ck ?n))
+      (arrange-nori (arrange ?ck ?n ?p))
+      (get-rice (get ?ck ?r))
+      (boil-rice (boil ?ck ?r))
+      (arrange-rice (arrange ?ck ?r ?p))
+      (get-cucumber (get ?ck ?cu))
+      (chop-cucumber (chop ?ck ?cu))
+      (arrange-cucumber (arrange ?ck ?cu ?p))
+      (deliver-plate (deliver ?ck ?p ?cl))
+    )
+    ; Individual components can be prepared, but not arranged in any order
+    :ordering (and
+      (< get-nori arrange-nori)
+      (< get-rice boil-rice)
+      (< boil-rice arrange-rice)
+      (< get-cucumber chop-cucumber)
+      (< chop-cucumber arrange-cucumber)
+      (< arrange-nori arrange-rice)
+      (< arrange-rice arrange-cucumber)
+      (< arrange-cucumber deliver-plate)
+    )
+  )
+
+
+  ; Partial order plan for assorted-sushi (cucumber + fish)
+  (:method make-assorted-sushi
+    :parameters (?cl - client ?ck - cook ?n - nori ?r - rice ?cu - cucumber ?f - fish ?p - plate)
+    :task (order-assorted-sushi ?cl)
+    :subtasks (and
+      (get-nori (get ?ck ?n))
+      (arrange-nori (arrange ?ck ?n ?p))
+      (get-rice (get ?ck ?r))
+      (boil-rice (boil ?ck ?r))
+      (arrange-rice (arrange ?ck ?r ?p))
+      (get-cucumber (get ?ck ?cu))
+      (chop-cucumber (chop ?ck ?cu))
+      (arrange-cucumber (arrange ?ck ?cu ?p))
+      (get-fish (get ?ck ?f))
+      (chop-fish (chop ?ck ?f))
+      (arrange-fish (arrange ?ck ?f ?p))
+      (deliver-plate (deliver ?ck ?p ?cl))
+    )
+    ; Individual components can be prepared, but not arranged in any order except for cucumber and fish
+    :ordering (and
+      (< get-nori arrange-nori)
+      (< get-rice boil-rice)
+      (< boil-rice arrange-rice)
+      (< get-cucumber chop-cucumber)
+      (< chop-cucumber arrange-cucumber)
+      (< get-fish chop-fish)
+      (< chop-fish arrange-fish)
+      (< arrange-nori arrange-rice)
+      (< arrange-rice arrange-cucumber)
+      (< arrange-rice arrange-fish)
+      (< arrange-cucumber deliver-plate)
+      (< arrange-fish deliver-plate)
+    )
+  )
+
+;;;;;;; END RECIPES   ;;;;;;;;
+
+
+;;;;;;; BEGIN OTHER METHODS ;;;;;;;;
+
+  (:method m-chop
+    :parameters (?ck - cook ?i - choppable ?k - knife)
+    :task (chop ?ck ?i)
+    :ordered-subtasks (and
+      (get-to ?ck ?k)
+      (drop ?ck ?i ?k)
+      (cut ?ck ?k ?i)
+      (pick-up ?ck ?i ?k)
+    )
+  )
+
+  (:method m-boil
+    :parameters (?ck - cook ?i - boilable ?p - pot)
+    :task (boil ?ck ?i)
+    :ordered-subtasks (and
+      (get-to ?ck ?p)
+      (drop ?ck ?i ?p)
+      (seethe ?p ?i)
+      (pick-up ?ck ?i ?p)
+    )
+  )
+
+  (:method m-move-to
+    :parameters (?c - cook ?l1 ?l2 - location)
+    :task (get-to ?c ?l2)
+    :ordered-subtasks (and
+      (move ?c ?l1 ?l2)
+    )
+  )
+
+  (:method m-move-to-via
+    :parameters (?ck - cook ?l1 ?l2 - location)
+    :task (get-to  ?ck ?l2)
+    :ordered-subtasks (and
+      (get-to ?ck ?l1)
+      (move ?ck ?l1 ?l2)
+    )
+  )
+
+  (:method m-already-there
+    :parameters (?c - cook ?l - location)
+    :task (get-to ?c ?l)
+    :ordered-subtasks (and
+      (noop ?c ?l)
+    )
+  )
+
+  (:method m-get
+    :parameters (?c - cook ?i - ingredient ?l - location)
+    :task (get ?c ?i)
+    :ordered-subtasks (and
+      (get-to ?c ?l)
+      (pick-up ?c ?i ?l)
+    )
+  )
+
+  (:method m-deliver
+    :parameters (?ck - cook ?p - plate ?l - counter ?cl - client)
+    :task (deliver ?ck ?p ?cl)
+    :ordered-subtasks (and
+      (get ?ck ?p)
+      (get-to ?ck ?l)
+      (give ?ck ?p ?cl)
+    )
+  )
+
+  (:method m-arrange-new-plate
+    :parameters (?c - cook ?i - ingredient ?t - tableware ?l - countertop)
+    :task (arrange ?c ?i ?t)
+    :ordered-subtasks (and
+      (get ?c ?t)
+      (get-to ?c ?l)
+      (drop ?c ?t ?l)
+      (get ?c ?i)
+      (put ?c ?i ?t)
+    )
+  )
+
+  (:method m-arrange-existing-plate
+    :parameters (?c - cook ?i - ingredient ?t - tableware ?l - countertop)
+    :task (arrange ?c ?i ?t)
+    :ordered-subtasks (and
+      (get ?c ?i)
+      (get-to ?c ?l)
+      (put ?c ?i ?t)
+    )
+  )
+
+;;;;;;; END OTHER METHODS ;;;;;;;;
+
+;;;;;;; BEGIN ACTIONS   ;;;;;;;;
+
+  (:action noop
+    :parameters (?x - object ?l - location)
+    :precondition (at ?x ?l)
+    :effect ()
+  )
+
+  (:action drop
+    :parameters (?c - cook ?o - carryable  ?l - location)
+    :precondition (and 
+      (at ?c ?l)
+      (carry ?c ?o)
+    )
+    :effect (and 
+      (at ?o ?l)
+      (not (carry ?c ?o))
+    )
+  )
+
+  (:action pick-up
+    :parameters (?c - cook ?o - carryable  ?l - location)
+    :precondition (and 
+      (at ?o ?l)
+      (carry ?c ?o)
+    )
+    :effect (and 
+      (at ?c ?l)
+      (carry ?c ?o)
+    )
+  )
+
+  (:action give
+    :parameters (?p1 - person ?o - carryable  ?p2 - person)
+    :precondition (and 
+      (exists (?l - location) 
+        (and (at ?p1 ?l) 
+          (at ?p2 ?l)))
+      ; (forall (?l - location) 
+      ;   when (at ?p1 ?l) 
+      ;     (at ?p2 ?l))
+      (carry ?p1 ?o)
+    )
+    :effect (and 
+      (not (carry ?p1 ?o))
+      (carry ?p2 ?o)
+    )
+  )
+
+  (:durative-action cut
+    :parameters (?c - cook ?k - knife ?i - choppable)
+    :duration (= ?duration (choptime ?i))
+    :condition (and 
+      (at start (at ?i ?k))
+      (at start (at ?c ?k))
+      (at start (not (chopped ?i)))
+      (at start (not (working ?c ?k ?i)))
+    )
+    :effect (and 
+      (at start (working ?c ?k ?i))
+      (at end  (chopped ?i))
+      (at end  (not (working ?c ?k ?i)))
+    )
+  )
+
+  (:durative-action seethe
+    :parameters (?p - pot ?i - boilable)
+    :duration (= ?duration (boiltime ?i))
+    :condition (and 
+      (at start (at ?i ?p))
+      (at start (not (boiled ?i)))
+      (at start (not (processing ?p ?i)))
+    )
+    :effect (and 
+      (at start (processing ?p ?i))
+      (at end (boiled ?i))
+      (at end (not (processing ?p ?i)))
+    )
+  )
+
+  (:durative-action put
+    :parameters (?c - cook ?i - ingredient  ?t - tableware)
+    :duration (= ?duration (puttime))
+    :condition (and 
+      (at start (not (on ?i ?t)))
+      (at start (carry ?c ?i))
+      (at start (exists (?l - location) 
+        (and (at ?c ?l) 
+          (at ?t ?l))))
+      ; (at start 
+      ;   (forall (?l - location)
+      ;     when (at ?c ?l) (at ?t ?l))
+      ; )
+    )
+    :effect (and 
+      (at end (on ?i ?t))
+      (at end (not (carry ?c ?i)))
+    )
+  )
+
+
+  (:durative-action move
+    :parameters (?ck - cook ?l1 ?l2 - location)
+    :duration (= ?duration (distance ?l1 ?l2))
+    :condition (and
+      (at start (at ?ck ?l1))
+      (at start (path ?l1 ?l2))
+    )
+    :effect (and
+      (at end (not (at ?ck ?l1)))
+      (at end (at ?ck ?l2))
+    )
+  )
+
+
+;;;;;;; END ACTIONS   ;;;;;;;;
+  
+)
