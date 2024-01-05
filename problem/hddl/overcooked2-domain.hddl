@@ -4,11 +4,13 @@
     :typing
     :durative-actions
 	  :negative-preconditions
-    :timed-initial-literals
-    :existential-preconditions
+    ; :timed-initial-literals
+    ; :existential-preconditions
+    :universal-preconditions
     :hierarchy
-    :numeric-fluents
-    :method-constraints)
+    ; :numeric-fluents 
+    ; :method-constraints
+    )
 
   (:types
     person carryable location - object
@@ -37,12 +39,12 @@
     (carry ?y - person ?x - carryable)
   )
 
-  (:functions
-    (distance ?x ?y - location)
-    (choptime ?x - choppable)
-    (boiltime ?x - boilable)
-    (puttime)
-  )
+  ; (:functions
+  ;   (distance ?x ?y - location)
+  ;   (choptime ?x - choppable)
+  ;   (boiltime ?x - boilable)
+  ;   (puttime)
+  ; )
 
   (:task order-lettuce-salad :parameters (?c - client))
   (:task order-lettuce-tomato-salad :parameters (?c - client))
@@ -375,12 +377,12 @@
   (:action give
     :parameters (?p1 - person ?o - carryable  ?p2 - person)
     :precondition (and 
-      (exists (?l - location) 
-        (and (at ?p1 ?l) 
-          (at ?p2 ?l)))
-      ; (forall (?l - location) 
-      ;   when (at ?p1 ?l) 
-      ;     (at ?p2 ?l))
+      ; (exists (?l - location) 
+      ;   (and (at ?p1 ?l) 
+      ;     (at ?p2 ?l)))
+      (forall (?l - location) 
+        when (at ?p1 ?l) 
+          (at ?p2 ?l))
       (carry ?p1 ?o)
     )
     :effect (and 
@@ -391,7 +393,8 @@
 
   (:durative-action cut
     :parameters (?c - cook ?k - knife ?i - choppable)
-    :duration (= ?duration (choptime ?i))
+    :duration (= ?duration 5)
+    ; :duration (= ?duration (choptime ?i))
     :condition (and 
       (at start (at ?i ?k))
       (at start (at ?c ?k))
@@ -407,7 +410,8 @@
 
   (:durative-action seethe
     :parameters (?p - pot ?i - boilable)
-    :duration (= ?duration (boiltime ?i))
+    :duration (= ?duration 10)
+    ; :duration (= ?duration (boiltime ?i))
     :condition (and 
       (at start (at ?i ?p))
       (at start (not (boiled ?i)))
@@ -422,17 +426,18 @@
 
   (:durative-action put
     :parameters (?c - cook ?i - ingredient  ?t - tableware)
-    :duration (= ?duration (puttime))
+    :duration (= ?duration 1)
+    ; :duration (= ?duration (puttime))
     :condition (and 
       (at start (not (on ?i ?t)))
       (at start (carry ?c ?i))
-      (at start (exists (?l - location) 
-        (and (at ?c ?l) 
-          (at ?t ?l))))
-      ; (at start 
-      ;   (forall (?l - location)
-      ;     when (at ?c ?l) (at ?t ?l))
-      ; )
+      ; (at start (exists (?l - location) 
+      ;   (and (at ?c ?l) 
+      ;     (at ?t ?l))))
+      (at start 
+        (forall (?l - location)
+          when (at ?c ?l) (at ?t ?l))
+      )
     )
     :effect (and 
       (at end (on ?i ?t))
@@ -443,7 +448,8 @@
 
   (:durative-action move
     :parameters (?ck - cook ?l1 ?l2 - location)
-    :duration (= ?duration (distance ?l1 ?l2))
+    :duration (= ?duration 1)
+    ; :duration (= ?duration (distance ?l1 ?l2))
     :condition (and
       (at start (at ?ck ?l1))
       (at start (path ?l1 ?l2))

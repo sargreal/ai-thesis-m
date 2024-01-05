@@ -27,6 +27,8 @@ dependencies {
     // This dependency is used by the application.
     implementation libs.guava
     implementation name: 'pddl4j-4.0.0'
+    implementation 'org.choco-solver:choco-solver:4.10.14'
+
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

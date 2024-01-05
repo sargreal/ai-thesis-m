@@ -1,0 +1,266 @@
+
+// Area definitions adapted from Race domain
+type Area with {
+  constant boolean isManipulationArea;
+};
+type PlArea < Area;  // area to place objects
+type ManArea < Area; // area from which a person manipulates
+type NavArea < Area; // other area where a person can be 
+
+// this would be useless with a primitive to check the type of a variable in ANML
+forall(ManArea a) { a.isManipulationArea := true; };
+forall((PlArea or NavArea) b) { b.isManipulationArea := false; };
+
+type Person with {
+  fluent Area loc;
+  // If the Person is carrying anything
+  fluent boolean carrying;
+  // If the Person is doing something
+  fluent boolean busy;
+};
+
+type Cook < Person;
+type Client < Person;
+
+type Tool with {
+  constant PlArea loc;
+  fluent boolean processing;
+};
+
+type Knife < Tool;
+type Pot < Tool;
+
+type Carryable with {
+  // Can either be at an placement area, carried by a Person or on a Tableware (Tablewares can be stacked)
+  fluent (PlArea or Person or Tableware) loc;
+};
+
+type Tableware < Carryable with {
+  fluent empty;
+};
+
+type Plate < Tableware;
+
+type Ingredient < Carryable with;
+
+type Nori < Ingredient;
+
+type Choppable < Ingredient with {
+  fluent boolean chopped;
+};
+
+type Shrimp < Choppable;
+type Fish < Choppable;
+type Lettuce < Choppable;
+type Tomato < Choppable;
+type Cucumber < Choppable;
+
+type Boilable < Ingredient with {
+  fluent boolean boiled;
+};
+
+type Rice < Boilable;
+
+// an object on 'pl' can be manipulated from 'man' and 'man' can be accessed from 'pre'
+constant boolean connected(Area a, Area b);
+constant integer distance(Area a, Area b);
+
+// Constants for durations of actions
+constant integer arrangetime;
+constant integer droptime;
+constant integer pickuptime;
+constant integer givetime;
+constant integer choptime(Choppable a);
+constant integer boiltime(Choppable a);
+
+/*** Primitive actions ***/
+
+action a_move(Person p, Area from, Area to) {
+  motivated;
+  duration := distance(from, to);
+  [all] {
+    connected(from, to);
+    p.loc == from :-> to;
+  };
+};
+
+action a_arrange(Cook c, Ingredient i, Tableware t) {
+  motivated;
+  duration := arrangetime;
+
+  constant PlArea pl;
+  constant ManArea man;
+  connected(pl, man);
+
+  [all] {
+    t.loc == pl;
+    c.loc == man;
+    i.loc == c :-> t;
+    co.carrying == true :-> false;
+  };
+  [end] {
+    // FIXME: how to handle the case that multiple ingredients can be on/in a tableware,
+    // but not other tablewares at the same time?
+    t.empty := false;
+  };
+};
+
+action a_drop(Cook co, Carryable ca, PlArea pl) {
+  motivated;
+  duration := droptime;
+
+  constant ManArea man;
+  connected(pl, man);
+
+  [all] {
+    co.loc == man;
+    ca.loc == co :-> pl;
+    co.carrying == true :-> false;
+  };
+};
+
+action a_pick_up(Cook co, Carryable ca) {
+  motivated;
+  duration := pickuptime;
+
+  constant PlArea pl;
+  constant ManArea man;
+  connected(pl, man);
+
+  [all] {
+    co.loc == man;
+    ca.loc == pl :-> co;
+    co.carrying == false :-> true;
+  };
+};
+
+action a_give(Person p1, Person p2, Carryable c) {
+  motivated;
+  duration := givetime;
+
+  constant Area a;
+  constant Area b;
+  connected(a, b);
+
+  [all] {
+    p1.loc == a;
+    p2.loc == b;
+    p1.carrying == true :-> false;
+    p2.carrying == false :-> true;
+    c.loc == p1 :-> p2;
+  };
+};
+
+action a_chop(Cook co, Choppable ch, Knife k) {
+  motivated;
+  duration := choptime(ch);
+
+  constant ManArea man;
+  connected(k.loc, man);
+
+  // FIXME: Unsure if this is the right way to make the cook busy
+  [start,end] {
+    contains k.processing;
+    contains co.busy;
+  };
+
+  [all] {
+    co.loc == man;
+    ch.loc == k.loc;
+    ch.chopped := false :-> true;
+  };
+};
+
+action a_boil(Cook c, Boilable b, Pot p) {
+  motivated;
+  duration := boiltime(b);
+
+  constant ManArea man;
+  connected(k.loc, man);
+
+  // Cook should be at the pot at the beginning and end
+  // FIXME: Does not support different cooks at the beginning and end
+  [start,end] {
+    co.loc == man;
+    // FIXME: Same as with busy cook
+    contains p.processing;
+  };
+
+  [all] {
+    b.loc == p.loc;
+    b.boiled := false :-> true;
+  };
+};
+
+/*** Methods ***/
+
+action m_get_to(Person p, Area to) {
+  motivated;
+  // Already there
+  :decomposition {
+    [all] p.loc == to;
+  };
+  // Directly connected
+  :decomposition {
+    constant Area from;
+    // Unsure if these constraints are necessary on this level
+    from != to;
+    connected(from, to);
+    [start] r.loc == from;
+    [all] contains ordered(
+      a_move(p, from, to)
+    );
+  };
+  // Move via an intermediate location recursively
+  :decomposition {
+    constant Area from;
+    constant Area via;
+    // Unsure if these constraints are necessary on this level
+    from != to;
+    from != via;
+    to != via;
+    connected(from, to) == false;
+    connected(from, via);
+    [start] r.loc == from;
+    [all] contains ordered(
+      a_move(p, from, via),
+      m_get_to(p, via, to)
+    );
+  };
+};
+
+action m_boil(Boilable b) {
+  motivated;
+  // Cook has the ingredient to be boiled in hand
+  :decomposition {
+
+    constant Pot p;
+    constant Cook c;
+    constant ManArea m;
+
+    connected(p.loc, m);
+
+
+
+    [all] contains ordered(
+      m_get_to(c,m),
+      a_drop(b)
+    );
+  };
+}
+
+action m_arrange(Cook c, Ingredient i, Tableware t) {
+  motivated;
+
+  // Two Options:
+  //  - The tableware is empty and needs to be fetched first
+  //  - The tableware already has ingredients and does not need to be fetched
+
+  :decomposition {
+    [start] t.empty
+    
+  }
+}
+
+/*** Recipes ***/
+

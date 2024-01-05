@@ -17,10 +17,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import picocli.CommandLine;
 
-@CommandLine.Command(name = "TemporalHTNPlanner", version = "TemporalHTNPlanner 0.1", description = "Solves a specified HTN planning problem with time constraints using a Partial-order Forward Decomposition strategy.", sortOptions = false, mixinStandardHelpOptions = true, headerHeading = "Usage:%n", synopsisHeading = "%n", descriptionHeading = "%nDescription:%n%n", parameterListHeading = "%nParameters:%n", optionListHeading = "%nOptions:%n")
-public class TemporalHTNPlanner extends AbstractSTNPlanner {
+@CommandLine.Command(name = "TemporalSTNPlanner", version = "TemporalHTNPlanner 0.1", description = "Solves a specified HTN planning problem with time constraints using a Partial-order Forward Decomposition strategy.", sortOptions = false, mixinStandardHelpOptions = true, headerHeading = "Usage:%n", synopsisHeading = "%n", descriptionHeading = "%nDescription:%n%n", parameterListHeading = "%nParameters:%n", optionListHeading = "%nOptions:%n")
+public class TemporalSTNPlanner extends AbstractSTNPlanner {
 
-  private static final Logger LOGGER = LogManager.getLogger(TemporalHTNPlanner.class.getName());
+  private static final Logger LOGGER = LogManager.getLogger(TemporalSTNPlanner.class.getName());
 
   /**
    * Returns if a specified problem is supported by the planner.
@@ -150,6 +150,7 @@ public class TemporalHTNPlanner extends AbstractSTNPlanner {
           } else { // Case of compound tasks
             for (Integer operator : relevantOperators) {
               final Method method = problem.getMethods().get(operator);
+              
               if (this.isInteractive()) {
                 LOGGER.info("\n======> Try to decompose compound tasks "
                     + problem.toString(problem.getTasks().get(taskIndex)) + " with\n\n"
@@ -187,7 +188,7 @@ public class TemporalHTNPlanner extends AbstractSTNPlanner {
 
   public static void main(final String[] args) {
     try {
-      final TemporalHTNPlanner planner = new TemporalHTNPlanner();
+      final TemporalSTNPlanner planner = new TemporalSTNPlanner();
       CommandLine cmd = new CommandLine(planner);
       int exitCode = (int) cmd.execute(args);
       if (exitCode == 1) {
