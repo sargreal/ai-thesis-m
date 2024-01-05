@@ -1,0 +1,139 @@
+/** Tutorial Environment **/
+
+forall(Ingredient i) {arrangetime(i) := 10; };
+forall(Carryable c) {droptime(c) := 5; };
+forall(Carryable c) {pickuptime(c) := 5; };
+forall(Carryable c) {givetime(c) := 5; };
+forall(Choppable c) {choptime(c) := 20; };
+forall(Boilable b) {boiltime(l) := 30; };
+
+instance Cook cook1,cook2;
+instance Client client1,client2,client3;
+
+instance Knife knife1,knife2;
+instance Lettuce lettuce1,lettuce2,lettuce3,lettuce4,lettuce5;
+instance Plate plate1,plate2,plate3,plate4,plate5;
+
+
+instance NavArea floorLeftBottom,floorLeftTop,floorMidBottom,floorMidTop,floorRightBottom,floorRightTop,floorExit;
+instance PlArea lettuceDispenser,plateDispenser,counterTopLeftTop,counterTopLeftBottom,counterTopMidLeft,counterTopMidRight,counterTopRightTop,counterTopRightBottom;
+instance ManArea manLettuceDispenser,manPlateDispenser,manCounterTopLeftTop,manCounterTopLeftBottom,manCounterTopMidLeftNorth,manCounterTopMidLeftSouth,manCounterTopMidRightNorth,manCounterTopMidRightSouth,manCounterTopRightTop,manCounterTopRightBottom;
+
+// Floors
+connected(floorLeftBottom,floorMidBottom) := true;
+connected(floorMidBottom,floorLeftBottom) := true;
+connected(floorLeftTop,floorMidTop) := true;
+connected(floorMidTop,floorLeftTop) := true;
+connected(floorRightBottom,floorMidBottom) := true;
+connected(floorMidBottom,floorRightBottom) := true;
+connected(floorRightTop,floorMidTop) := true;
+connected(floorMidTop,floorRightTop) := true;
+connected(floorMidTop,floorMidBottom) := true;
+connected(floorMidBottom,floorMidTop) := true;
+connected(floorMidBottom,floorExit) := true;
+connected(floorExit,floorMidBottom) := true;
+
+// Floors <-> Manipulation Areas 
+connected(floorLeftBottom,manCounterTopLeftBottom) := true;
+connected(manCounterTopLeftBottom,floorLeftBottom) := true;
+connected(floorLeftTop,manCounterTopLeftTop) := true;
+connected(manCounterTopLeftTop,floorLeftTop) := true;
+connected(floorLeftBottom,manLettuceDispenser) := true;
+connected(manLettuceDispenser,floorLeftBottom) := true;
+
+connected(floorMidBottom,manCounterTopMidLeftSouth) := true;
+connected(manCounterTopMidLeftSouth,floorMidBottom) := true;
+connected(floorMidBottom,manCounterTopMidRightSouth) := true;
+connected(manCounterTopMidRightSouth,floorMidBottom) := true;
+
+connected(floorMidTop,manCounterTopMidLeftNorth) := true;
+connected(manCounterTopMidLeftNorth,floorMidTop) := true;
+connected(floorMidTop,manCounterTopMidRightNorth) := true;
+connected(manCounterTopMidRightNorth,floorMidTop) := true;
+
+connected(floorRightBottom,manPlateDispenser) := true;
+connected(manPlateDispenser,floorRightBottom) := true;
+connected(floorRightBottom,manCounterTopRightBottom) := true;
+connected(manCounterTopRightBottom,floorRightBottom) := true;
+connected(floorRightTop,manCounterTopRightTop) := true;
+connected(manCounterTopRightTop,floorRightTop) := true;
+
+// Manipulation Areas <-> Placement Areas
+connected(manCounterTopLeftBottom,counterTopLeftBottom) := true;
+connected(counterTopLeftBottom,manCounterTopLeftBottom) := true;
+connected(manCounterTopLeftTop,counterTopLeftTop) := true;
+connected(counterTopLeftTop,manCounterTopLeftTop) := true;
+connected(manLettuceDispenser,lettuceDispenser) := true;
+connected(lettuceDispenser,manLettuceDispenser) := true;
+
+
+connected(counterTopMidLeft,manCounterTopMidLeftNorth) := true;
+connected(manCounterTopMidLeftNorth,counterTopMidLeft) := true;
+connected(counterTopMidLeft,manCounterTopMidLeftSouth) := true;
+connected(manCounterTopMidLeftSouth,counterTopMidLeft) := true;
+
+connected(counterTopMidRight,manCounterTopMidRightNorth) := true;
+connected(manCounterTopMidRightNorth,counterTopMidRight) := true;
+connected(counterTopMidRight,manCounterTopMidRightSouth) := true;
+connected(manCounterTopMidRightSouth,counterTopMidRight) := true;
+
+connected(manCounterTopRightBottom,counterTopRightBottom) := true;
+connected(counterTopRightBottom,manCounterTopRightBottom) := true;
+connected(manCounterTopRightTop,counterTopRightTop) := true;
+connected(counterTopRightTop,manCounterTopRightTop) := true;
+connected(manPlateDispenser,plateDispenser) := true;
+connected(plateDispenser,manPlateDispenser) := true;
+
+// Tool locations
+knife1.loc := counterTopLeftTop;
+knife2.loc := counterTopRightTop;
+
+// Clients for now always in exit
+[all] {
+  client1.loc := floorExit;
+  client2.loc := floorExit;
+  client3.loc := floorExit;
+  client1.carrying := false;
+  client2.carrying := false;
+  client3.carrying := false;
+  client1.busy := false;
+  client2.busy := false;
+  client3.busy := false;
+};
+
+// Initial environment
+
+[start] {
+  cook1.loc := floorMidBottom;
+  cook1.carrying := false;
+  cook2.loc := floorMidTop;
+  cook2.carrying := false;
+  lettuce1.loc := lettuceDispenser;
+  lettuce2.loc := lettuceDispenser;
+  lettuce3.loc := lettuceDispenser;
+  lettuce4.loc := lettuceDispenser;
+  lettuce5.loc := lettuceDispenser;
+  lettuce1.chopped := false;
+  lettuce2.chopped := false;
+  lettuce3.chopped := false;
+  lettuce4.chopped := false;
+  lettuce5.chopped := false;
+  plate1.loc := plateDispenser;
+  plate2.loc := plateDispenser;
+  plate3.loc := plateDispenser;
+  plate4.loc := plateDispenser;
+  plate5.loc := plateDispenser;
+  plate1.empty := true;
+  plate2.empty := true;
+  plate3.empty := true;
+  plate4.empty := true;
+  plate5.empty := true;
+  knife1.processing := false;
+  knife2.processing := false;
+};
+
+/** TASKS **/
+
+order_lettuce_salad(client1);
+// order_lettuce_salad(client2);
+// order_lettuce_salad(client3);
