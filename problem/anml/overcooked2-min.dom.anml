@@ -1,0 +1,445 @@
+
+// Area definitions adapted from Race domain
+type Area ;
+// with {
+//   constant boolean isManipulationArea;
+//   constant ManArea man_area;
+// };
+type ManArea < Area; // area from which a person manipulates
+type PlArea < Area;  // area to place objects
+type ArrangeArea < PlArea; // area to arrange objects
+type ToolArea < PlArea; // area to work with tools
+type StorageArea < PlArea; // area where objects are stored initially
+type NavArea < Area; // other area where a person can be 
+
+// this would be useless with a primitive to check the type of a variable in ANML
+// forall(ManArea a) { a.isManipulationArea := true; };
+// forall((PlArea or NavArea) b) { b.isManipulationArea := false; };
+
+type Person with {
+  fluent (NavArea or ManArea) loc;
+  // If the Person is carrying anything
+  fluent boolean carrying;
+  // If the Person is doing something
+  fluent boolean busy;
+};
+
+type Cook < Person;
+type Client < Person;
+
+type Tool with {
+  constant PlArea loc;
+  fluent boolean processing;
+};
+
+type Knife < Tool;
+type Pot < Tool;
+
+type Carryable with {
+  // Can either be at an placement area, carried by a Person or on a Tableware (Tablewares can be stacked)
+  fluent (PlArea or Person or Tableware) loc;
+};
+
+type Tableware < Carryable with {
+  fluent boolean empty;
+};
+
+type Plate < Tableware;
+
+type Ingredient < Carryable;
+
+type Nori < Ingredient;
+
+type Choppable < Ingredient with {
+  fluent boolean chopped;
+};
+
+type Shrimp < Choppable;
+type Fish < Choppable;
+type Lettuce < Choppable;
+type Tomato < Choppable;
+type Cucumber < Choppable;
+
+type Boilable < Ingredient with {
+  fluent boolean boiled;
+};
+
+type Rice < Boilable;
+
+// an object on 'pl' can be manipulated from 'man' and 'man' can be accessed from 'pre'
+constant boolean connected(PlArea a, ManArea b);
+constant integer distance(ManArea a, ManArea b);
+
+// Constants for durations of actions
+constant integer arrangetime(Ingredient i);
+constant integer droptime(Carryable c);
+constant integer pickuptime(Carryable c);
+constant integer givetime(Carryable c);
+constant integer choptime(Choppable a);
+constant integer boiltime(Boilable a);
+
+/*** Primitive actions ***/
+
+action a_move(Person p, ManArea to) {
+  // FIXME: Maybe a person should be able to move without being motivated by a method/decomposition?
+  motivated;
+  // duration := distance(from, to);
+  duration := 5;
+  constant ManArea from;
+  [all] {
+    p.loc == from :-> to;
+  };
+};
+
+action a_arrange_new(Person p, Ingredient i, Tableware t) {
+  motivated;
+  duration := arrangetime(i);
+
+  constant ArrangeArea pl;
+  constant ManArea man;
+  connected(pl, man);
+
+  [all] {
+    t.loc == pl;
+    p.loc == man;
+    i.loc == p :-> t;
+    p.carrying == true :-> false;
+    t.empty == true :-> false;
+  };
+};
+
+action a_arrange_add(Person p, Ingredient i, Tableware t) {
+  motivated;
+  duration := arrangetime(i);
+
+  constant ArrangeArea pl;
+  constant ManArea man;
+  connected(pl, man);
+
+  [all] {
+    t.loc == pl;
+    p.loc == man;
+    i.loc == p :-> t;
+    p.carrying == true :-> false;
+    t.empty == false :-> false;
+  };
+};
+
+action a_drop(Person p, Carryable ca) {
+  motivated;
+  duration := droptime(ca);
+
+  constant PlArea pl;
+  constant ManArea man;
+  connected(pl, man);
+
+  [all] {
+    p.loc == man;
+    ca.loc == p :-> pl;
+    p.carrying == true :-> false;
+  };
+};
+
+action a_pick_up(Person p, Carryable ca) {
+  motivated;
+  duration := pickuptime(ca);
+
+  constant PlArea pl;
+  constant ManArea man;
+  connected(pl, man);
+
+  [all] {
+    p.loc == man;
+    ca.loc == pl :-> p;
+    p.carrying == false :-> true;
+  };
+};
+
+action a_give(Person p1, Person p2, Carryable c) {
+  motivated;
+  duration := givetime(c);
+
+  constant ManArea m;
+  [all] {
+    p1.loc == m;
+    p2.loc == m;
+    p1.carrying == true :-> false;
+    p2.carrying == false :-> true;
+    c.loc == p1 :-> p2;
+  };
+};
+
+action a_chop(Cook co, Choppable ch, Knife k) {
+  motivated;
+  duration := choptime(ch);
+
+  constant ManArea man;
+  constant ToolArea ta;
+  connected(ta, man);
+  k.loc == ta;
+
+  // FIXME: Unsure if this is the right way to make the cook busy
+  // [start,end] contains k.processing == true;
+  // [start,end] contains co.busy == true;
+
+  [all] {
+    co.loc == man;
+    ch.loc == ta;
+    ch.chopped == false :-> true;
+  };
+};
+
+// action a_boil(Cook c, Boilable b, Pot p) {
+//   motivated;
+//   duration := boiltime(b);
+
+//   constant ManArea man;
+//   connected(p.loc, man);
+
+//   // Cook should be at the pot at the beginning and end
+//   // FIXME: Does not support different cooks at the beginning and end
+//   [start,end] {
+//     c.loc == man;
+//   };
+//   // FIXME: Same as with busy cook
+//   // [start,end] contains p.processing == true;
+
+//   [all] {
+//     b.loc == p.loc;
+//     b.boiled == false :-> true;
+//   };
+// };
+
+/*** Methods ***/
+
+action m_get_to(Person p, ManArea to) {
+  motivated;
+  // Already there
+  :decomposition {
+    [all] p.loc == to;
+  };
+  :decomposition {
+    [all] contains ordered(
+      a_move(p, to)
+    );
+  };
+};
+
+action m_fetch(Cook co, Carryable ca) {
+  motivated;
+  // Cook already has the ingredient
+  :decomposition {
+    [all] ca.loc == co;
+  };
+  // Go to ingredients location and get it
+  :decomposition {
+    constant PlArea pl;
+    constant ManArea m;
+    connected(pl, m);
+    [start] ca.loc == pl;
+    [all] contains ordered(
+      m_get_to(co, m),
+      a_pick_up(co, ca)
+    );
+  };
+  // Another person has the ingredient and it has to be given to the cook
+  :decomposition {
+    constant Person p;
+    constant ManArea m;
+    [all] p.loc == m;
+    [start] ca.loc == p;
+    [all] contains ordered(
+      m_get_to(co, m),
+      a_give(p, co, ca)
+    );
+  };
+};
+
+action m_transport_to(Carryable ca, PlArea pl) {
+  motivated;
+  // Already there
+  :decomposition {
+    ca.loc == pl;
+  };
+  // Fetch, get to target man area and then drop
+  :decomposition {
+    constant Cook co;
+    constant ManArea m;
+    connected(pl, m);
+    [all] contains ordered(
+      m_fetch(co, ca),
+      m_get_to(co, m),
+      a_drop(co, ca)
+    );
+  };
+};
+
+// action m_boil(Boilable b) {
+//   motivated;
+//   :decomposition {
+
+//     constant Pot p;
+//     constant Cook c;
+//     constant ManArea m;
+//     constant ToolArea ta;
+//     p.loc == ta;
+
+//     connected(ta, m);
+
+//     [all] contains ordered(
+//       m_transport_to(b,ta),
+//       m_get_to(c, m),
+//       a_boil(c, b, p),
+//       // FIXME: No guarantee that the cook is still there?
+//       m_get_to(c, m),
+//       a_pick_up(c, b)
+//     );
+//   };
+// };
+
+action m_chop(Choppable ch) {
+  motivated;
+  :decomposition {
+    ch.chopped == true;
+  };
+  :decomposition {
+
+    constant Knife k;
+    constant Cook co;
+    constant ToolArea p;
+    k.loc == p;
+
+    [all] contains ordered(
+      m_transport_to(ch, p),
+      a_chop(co, ch, k)
+    );
+  };
+};
+
+
+action m_arrange(Ingredient i, Tableware t) {
+  motivated;
+
+  // Three Options:
+  //  - The ingedient is already on the tableware
+  //  - The tableware is empty and (may) need to be fetched first
+  //  - The tableware already has ingredients and does not need to be fetched
+  :decomposition {
+    i.loc == t;
+  };
+
+  :decomposition {
+
+    constant StorageArea s;
+    constant ArrangeArea p;
+    constant ManArea m;
+    constant Cook c;
+
+    connected(p, m);
+    
+    [start] t.loc == s;
+    [all] contains ordered(
+      m_transport_to(t, p),
+      m_fetch(c, i),
+      m_get_to(c, m),
+      a_arrange_new(c, i, t)
+    );
+  };
+
+  :decomposition {
+    constant ArrangeArea p;
+    constant ManArea m;
+    constant Cook c;
+    connected(p, m);
+    [all] t.loc == p;
+
+    [all] contains ordered(
+      m_fetch(c, i),
+      m_get_to(c, m),
+      a_arrange_add(c, i, t)
+    );
+  };
+};
+
+action m_deliver(Tableware t, Client cl) {
+  motivated;
+  :decomposition {
+    t.loc == cl;
+  };
+  :decomposition {
+    constant Cook co;
+    constant Area a;
+    [all] cl.loc == a;
+    [all] contains ordered(
+      m_fetch(co, t),
+      m_get_to(co, a),
+      a_give(co, cl, t)
+    );
+  };
+};
+
+/*** Recipes ***/
+
+action order_lettuce_salad(Client cl) {
+  motivated;
+  duration :in [0, 300];
+  :decomposition {
+    constant Lettuce l;
+    constant Tableware t;
+    [all] contains ordered (
+      m_chop(l),
+      m_arrange(l, t),
+      m_deliver(t, cl)
+    );
+  };
+};
+
+action order_lettuce_tomato_salad(Client cl) {
+  motivated;
+  duration :in [0, 600];
+  :decomposition {
+    constant Lettuce l;
+    constant Tomato to;
+    constant Tableware t;
+    [all] contains ordered (
+      unordered(
+        ordered(
+          m_chop(l),
+          m_arrange(l, t)
+        ),
+        ordered(
+          m_chop(to),
+          m_arrange(to, t)
+        )
+      ),
+      m_deliver(t, cl)
+    );
+  };
+};
+action order_lettuce_tomato_cucumber_salad(Client cl) {
+  motivated;
+  duration :in [0, 900];
+  :decomposition {
+    constant Lettuce l;
+    constant Tomato to;
+    constant Cucumber cu;
+    constant Tableware t;
+    [all] contains ordered (
+      unordered(
+        ordered(
+          m_chop(l),
+          m_arrange(l, t)
+        ),
+        ordered(
+          m_chop(to),
+          m_arrange(to, t)
+        ),
+        ordered(
+          m_chop(cu),
+          m_arrange(cu, t)
+        )
+      ),
+      m_deliver(t, cl)
+    );
+  };
+};
