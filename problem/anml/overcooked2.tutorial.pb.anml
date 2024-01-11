@@ -11,13 +11,18 @@ instance Cook cook1,cook2;
 instance Client client1,client2,client3;
 
 instance Knife knife1,knife2;
-instance Lettuce lettuce1,lettuce2,lettuce3,lettuce4,lettuce5;
+instance Lettuce lettuce1,lettuce2;
+instance Tomato tomato1,tomato2;
 instance Plate plate1,plate2,plate3,plate4,plate5;
 
 
 instance NavArea floorLeftBottom,floorLeftTop,floorMidBottom,floorMidTop,floorRightBottom,floorRightTop,floorExit;
-instance PlArea lettuceDispenser,plateDispenser,counterTopLeftTop,counterTopLeftBottom,counterTopMidLeft,counterTopMidRight,counterTopRightTop,counterTopRightBottom;
-instance ManArea manLettuceDispenser,manPlateDispenser,manCounterTopLeftTop,manCounterTopLeftBottom,manCounterTopMidLeftNorth,manCounterTopMidLeftSouth,manCounterTopMidRightNorth,manCounterTopMidRightSouth,manCounterTopRightTop,manCounterTopRightBottom;
+instance ManArea manLettuceDispenser,manTomatoDispenser,manPlateDispenser,manCounterTopLeftTop,manCounterTopLeftBottom,manCounterTopRightTop,
+manCounterTopRightBottom,manCounterTopMidLeftNorth,manCounterTopMidLeftSouth,manCounterTopMidRightNorth,manCounterTopMidRightSouth;
+instance ToolArea counterTopLeftTop,counterTopRightTop;
+instance ArrangeArea counterTopLeftBottom,
+counterTopMidLeft,counterTopMidRight,counterTopRightBottom;
+instance StorageArea lettuceDispenser,tomatoDispenser,plateDispenser;
 
 // Floors
 connected(floorLeftBottom,floorMidBottom) := true;
@@ -40,6 +45,8 @@ connected(floorLeftTop,manCounterTopLeftTop) := true;
 connected(manCounterTopLeftTop,floorLeftTop) := true;
 connected(floorLeftBottom,manLettuceDispenser) := true;
 connected(manLettuceDispenser,floorLeftBottom) := true;
+connected(floorLeftBottom,manTomatoDispenser) := true;
+connected(manTomatoDispenser,floorLeftBottom) := true;
 
 connected(floorMidBottom,manCounterTopMidLeftSouth) := true;
 connected(manCounterTopMidLeftSouth,floorMidBottom) := true;
@@ -51,10 +58,10 @@ connected(manCounterTopMidLeftNorth,floorMidTop) := true;
 connected(floorMidTop,manCounterTopMidRightNorth) := true;
 connected(manCounterTopMidRightNorth,floorMidTop) := true;
 
-connected(floorRightBottom,manPlateDispenser) := true;
-connected(manPlateDispenser,floorRightBottom) := true;
 connected(floorRightBottom,manCounterTopRightBottom) := true;
 connected(manCounterTopRightBottom,floorRightBottom) := true;
+connected(floorRightBottom,manPlateDispenser) := true;
+connected(manPlateDispenser,floorRightBottom) := true;
 connected(floorRightTop,manCounterTopRightTop) := true;
 connected(manCounterTopRightTop,floorRightTop) := true;
 
@@ -65,6 +72,8 @@ connected(manCounterTopLeftTop,counterTopLeftTop) := true;
 connected(counterTopLeftTop,manCounterTopLeftTop) := true;
 connected(manLettuceDispenser,lettuceDispenser) := true;
 connected(lettuceDispenser,manLettuceDispenser) := true;
+connected(tomatoDispenser,manTomatoDispenser) := true;
+connected(manTomatoDispenser,tomatoDispenser) := true;
 
 
 connected(counterTopMidLeft,manCounterTopMidLeftNorth) := true;
@@ -84,40 +93,108 @@ connected(counterTopRightTop,manCounterTopRightTop) := true;
 connected(manPlateDispenser,plateDispenser) := true;
 connected(plateDispenser,manPlateDispenser) := true;
 
+// Floors
+distance(floorLeftBottom,floorMidBottom) := 5;
+distance(floorMidBottom,floorLeftBottom) := 5;
+distance(floorLeftTop,floorMidTop) := 5;
+distance(floorMidTop,floorLeftTop) := 5;
+distance(floorRightBottom,floorMidBottom) := 5;
+distance(floorMidBottom,floorRightBottom) := 5;
+distance(floorRightTop,floorMidTop) := 5;
+distance(floorMidTop,floorRightTop) := 5;
+distance(floorMidTop,floorMidBottom) := 5;
+distance(floorMidBottom,floorMidTop) := 5;
+distance(floorMidBottom,floorExit) := 5;
+distance(floorExit,floorMidBottom) := 5;
+
+// Floors <-> Manipulation Areas 
+distance(floorLeftBottom,manCounterTopLeftBottom) := 2;
+distance(manCounterTopLeftBottom,floorLeftBottom) := 2;
+distance(floorLeftTop,manCounterTopLeftTop) := 2;
+distance(manCounterTopLeftTop,floorLeftTop) := 2;
+distance(floorLeftBottom,manLettuceDispenser) := 2;
+distance(manLettuceDispenser,floorLeftBottom) := 2;
+distance(floorLeftBottom,manTomatoDispenser) := 2;
+distance(manTomatoDispenser,floorLeftBottom) := 2;
+
+distance(floorMidBottom,manCounterTopMidLeftSouth) := 2;
+distance(manCounterTopMidLeftSouth,floorMidBottom) := 2;
+distance(floorMidBottom,manCounterTopMidRightSouth) := 2;
+distance(manCounterTopMidRightSouth,floorMidBottom) := 2;
+
+distance(floorMidTop,manCounterTopMidLeftNorth) := 2;
+distance(manCounterTopMidLeftNorth,floorMidTop) := 2;
+distance(floorMidTop,manCounterTopMidRightNorth) := 2;
+distance(manCounterTopMidRightNorth,floorMidTop) := 2;
+
+distance(floorRightBottom,manPlateDispenser) := 2;
+distance(manPlateDispenser,floorRightBottom) := 2;
+distance(floorRightBottom,manCounterTopRightBottom) := 2;
+distance(manCounterTopRightBottom,floorRightBottom) := 2;
+distance(floorRightTop,manCounterTopRightTop) := 2;
+distance(manCounterTopRightTop,floorRightTop) := 2;
+
+// Manipulation Areas <-> Placement Areas
+distance(manCounterTopLeftBottom,counterTopLeftBottom) := 1;
+distance(counterTopLeftBottom,manCounterTopLeftBottom) := 1;
+distance(manCounterTopLeftTop,counterTopLeftTop) := 1;
+distance(counterTopLeftTop,manCounterTopLeftTop) := 1;
+distance(manLettuceDispenser,lettuceDispenser) := 1;
+distance(lettuceDispenser,manLettuceDispenser) := 1;
+distance(tomatoDispenser,manTomatoDispenser) := 1;
+distance(manTomatoDispenser,tomatoDispenser) := 1;
+
+
+distance(counterTopMidLeft,manCounterTopMidLeftNorth) := 1;
+distance(manCounterTopMidLeftNorth,counterTopMidLeft) := 1;
+distance(counterTopMidLeft,manCounterTopMidLeftSouth) := 1;
+distance(manCounterTopMidLeftSouth,counterTopMidLeft) := 1;
+
+distance(counterTopMidRight,manCounterTopMidRightNorth) := 1;
+distance(manCounterTopMidRightNorth,counterTopMidRight) := 1;
+distance(counterTopMidRight,manCounterTopMidRightSouth) := 1;
+distance(manCounterTopMidRightSouth,counterTopMidRight) := 1;
+
+distance(manCounterTopRightBottom,counterTopRightBottom) := 1;
+distance(counterTopRightBottom,manCounterTopRightBottom) := 1;
+distance(manCounterTopRightTop,counterTopRightTop) := 1;
+distance(counterTopRightTop,manCounterTopRightTop) := 1;
+distance(manPlateDispenser,plateDispenser) := 1;
+distance(plateDispenser,manPlateDispenser) := 1;
+
 // Tool locations
 knife1.loc := counterTopLeftTop;
 knife2.loc := counterTopRightTop;
 
 // Clients for now always in exit
-[all] {
-  client1.loc := floorExit;
-  client2.loc := floorExit;
-  client3.loc := floorExit;
-  client1.carrying := false;
-  client2.carrying := false;
-  client3.carrying := false;
-  client1.busy := false;
-  client2.busy := false;
-  client3.busy := false;
-};
 
 // Initial environment
 
 [start] {
   cook1.loc := floorMidBottom;
   cook1.carrying := false;
-  cook2.loc := floorMidTop;
+  cook2.loc := floorRightBottom;
   cook2.carrying := false;
   lettuce1.loc := lettuceDispenser;
   lettuce2.loc := lettuceDispenser;
-  lettuce3.loc := lettuceDispenser;
-  lettuce4.loc := lettuceDispenser;
-  lettuce5.loc := lettuceDispenser;
+  // lettuce3.loc := lettuceDispenser;
+  // lettuce4.loc := lettuceDispenser;
+  // lettuce5.loc := lettuceDispenser;
   lettuce1.chopped := false;
   lettuce2.chopped := false;
-  lettuce3.chopped := false;
-  lettuce4.chopped := false;
-  lettuce5.chopped := false;
+  // lettuce3.chopped := false;
+  // lettuce4.chopped := false;
+  // lettuce5.chopped := false;
+  tomato1.loc := tomatoDispenser;
+  tomato2.loc := tomatoDispenser;
+  // tomato3.loc := tomatoDispenser;
+  // tomato4.loc := tomatoDispenser;
+  // tomato5.loc := tomatoDispenser;
+  tomato1.chopped := false;
+  tomato2.chopped := false;
+  // tomato3.chopped := false;
+  // tomato4.chopped := false;
+  // tomato5.chopped := false;
   plate1.loc := plateDispenser;
   plate2.loc := plateDispenser;
   plate3.loc := plateDispenser;
@@ -130,10 +207,34 @@ knife2.loc := counterTopRightTop;
   plate5.empty := true;
   knife1.processing := false;
   knife2.processing := false;
+  client1.carrying := false;
+  client2.carrying := false;
+  client3.carrying := false;
+  client1.busy := false;
+  client2.busy := false;
+  client3.busy := false;
+  client1.loc := floorExit;
+  client2.loc := floorExit;
+  client3.loc := floorExit;
 };
 
 /** TASKS **/
 
-order_lettuce_salad(client1);
-// order_lettuce_salad(client2);
+// m_deliver(plate1,client1);
+// m_chop(lettuce2);
+// m_arrange(lettuce1, plate1);
+// m_arrange(lettuce2, plate1);
+// m_get_to(cook2, floorExit);
+
+[start,end] contains unordered(
+  m_fetch(cook1,tomato1)
+  // order_lettuce_salad(client2);
+);
+[start+10,end] contains unordered(
+  m_fetch(cook2,lettuce1)
+  // order_lettuce_salad(client2);
+);
+// ordered(
+//   order_lettuce_salad(client2)
+// );
 // order_lettuce_salad(client3);
