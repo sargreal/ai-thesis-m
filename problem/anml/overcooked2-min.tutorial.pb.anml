@@ -7,13 +7,15 @@ forall(Carryable c) {givetime(c) := 5; };
 forall(Choppable c) {choptime(c) := 20; };
 forall(Boilable b) {boiltime(l) := 30; };
 
-instance Cook cook1,cook2;
-instance Client client1,client2,client3;
+instance Cook cook1;
+// ,cook2;
+instance Client client1,client2,client3,client4,client5;
 
 instance Knife knife1,knife2;
-instance Lettuce lettuce1,lettuce2,lettuce3;
-instance Tomato tomato1,tomato2;
-instance Cucumber cucumber1,cucumber2;
+instance Lettuce lettuce1,lettuce2,lettuce3,lettuce4,lettuce5;
+instance Tomato tomato1,tomato2,tomato3,tomato4,tomato5;
+instance Cucumber cucumber1;
+// ,cucumber2;
 instance Plate plate1,plate2,plate3,plate4,plate5;
 
 
@@ -142,6 +144,88 @@ connected(plateDispenser,manPlateDispenser) := true;
 // distance(manPlateDispenser,plateDispenser) := 1;
 // distance(plateDispenser,manPlateDispenser) := 1;
 
+// manLettuceDispenser 
+// manTomatoDispenser
+// manCucumberDispenser
+// manPlateDispenser
+// manCounterTopLeftTop
+// manCounterTopLeftBottom
+// manCounterTopRightTop
+// manCounterTopRightBottom
+// manDeliver
+distance(manLettuceDispenser,manTomatoDispenser) := 1;
+distance(manLettuceDispenser,manCucumberDispenser) := 5;
+distance(manLettuceDispenser,manPlateDispenser) := 6;
+distance(manLettuceDispenser,manCounterTopLeftTop) := 9;
+distance(manLettuceDispenser,manCounterTopLeftBottom) := 4;
+distance(manLettuceDispenser,manCounterTopRightTop) := 15;
+distance(manLettuceDispenser,manCounterTopRightBottom) := 10;
+distance(manLettuceDispenser,manDeliver) := 3;
+distance(manTomatoDispenser,manLettuceDispenser) := 1;
+distance(manTomatoDispenser,manCucumberDispenser) := 4;
+distance(manTomatoDispenser,manPlateDispenser) := 5;
+distance(manTomatoDispenser,manCounterTopLeftTop) := 10;
+distance(manTomatoDispenser,manCounterTopLeftBottom) := 5;
+distance(manTomatoDispenser,manCounterTopRightTop) := 14;
+distance(manTomatoDispenser,manCounterTopRightBottom) := 9;
+distance(manTomatoDispenser,manDeliver) := 2;
+distance(manCucumberDispenser,manLettuceDispenser) := 5;
+distance(manCucumberDispenser,manTomatoDispenser) := 4;
+distance(manCucumberDispenser,manPlateDispenser) := 1;
+distance(manCucumberDispenser,manCounterTopLeftTop) := 14;
+distance(manCucumberDispenser,manCounterTopLeftBottom) := 9;
+distance(manCucumberDispenser,manCounterTopRightTop) := 10;
+distance(manCucumberDispenser,manCounterTopRightBottom) := 5;
+distance(manCucumberDispenser,manDeliver) := 2;
+distance(manPlateDispenser,manLettuceDispenser) := 6;
+distance(manPlateDispenser,manTomatoDispenser) := 5;
+distance(manPlateDispenser,manCucumberDispenser) := 1;
+distance(manPlateDispenser,manCounterTopLeftTop) := 15;
+distance(manPlateDispenser,manCounterTopLeftBottom) := 10;
+distance(manPlateDispenser,manCounterTopRightTop) := 9;
+distance(manPlateDispenser,manCounterTopRightBottom) := 4;
+distance(manPlateDispenser,manDeliver) := 3;
+distance(manCounterTopLeftTop,manLettuceDispenser) := 9;
+distance(manCounterTopLeftTop,manTomatoDispenser) := 10;
+distance(manCounterTopLeftTop,manCucumberDispenser) := 14;
+distance(manCounterTopLeftTop,manPlateDispenser) := 15;
+distance(manCounterTopLeftTop,manCounterTopLeftBottom) := 5;
+distance(manCounterTopLeftTop,manCounterTopRightTop) := 10;
+distance(manCounterTopLeftTop,manCounterTopRightBottom) := 15;
+distance(manCounterTopLeftTop,manDeliver) := 12;
+distance(manCounterTopLeftBottom,manLettuceDispenser) := 4;
+distance(manCounterTopLeftBottom,manTomatoDispenser) := 5;
+distance(manCounterTopLeftBottom,manCucumberDispenser) := 9;
+distance(manCounterTopLeftBottom,manPlateDispenser) := 10;
+distance(manCounterTopLeftBottom,manCounterTopLeftTop) := 5;
+distance(manCounterTopLeftBottom,manCounterTopRightTop) := 15;
+distance(manCounterTopLeftBottom,manCounterTopRightBottom) := 10;
+distance(manCounterTopLeftBottom,manDeliver) := 7;
+distance(manCounterTopRightTop,manLettuceDispenser) := 15;
+distance(manCounterTopRightTop,manTomatoDispenser) := 14;
+distance(manCounterTopRightTop,manCucumberDispenser) := 10;
+distance(manCounterTopRightTop,manPlateDispenser) := 9;
+distance(manCounterTopRightTop,manCounterTopLeftTop) := 10;
+distance(manCounterTopRightTop,manCounterTopLeftBottom) := 15;
+distance(manCounterTopRightTop,manCounterTopRightBottom) := 5;
+distance(manCounterTopRightTop,manDeliver) := 12;
+distance(manCounterTopRightBottom,manLettuceDispenser) := 10;
+distance(manCounterTopRightBottom,manTomatoDispenser) := 9;
+distance(manCounterTopRightBottom,manCucumberDispenser) := 5;
+distance(manCounterTopRightBottom,manPlateDispenser) := 4;
+distance(manCounterTopRightBottom,manCounterTopLeftTop) := 15;
+distance(manCounterTopRightBottom,manCounterTopLeftBottom) := 10;
+distance(manCounterTopRightBottom,manCounterTopRightTop) := 5;
+distance(manCounterTopRightBottom,manDeliver) := 7;
+distance(manDeliver,manLettuceDispenser) := 3;
+distance(manDeliver,manTomatoDispenser) := 2;
+distance(manDeliver,manCucumberDispenser) := 2;
+distance(manDeliver,manPlateDispenser) := 3;
+distance(manDeliver,manCounterTopLeftTop) := 12;
+distance(manDeliver,manCounterTopLeftBottom) := 7;
+distance(manDeliver,manCounterTopRightTop) := 12;
+distance(manDeliver,manCounterTopRightBottom) := 7;
+
 // Tool locations
 knife1.loc := counterTopLeftTop;
 knife2.loc := counterTopRightTop;
@@ -153,59 +237,95 @@ knife2.loc := counterTopRightTop;
 [start] {
   cook1.loc := manCounterTopLeftBottom;
   cook1.carrying := false;
-  cook2.loc := manCounterTopRightBottom;
-  cook2.carrying := false;
+  cook1.busy := false;
+  // cook2.loc := manCounterTopRightBottom;
+  // cook2.carrying := false;
+  // cook2.busy := false;
   lettuce1.loc := lettuceDispenser;
   lettuce2.loc := lettuceDispenser;
   lettuce3.loc := lettuceDispenser;
-  // lettuce4.loc := lettuceDispenser;
-  // lettuce5.loc := lettuceDispenser;
+  lettuce4.loc := lettuceDispenser;
+  lettuce5.loc := lettuceDispenser;
   lettuce1.chopped := false;
   lettuce2.chopped := false;
   lettuce3.chopped := false;
-  // lettuce4.chopped := false;
-  // lettuce5.chopped := false;
+  lettuce4.chopped := false;
+  lettuce5.chopped := false;
+  lettuce1.arranged := false;
+  lettuce2.arranged := false;
+  lettuce3.arranged := false;
+  lettuce4.arranged := false;
+  lettuce5.arranged := false;
+  lettuce1.prepared := false;
+  lettuce2.prepared := false;
+  lettuce3.prepared := false;
+  lettuce4.prepared := false;
+  lettuce5.prepared := false;
   tomato1.loc := tomatoDispenser;
   tomato2.loc := tomatoDispenser;
-  // tomato3.loc := tomatoDispenser;
-  // tomato4.loc := tomatoDispenser;
-  // tomato5.loc := tomatoDispenser;
+  tomato3.loc := tomatoDispenser;
+  tomato4.loc := tomatoDispenser;
+  tomato5.loc := tomatoDispenser;
   tomato1.chopped := false;
   tomato2.chopped := false;
-  // tomato3.chopped := false;
-  // tomato4.chopped := false;
-  // tomato5.chopped := false;
-  cucumber1.loc := cucumberDispenser;
-  cucumber2.loc := cucumberDispenser;
+  tomato3.chopped := false;
+  tomato4.chopped := false;
+  tomato5.chopped := false;
+  tomato1.arranged := false;
+  tomato2.arranged := false;
+  tomato3.arranged := false;
+  tomato4.arranged := false;
+  tomato5.arranged := false;
+  // cucumber1.loc := cucumberDispenser;
+  // cucumber2.loc := cucumberDispenser;
   // cucumber3.loc := cucumberDispenser;
   // cucumber4.loc := cucumberDispenser;
   // cucumber5.loc := cucumberDispenser;
-  cucumber1.chopped := false;
-  cucumber2.chopped := false;
+  // cucumber1.chopped := false;
+  // cucumber2.chopped := false;
   // cucumber3.chopped := false;
   // cucumber4.chopped := false;
   // cucumber5.chopped := false;
+  // cucumber1.arranged := false;
+  // cucumber2.arranged := false;
+  // cucumber3.arranged := false;
+  // cucumber4.arranged := false;
+  // cucumber5.arranged := false;
   plate1.loc := plateDispenser;
   plate2.loc := plateDispenser;
   plate3.loc := plateDispenser;
   plate4.loc := plateDispenser;
   plate5.loc := plateDispenser;
-  plate1.empty := true;
-  plate2.empty := true;
-  plate3.empty := true;
-  plate4.empty := true;
-  plate5.empty := true;
+  // plate1.empty := true;
+  // plate2.empty := true;
+  // plate3.empty := true;
+  // plate4.empty := true;
+  // plate5.empty := true;
   knife1.processing := false;
   knife2.processing := false;
   client1.carrying := false;
   client2.carrying := false;
   client3.carrying := false;
+  client4.carrying := false;
+  client5.carrying := false;
   client1.busy := false;
   client2.busy := false;
   client3.busy := false;
+  client4.busy := false;
+  client5.busy := false;
   client1.loc := manDeliver;
   client2.loc := manDeliver;
   client3.loc := manDeliver;
+  client4.loc := manDeliver;
+  client5.loc := manDeliver;
+  counterTopLeftTop.occupied := false;
+  counterTopRightTop.occupied := false;
+  counterTopLeftBottom.occupied := false;
+  counterTopRightBottom.occupied := false;
+  lettuceDispenser.occupied := false;
+  tomatoDispenser.occupied := false;
+  cucumberDispenser.occupied := false;
+  plateDispenser.occupied := false;
 };
 
 /** TASKS **/
@@ -214,12 +334,55 @@ knife2.loc := counterTopRightTop;
 // m_chop(lettuce2);
 // m_arrange(lettuce1, plate1);
 // m_arrange(lettuce2, plate1);
-// m_get_to(cook2, floorExit);
+// m_get_to(cook2, manDeliver);
 
-[start,end] contains ordered(
-  order_lettuce_tomato_cucumber_salad(client1)
-);
-// [start+150,end] contains unordered(
+// [start+1, start+6] contains a_move(cook1, manLettuceDispenser);
+// [start+7, start+12] contains a_pick_up(cook1, lettuce1);
+// [all] contains ordered(
+//   order_lettuce_salad(client1, lettuce1, plate1)
+// );
+
+// m_fetch(cook1,lettuce1);
+// [start,start+300] contains ordered(
+//   order_lettuce_salad(client1, lettuce1, plate1)
+// );
+
+// [start+400,start+700] contains ordered(
+//   order_lettuce_salad(client2, lettuce2, plate2)
+  
+// );
+
+// [start,start+5] contains     a_move(cook2, manLettuceDispenser); // (id:11)                 earliest-start: 0     min-duration: 5     
+// // 0:     m2-m_fetch(cook2, plate1) (id:12)                          earliest-start: 0     min-duration: 51    
+// // 0:     m2-m_get_to(cook2, manPlateDispenser) (id:14)              earliest-start: 0     min-duration: 46    
+// [start+6,start+11] contains     a_pick_up(cook2, lettuce1); // (id:7)                          earliest-start: 6     min-duration: 5     
+// // 11:    m2-m_get_to(cook2, manCounterTopRightTop) (id:16)          earliest-start: 11    min-duration: 5     
+// [start+11,start+16] contains    a_move(cook2, manCounterTopRightTop); // (id:17)               earliest-start: 11    min-duration: 5     
+// [start+16,start+21] contains    a_drop(cook2, lettuce1); // (id:4)                             earliest-start: 16    min-duration: 5     
+// [start+21,start+41] contains    a_chop(cook2, lettuce1, knife2); // (id:2)                     earliest-start: 21    min-duration: 20    
+// [start+41,start+46] contains    a_move(cook2, manPlateDispenser); // (id:15)                   earliest-start: 41    min-duration: 5     
+// [start+46,start+51] contains    a_pick_up(cook2, plate1); // (id:13)                           earliest-start: 46    min-duration: 5     
+// // 51:    m2-m_get_to(cook2, manCounterTopRightBottom) (id:18)       earliest-start: 51    min-duration: 5     
+// [start+51,start+56] contains    a_move(cook2, manCounterTopRightBottom); // (id:19)            earliest-start: 51    min-duration: 5     
+// [start+56,start+61] contains    a_drop(cook2, plate1); // (id:9)            //                    earliest-start: 56    min-duration: 5     
+// // 61:    m2-m_arrange(lettuce1, plate1) (id:20)                     earliest-start: 61    min-duration: 25    
+// // 61:    m2-m_fetch(cook2, lettuce1) (id:22)                        earliest-start: 61    min-duration: 10    
+// // 61:    m2-m_get_to(cook2, manCounterTopRightTop) (id:24)          earliest-start: 61    min-duration: 5     
+// [start+61,start+66] contains    a_move(cook2, manCounterTopRightTop); // (id:25)               earliest-start: 61    min-duration: 5     
+// [start+66,start+71] contains    a_pick_up(cook2, lettuce1); // (id:23)                         earliest-start: 66    min-duration: 5     
+// // 71:    m2-m_get_to(cook2, manCounterTopRightBottom) (id:26)       earliest-start: 71    min-duration: 5     
+// [start+71,start+76] contains    a_move(cook2, manCounterTopRightBottom); // (id:27)            earliest-start: 71    min-duration: 5     
+// [start+76,start+86] contains    a_arrange(cook2, lettuce1, plate1); // (id:21)                 earliest-start: 76    min-duration: 10    
+// // 86:    m2-m_deliver(plate1, client1) (id:28)                      earliest-start: 86    min-duration: 20    
+// // 86:    m2-m_fetch(cook1, plate1) (id:30)                          earliest-start: 86    min-duration: 10    
+// // 86:    m2-m_get_to(cook1, manCounterTopRightBottom) (id:34)       earliest-start: 86    min-duration: 5     
+// [start+86,start+91] contains    a_move(cook1, manCounterTopRightBottom); // (id:35)            earliest-start: 86    min-duration: 5     
+// [start+91,start+96] contains    a_pick_up(cook1, plate1); // (id:31)                           earliest-start: 91    min-duration: 5     
+// // 96:    m2-m_get_to(cook1, manDeliver) (id:32)                     earliest-start: 96    min-duration: 5     
+// [start+96,start+101] contains    a_move(cook1, manDeliver); // (id:33)                          earliest-start: 96    min-duration: 5     
+// // 101:   a_give(cook1, client1, plate1) (id:29)                     earliest-start: 101   min-duration: 5
+// // [start+100,start+400] contains ordered(
+// //   order_lettuce_salad(client2, lettuce2, plate2)
 // );
 // ordered(
 //   order_lettuce_salad(client2)

@@ -1,4 +1,6 @@
 
+// FIXME: There is an issue with ingredients being reused in different orders
+
 // Area definitions adapted from Race domain
 type Area ;
 // with {
@@ -6,10 +8,13 @@ type Area ;
 //   constant ManArea man_area;
 // };
 type ManArea < Area; // area from which a person manipulates
-type PlArea < Area;  // area to place objects
+type OccupationArea < Area with {
+  fluent boolean occupied;
+}; // area where an ingrediant can be located
+type StorageArea < OccupationArea; // area where objects are stored initially
+type PlArea < OccupationArea;  // area to place objects
 type ArrangeArea < PlArea; // area to arrange objects
 type ToolArea < PlArea; // area to work with tools
-type StorageArea < PlArea; // area where objects are stored initially
 type NavArea < Area; // other area where a person can be 
 
 // this would be useless with a primitive to check the type of a variable in ANML
@@ -37,16 +42,17 @@ type Pot < Tool;
 
 type Carryable with {
   // Can either be at an placement area, carried by a Person or on a Tableware (Tablewares can be stacked)
-  fluent (PlArea or Person or Tableware) loc;
+  fluent (OccupationArea or Person or Tableware) loc;
 };
 
-type Tableware < Carryable with {
-  fluent boolean empty;
-};
+type Tableware < Carryable;
 
 type Plate < Tableware;
 
-type Ingredient < Carryable;
+type Ingredient < Carryable with {
+  fluent boolean arranged;
+  fluent boolean prepared;
+};
 
 type Nori < Ingredient;
 
@@ -67,7 +73,7 @@ type Boilable < Ingredient with {
 type Rice < Boilable;
 
 // an object on 'pl' can be manipulated from 'man' and 'man' can be accessed from 'pre'
-constant boolean connected(PlArea a, ManArea b);
+constant boolean connected(OccupationArea a, ManArea b);
 constant integer distance(ManArea a, ManArea b);
 
 // Constants for durations of actions
@@ -82,16 +88,17 @@ constant integer boiltime(Boilable a);
 
 action a_move(Person p, ManArea to) {
   // FIXME: Maybe a person should be able to move without being motivated by a method/decomposition?
-  motivated;
-  // duration := distance(from, to);
+  // motivated;
   duration := 5;
   constant ManArea from;
+  // duration := distance(from, to);
+  from != to;
   [all] {
     p.loc == from :-> to;
   };
 };
 
-action a_arrange_new(Person p, Ingredient i, Tableware t) {
+action a_arrange(Person p, Ingredient i, Tableware t) {
   motivated;
   duration := arrangetime(i);
 
@@ -104,26 +111,10 @@ action a_arrange_new(Person p, Ingredient i, Tableware t) {
     p.loc == man;
     i.loc == p :-> t;
     p.carrying == true :-> false;
-    t.empty == true :-> false;
+    i.arranged == false :-> true;
   };
 };
 
-action a_arrange_add(Person p, Ingredient i, Tableware t) {
-  motivated;
-  duration := arrangetime(i);
-
-  constant ArrangeArea pl;
-  constant ManArea man;
-  connected(pl, man);
-
-  [all] {
-    t.loc == pl;
-    p.loc == man;
-    i.loc == p :-> t;
-    p.carrying == true :-> false;
-    t.empty == false :-> false;
-  };
-};
 
 action a_drop(Person p, Carryable ca) {
   motivated;
@@ -144,13 +135,13 @@ action a_pick_up(Person p, Carryable ca) {
   motivated;
   duration := pickuptime(ca);
 
-  constant PlArea pl;
+  constant OccupationArea oc;
   constant ManArea man;
-  connected(pl, man);
+  connected(oc, man);
 
   [all] {
     p.loc == man;
-    ca.loc == pl :-> p;
+    ca.loc == oc :-> p; 
     p.carrying == false :-> true;
   };
 };
@@ -178,13 +169,12 @@ action a_chop(Cook co, Choppable ch, Knife k) {
   connected(ta, man);
   k.loc == ta;
 
-  // FIXME: Unsure if this is the right way to make the cook busy
-  // [start,end] contains k.processing == true;
-  // [start,end] contains co.busy == true;
-
   [all] {
     co.loc == man;
     ch.loc == ta;
+    k.processing == false :-> false;
+    co.busy == false :-> false;
+    co.carrying == false :-> false;
     ch.chopped == false :-> true;
   };
 };
@@ -231,9 +221,9 @@ action m_fetch(Cook co, Carryable ca) {
   :decomposition {
     [all] ca.loc == co;
   };
-  // Go to ingredients location and get it
+  // Go to carryables location and get it
   :decomposition {
-    constant PlArea pl;
+    constant OccupationArea pl;
     constant ManArea m;
     connected(pl, m);
     [start] ca.loc == pl;
@@ -242,17 +232,17 @@ action m_fetch(Cook co, Carryable ca) {
       a_pick_up(co, ca)
     );
   };
-  // Another person has the ingredient and it has to be given to the cook
-  :decomposition {
-    constant Person p;
-    constant ManArea m;
-    [all] p.loc == m;
-    [start] ca.loc == p;
-    [all] contains ordered(
-      m_get_to(co, m),
-      a_give(p, co, ca)
-    );
-  };
+  // Another cook has the carryable and it has to be given to the cook
+  // :decomposition {
+  //   constant Cook co2;
+  //   constant ManArea m;
+  //   [all] co2.loc == m;
+  //   [start] ca.loc == co2;
+  //   [all] contains ordered(
+  //     m_get_to(co, m),
+  //     a_give(co2, co, ca)
+  //   );
+  // };
 };
 
 action m_transport_to(Carryable ca, PlArea pl) {
@@ -272,6 +262,20 @@ action m_transport_to(Carryable ca, PlArea pl) {
       a_drop(co, ca)
     );
   };
+  // Let cook move back to original position
+  // :decomposition {
+  //   constant Cook co;
+  //   constant ManArea currentCookLoc;
+  //   constant ManArea m;
+  //   connected(pl, m);
+  //   [start] co.loc == currentCookLoc;
+  //   [all] contains ordered(
+  //     m_fetch(co, ca),
+  //     m_get_to(co, m),
+  //     a_drop(co, ca),
+  //     m_get_to(co, currentCookLoc)
+  //   );
+  // };
 };
 
 // action m_boil(Boilable b) {
@@ -301,6 +305,7 @@ action m_chop(Choppable ch) {
   motivated;
   :decomposition {
     ch.chopped == true;
+    // ch.prepared == true;
   };
   :decomposition {
 
@@ -314,6 +319,59 @@ action m_chop(Choppable ch) {
       a_chop(co, ch, k)
     );
   };
+  // Let cook move back to original position
+  // :decomposition {
+
+  //   constant Knife k;
+  //   constant Cook co;
+  //   constant ToolArea p;
+  //   constant ManArea currentCookLoc;
+  //   k.loc == p;
+
+  //   [start] co.loc == currentCookLoc;
+  //   [all] contains ordered(
+  //     m_transport_to(ch, p),
+  //     a_chop(co, ch, k),
+  //     m_get_to(co, currentCookLoc)
+  //   );
+  // };
+};
+
+/** FIXME: The preparation actions can be fooled by using the m_chop decomposition with being prepared and  **/
+
+// action m_prepare_ingredient_chop(Choppable i) {
+//   motivated;
+//   :decomposition {
+//     [all] i.prepared == false :-> true;
+//     [all] contains ordered(
+//       m_chop(i)
+//     );
+//   };
+// };
+
+// action m_prepare_lettuce(Lettuce l) {
+//   motivated;
+//   :decomposition {
+//     [all] contains ordered(
+//       m_prepare_ingredient_chop(l)
+//     );
+//   };
+// };
+
+action m_prepare_tableware(Tableware t) {
+  motivated;
+  :decomposition {
+    constant ArrangeArea a;
+    t.loc == a;
+  };
+  :decomposition {
+    constant StorageArea s;
+    constant ArrangeArea a;
+    [start] t.loc == s;
+    [all] contains ordered(
+      m_transport_to(t, a)
+    );
+  };
 };
 
 
@@ -321,51 +379,50 @@ action m_arrange(Ingredient i, Tableware t) {
   motivated;
 
   // Three Options:
-  //  - The ingedient is already on the tableware
-  //  - The tableware is empty and (may) need to be fetched first
-  //  - The tableware already has ingredients and does not need to be fetched
-  :decomposition {
-    i.loc == t;
-  };
+  //  - The ingredient is already on the tableware
+  //  - The ingredient has to be added to the tableware
+  // :decomposition {
+  //   i.loc == t;
+  // };
 
   :decomposition {
-
-    constant StorageArea s;
-    constant ArrangeArea p;
+    constant ArrangeArea a;
     constant ManArea m;
     constant Cook c;
+    connected(a, m);
+    [all] t.loc == a;
 
-    connected(p, m);
+    [all] contains ordered(
+      m_fetch(c, i),
+      m_get_to(c, m),
+      a_arrange(c, i, t)
+    );
+  };  
+  // Let cook move back to original position
+  // :decomposition {
+  //   constant ArrangeArea a;
+  //   constant ManArea m;
+  //   constant Cook co;
+  //   constant ManArea currentCookLoc;
+  //   connected(a, m);
     
-    [start] t.loc == s;
-    [all] contains ordered(
-      m_transport_to(t, p),
-      m_fetch(c, i),
-      m_get_to(c, m),
-      a_arrange_new(c, i, t)
-    );
-  };
+  //   [start] co.loc == currentCookLoc;
+  //   [all] t.loc == a;
 
-  :decomposition {
-    constant ArrangeArea p;
-    constant ManArea m;
-    constant Cook c;
-    connected(p, m);
-    [all] t.loc == p;
-
-    [all] contains ordered(
-      m_fetch(c, i),
-      m_get_to(c, m),
-      a_arrange_add(c, i, t)
-    );
-  };
+  //   [all] contains ordered(
+  //     m_fetch(co, i),
+  //     m_get_to(co, m),
+  //     a_arrange(co, i, t),
+  //     m_get_to(co, currentCookLoc)
+  //   );
+  // };
 };
 
 action m_deliver(Tableware t, Client cl) {
   motivated;
-  :decomposition {
-    t.loc == cl;
-  };
+  // :decomposition {
+  //   t.loc == cl;
+  // };
   :decomposition {
     constant Cook co;
     constant Area a;
@@ -376,70 +433,89 @@ action m_deliver(Tableware t, Client cl) {
       a_give(co, cl, t)
     );
   };
+  // Let cook move back to original position
+  // :decomposition {
+  //   constant Cook co;
+  //   constant ManArea currentCookLoc;
+  //   constant Area a;
+  //   [all] cl.loc == a;
+  //   [all] contains ordered(
+  //     m_fetch(co, t),
+  //     m_get_to(co, a),
+  //     a_give(co, cl, t),
+  //     m_get_to(co, currentCookLoc)
+  //   );
+  // };
 };
 
 /*** Recipes ***/
 
-action order_lettuce_salad(Client cl) {
+action order_lettuce_salad(Client cl/*, Lettuce l, Tableware t*/) {
   motivated;
-  duration :in [0, 300];
   :decomposition {
     constant Lettuce l;
-    constant Tableware t;
-    [all] contains ordered (
-      m_chop(l),
-      m_arrange(l, t),
-      m_deliver(t, cl)
-    );
-  };
-};
-
-action order_lettuce_tomato_salad(Client cl) {
-  motivated;
-  duration :in [0, 600];
-  :decomposition {
-    constant Lettuce l;
-    constant Tomato to;
     constant Tableware t;
     [all] contains ordered (
       unordered(
-        ordered(
-          m_chop(l),
-          m_arrange(l, t)
-        ),
-        ordered(
-          m_chop(to),
-          m_arrange(to, t)
-        )
+        m_prepare_tableware(t),
+        m_chop(l),
+        m_arrange(l, t)
       ),
       m_deliver(t, cl)
     );
   };
 };
-action order_lettuce_tomato_cucumber_salad(Client cl) {
+
+action order_lettuce_tomato_salad(Client cl/*, Lettuce l, Tomato to, Tableware t*/) {
   motivated;
-  duration :in [0, 900];
+  // duration :in [0, 600];
+  :decomposition {
+    constant Lettuce l;
+    constant Tomato to;
+    constant Tableware t;
+    [all] contains {
+      t_prep : m_prepare_tableware(t);
+      t_chop_l : m_chop(l);
+      t_arr_l : m_arrange(l, t);
+      t_chop_to : m_chop(to);
+      t_arr_to : m_arrange(to, t);
+      t_del : m_deliver(t, cl);
+    };
+    end(t_prep) <= start(t_arr_l);
+    end(t_prep) <= start(t_arr_to);
+    end(t_chop_l) <= start(t_arr_l);
+    end(t_chop_to) <= start(t_arr_to);
+    end(t_arr_l) <= start(t_del);
+    end(t_arr_to) <= start(t_del);
+  };
+};
+
+action order_lettuce_tomato_cucumber_salad(Client cl/*, Lettuce l, Tomato to, Cucumber cu, Tableware t*/) {
+  motivated;
+  // duration :in [0, 900];
   :decomposition {
     constant Lettuce l;
     constant Tomato to;
     constant Cucumber cu;
     constant Tableware t;
-    [all] contains ordered (
-      unordered(
-        ordered(
-          m_chop(l),
-          m_arrange(l, t)
-        ),
-        ordered(
-          m_chop(to),
-          m_arrange(to, t)
-        ),
-        ordered(
-          m_chop(cu),
-          m_arrange(cu, t)
-        )
-      ),
-      m_deliver(t, cl)
-    );
+    [all] contains {
+      t_prep : m_prepare_tableware(t);
+      t_chop_l : m_chop(l);
+      t_arr_l : m_arrange(l, t);
+      t_chop_to : m_chop(to);
+      t_arr_to : m_arrange(to, t);
+      t_chop_cu : m_chop(cu);
+      t_arr_cu : m_arrange(cu, t);
+      t_del : m_deliver(t, cl);
+    };
+    end(t_prep) < start(t_arr_l);
+    end(t_prep) < start(t_arr_to);
+    end(t_prep) < start(t_arr_cu);
+    end(t_chop_l) < start(t_arr_l);
+    end(t_chop_to) < start(t_arr_to);
+    end(t_chop_cu) < start(t_arr_cu);
+    end(t_arr_l) < start(t_del);
+    end(t_arr_to) < start(t_del);
+    end(t_arr_cu) < start(t_del);
   };
 };
