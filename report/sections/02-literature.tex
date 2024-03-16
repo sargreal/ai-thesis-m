@@ -4,7 +4,7 @@
 \subsection{HTN Planning}\label{sec:htn-planning}
 
 Hierarchical Task Network (HTN) planning is a planning paradigm that allows for the specification of complex tasks by decomposing them into the subtasks.
-The planning is finished when there is no task left that has subtasks, the result is also called a Decomposition Tree.
+The planning is finished when there is no task left that has subtasks and there are no other threats, the result is also called a Decomposition Tree.
 % The HTN planning paradigm was first introduced by \cite{erol1994htn} and has since been used in a variety of domains, including robotics \citep{ghallab1998pddl, nau2003shop2, cashmore2008htn, cashmore2015htn}, video games \citep{ontanon2015survey}, and natural language processing \citep{zettlemoyer2005learning, wang2006learning, wang2007learning, wang2008learning, wang2010learning, wang2011learning, wang2012learning, wang2013learning, wang2014learning, wang2015learning, wang2016learning, wang2017learning, wang2018learning, wang2019learning, wang2020learning}.
 HTN Planning can be seen as a guided form of traditional planning, since the task structure is given.
 HTN Planning problems can be defined in several languages, such as the SHOP syntax, supported by SHOP-Like planners, ANML Language - supported by the FAPE planner and HDDL Syntax which is expected to become the standard.
@@ -13,6 +13,14 @@ The HDDL 2.1 proposal adds the support for Temporal planning, but there is curre
 The most expressive Syntax is the ANML-Language, which also supports dynamic fluents, that change over time.
 This Syntax is used throughout the whole thesis, as it supports Time for HTN Planning and is much less verbose than SHOP.
 The Fape planner is therefore used as a basis for this work.
+
+
+\subsection{Acting}\label{sec:acting}
+
+Acting is a field that executes a plan in a real world environment.
+The challenges here include uncertainty in the environment, failure of actions and therefore replanning, and the need for real-time performance.
+Replanning with HTN Planning is another challenge, since the hierarchy of tasks must be considered and replanning cannot be done trivially
+
 
 \subsubsection{ANML Language}
 

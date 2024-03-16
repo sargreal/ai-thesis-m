@@ -1,1 +1,301 @@
 \section{Methodology}\label{sec:methodology}
+
+% Problem definition
+
+A temporal htn planning problem is defined as a tuple $\langle X,X,X \rangle$.
+
+A temporal planning problem with a stream of tasks is defined as $\langle X,X,X,S \rangle$.
+
+$S$ is a stream of tasks that is unknown at the beginning of acting, and new tasks are added to the stream during acting.
+
+The new tasks need to be added to the current plan, where some actions may have been already executed, are currently executing or are still pending.
+
+The addition of theses tasks to the current problem may be straightforward in most cases, but sometimes it may be impossible to add the new task to the problem, although it would be possible if the tasks had been known in advance.
+
+This thesis evaluates the different options for optimizing plans for the case of adding new tasks.
+
+There are several options to consider in solving this issue:
+
+\begin{enumerate}
+    \item optimizing the existing plan directly for the case of adding additional actions. This is achieved by adding a heuristic for "Robustness" of a plan during the search phase of planning.
+    \item The addition of preparation tasks for possible future tasks. 
+    \item \todo{Maybe another one like replanning}
+\end{enumerate}
+
+
+\subsection{Domain Specification}
+
+The Domain overcooked2 contains several types in a hierarchy.
+
+The first Base Type is $Area$.
+This Type is used for specifying the location of an item or person. There are two types of Locations, Manipulation Areas and Occupation Areas.
+Occupation Areas can only contain items, and Persons can only be in Manipulation Areas.
+The Occupation Area is divided into StorageArea where Ingredients are stored and Placement Areas where Ingredients or Plates may be placed.
+The Placement Areas have an additional division into Tool Areas where the ingredients are processed and Arrange Areas where processed Ingredients may be arranged on a plate.
+
+The second base type is $Person$.
+A person has the associated fluents location, carrying and busy.
+A person is may carry only one item at a time and is busy when they are operating a Tool.
+Cook and Client are the two subtypes of a Person.
+
+The third base Type is $Tool$. A tool has an associated constant location and a fluent processing that describes if the tool is is use.
+There are two subtypes Knife and Pot defined.
+
+The forth and final base type is $Carryable$.
+A carryable has an associated fluent location that may be of the different types Occupation Area, Person or Tableware.
+The Carryable has the subtypes Tableware and Ingredient, a tableware has the subtype Plate.
+An Ingredient has the associated fluent arranged that describes if the ingredient is arranged on a tableware.
+The Ingredient has two inner \todo{Better naming?} subtypes Choppable and Boilable.
+A Choppable has the fluent chopped and a Boilable has the fluent boiled.
+The only for leaf subtype for Ingredient is Nori.
+The leaf subtypes of Choppable are Shrimp, Fish, Lettuce, Tomato and Cucumber.
+The only leaf subtype for Boilable is Rice.
+
+In the Language ANML it is not possible to inherit multiple types.
+
+The Domain further contains several constant functions.
+
+The boolean function connected of an Occupation Area and a Manipulation Area describes if Objects in the Occupation Areas can be manipulated from the Manipulation Area.
+The integer function distance of two Manipulation Areas describes the distance measured in timepoints between these Manipulation Areas.
+The rest of the functions describe the time it takes to perform a specific action.
+These functions are arrangetime, droptime, pickuptime, givetime, choptime and boiltime.
+The functions can have different values for each instance of the relevant Ingredient, Carryable, Choppable or Boilable.
+
+The Domain then contains several base actions, these have the prefix $a\_$.
+
+The action $a\_move$ makes a person move from its current Manipulation Area to the target Manipulation Area.
+The duration of the action equals the distance between the current and target Manipulation Area.
+This action is implemented like a teleportation, actual routing is not included as it unnecessarily increases the search space.
+
+\begin{anmlcode}
+action a_move(Person p, ManArea to) {
+  motivated;
+  constant ManArea from;
+  duration := distance(from, to);
+  from != to;
+  [all] {
+    p.loc == from :-> to;
+  };
+};
+\end{anmlcode}
+
+The action $a\_arrange$ makes a Person arrange an Ingredient on a Tableware.
+The duration equals the arrangetime of the Ingredient.
+The Person needs to be in the Manipulation Area connected to where the Tableware is, and the Ingredient has to be carried by the Person at the start of the action.
+
+\begin{anmlcode}
+action a_arrange(Person p, Ingredient i, Tableware t) {
+  motivated;
+  duration := arrangetime(i);
+  constant ArrangeArea pl;
+  constant ManArea man;
+  connected(pl, man);
+  [all] {
+    t.loc == pl;
+    p.loc == man;
+    i.loc == p :-> t;
+    p.carrying == true :-> false;
+    i.arranged == false :-> true;
+  };
+};
+\end{anmlcode}
+
+The action $a\_drop$ makes a Person drop a Carryable onto the connected Placement Area.
+The duration of the action equals the droptime of the Carryable.
+The Carryable has to be carried by the person at the start of the action.
+
+\begin{anmlcode}
+action a_drop(Person p, Carryable ca) {
+  motivated;
+  duration := droptime(ca);
+  constant PlArea pl;
+  constant ManArea man;
+  connected(pl, man);
+  [all] {
+    p.loc == man;
+    ca.loc == p :-> pl;
+    p.carrying == true :-> false;
+  };
+};
+\end{anmlcode}
+
+The action $a\_pick\_up$ makes a Person pick up a Carryable from the connected Occupation Area Area.
+The duration of the action equals the pickuptime of the Carryable.
+The Carryable has to be on the connected Occupation Area at the start of the action.
+
+\begin{anmlcode}
+action a_pick_up(Person p, Carryable ca) {
+  motivated;
+  duration := pickuptime(ca);
+  constant OccupationArea oc;
+  constant ManArea man;
+  connected(oc, man);
+  [all] {
+    p.loc == man;
+    ca.loc == oc :-> p; 
+    p.carrying == false :-> true;
+  };
+};
+\end{anmlcode}
+
+The action $a\_give$ makes a person give a Carryable to another Person.
+The duration equals the givetime of the Carryable.
+The two persons have to be in the same Manipulation Area and the Carryable has to be carried by the first person at the start of the action.
+
+\begin{anmlcode}
+action a_give(Person p1, Person p2, Carryable c) {
+  motivated;
+  duration := givetime(c);
+  constant ManArea m;
+  [all] {
+    p1.loc == m;
+    p2.loc == m;
+    p1.carrying == true :-> false;
+    p2.carrying == false :-> true;
+    c.loc == p1 :-> p2;
+  };
+};
+\end{anmlcode}
+
+The action $a\_chop$ makes a person chop a Choppable using a Knife.
+The duration equals the choptime of the Choppable.
+The person has to be located in the connected Manipulation Area to the Tool Area where the Knife is located and the Choppable has to be at this Tool Area as well.
+
+\begin{anmlcode}
+action a_chop(Cook co, Choppable ch, Knife k) {
+  motivated;
+  duration := choptime(ch);
+  constant ManArea man;
+  constant ToolArea ta;
+  connected(ta, man);
+  k.loc == ta;
+  [all] {
+    co.loc == man;
+    ch.loc == ta;
+    k.processing == false :-> false;
+    co.busy == false :-> false;
+    co.carrying == false :-> false;
+    ch.chopped == false :-> true;
+  };
+};
+\end{anmlcode}
+
+\todo[inline]{Rest of methods and orders}
+
+\subsection{Stream of Tasks}
+
+The core element around which this thesis is built, is that tasks may be received during the execution of a plan, so during the acting phase.
+This behavior is shown in the following flow chart.
+
+\missingfigure{Flowchart}
+
+The receiving of new tasks may occur at any point during the execution, so there are 3 separate points where this may happen.
+When the Acting Engine is in an idle state, the received task is added to the Planning Problem and Planning is started.
+When the Acting Engine is currently planning, the current planning is stopped, the task is added to the Problem and planning is restarted.
+When the Acting Engine is currently acting, the dispatching of new action is stopped, the new task is added to the Problem, Planning is restarted and currently executing actions are finished while planning.
+For simplicity, the simulated time is stopped during planning, so the planning time does not influence the executability of actions.
+
+Inserting new tasks into an existing plan is handled using the following procedure:
+The current state of the environment is saved to the Problem.
+For each partly executed task, a new method is created in the problem that only includes the not yet executed actions of the hierarchy.
+This method can only be used when exactly these conditions apply, therefore the methods receives the preconditions tied to this execution.
+Each variable used in these method is required to be the instance used in the current plan and they are also required to have the same value as in the current state.
+For tasks that are currently executing, \todo{Do not know how to handle}
+Then the new task is inserted as a new chronicle and the planning is started again.
+
+
+\subsection{Robustness heuristic}
+
+The type of Robustness required here is in several ways different to other definitions in the Literature.
+
+\begin{definition}
+    A Plan is robust if changes in the start or end time points of executed actions do not make the plan inconsistent.  
+\end{definition}
+
+This definition considers all actions in a plan rigid, which is a common requirement in several application areas of planning.
+A plan that has been generated cannot be changed later, and some resources may also depend on the rigidness of the planned actions. 
+This makes the most robust plans always include padding between the individual actions.
+
+In this context that definition still holds, however the assumptions are different.
+Actions in this context may be delayed until the final deadline is missed.
+These delays may come from the insertion of new tasks into the existing plan.
+Therefore the actions in the plan are not rigid and padding does not make the plan more robust.
+Instead the robustness is calculated using pertubations similarly to the robustness in QCNs.
+
+The pertubations in this case are random delays of action starts.
+The most robust plans are then the plans with the shortest makespan with the additional metric of least dependencies between parallel actions.
+
+
+The Robustness is the number of random pertubations that can be added on average until the plan is inconsistent.
+To approximate this, 10 random pertubations are added 10 times and the average is taken.
+
+
+\subsection{Preparations}
+
+Preparing parts of a meal is a common strategy in Restaurants to handle high loads.
+
+Due to the nature of the hierarchical plan, the most essential actions for a task can be gathered.
+These actions are added to the current plan with the constraints that they can be executed between the current timepoint and the expected end of the current plan.
+
+The generation of potentially preparable tasks is shown in algorithm \ref{alg:methodology:preparations}.
+It receives a list of potential task names, in this case the potential orders that may be submitted in the stream of tasks.
+These should be known at the at the beginning of acting, but could be changed during acting.
+For each potential order if a subtask does not require any argument of the order, it is independent of the individual order and is a potential subject for preparation.
+If the task depends on a previous task, this previous task has to have been executed with the matching arguments.
+All of these tasks in the domain also need to have one possible decomposition that is fulfilled if all postconditions are met.
+Otherwise the prepared instances could not be used in future orders.
+The arguments for these tasks need to be instantiated statically and cannot overlap with already existing preparations or task executions.
+Otherwise they could be included multiple times in the plan without any effect due to the previous condition.
+
+
+\begin{algorithm}
+    \caption{Generation of possible preparations}
+    \label{alg:methodology:preparations}
+    \KwIn{plan; potential orders}
+    \KwOut{possible preparations}
+    $preparations \leftarrow \emptyset$\;
+    \ForEach{$o \in$ potential orders}{
+        \ForEach{$t \in subtasks(o)$}{
+            \If{$arguments(t) \nsubseteq arguments(o)$}{
+                \ForEach{$p \in instantions(t)$}{
+                    \If{$dependencies(o,t) \neq \emptyset$}{
+                        \If{dependenciesExecuted(o,p)} {
+                            $preparations \leftarrow preparations + \{p\}$
+                        }
+                    }
+                    \Else{
+                        $preparations \leftarrow preparations + \{p\}$
+                    }
+                }
+            }
+        }
+    }
+    \Return{preparations}
+\end{algorithm}
+
+After generating all possible preparations, they are added randomly to the current plan, and planning is continued.
+If the planning fails, it is likely that it is not possible to prepare any tasks anymore.
+Therefore the planning is stopped and the previous plan is returned.
+Otherwise the same procedure is repeated.
+
+\begin{algorithm}
+    \caption{Planning with adding preparations}
+    \label{alg:methodology:planning}
+    \KwIn{problem; potential orders}
+    \KwOut{plan}
+    $planning \leftarrow 1$\;
+    $sol \leftarrow \emptyset$\;
+    \While{planning}{
+        $solution \leftarrow search(problem)$\;
+        \If{consistent(solution)}{
+            $sol \leftarrow solution$\;
+            $preparations \leftarrow PREPARATION\_TASKS(solution, potential orders)$\;
+            $preparation \leftarrow random(preparations)$\;
+            $problem \leftarrow problem + \{preparation\}$\;
+        }
+        \Else{
+            $planning \leftarrow 0$\;
+        }
+    }
+    \Return{sol}
+\end{algorithm}
