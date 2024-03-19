@@ -47,6 +47,14 @@ reversibility sackgasse und anticipatorisch
   - Entstehen überhaupt Sackgassen, sind sie überhaupt verhinderbar?
   - Optimierung hin zu maximaler Auslastung? Ähnlich wie bei Sprint Planung?
 
+### Mögliche Lösung für das Replanning Problem:
+
+- Neuer Plan mit allen schon ausgeführten/geplanten Aktionen
+- Alle Aufträge einfügen
+- Planning starten
+  - Die Hierarchie solle aufgebaut werden können und die existierenden Aktionen nutzen
+  - Problematisch eventuell: wie könnnen Aktionen als ausgeführt markiert werden?
+
 ### Generelle Anmerkungen & Diskussionen
 
 Robustheit:
