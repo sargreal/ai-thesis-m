@@ -1,5 +1,7 @@
 \section{Related Work}\label{sec:related-work}
 
+\subsection{Classical planning}\label{sec:classical-planning}
+
 
 \subsection{HTN Planning}\label{sec:htn-planning}
 
@@ -19,7 +21,24 @@ The Fape planner is therefore used as a basis for this work.
 
 Acting is a field that executes a plan in a real world environment.
 The challenges here include uncertainty in the environment, failure of actions and therefore replanning, and the need for real-time performance.
-Replanning with HTN Planning is another challenge, since the hierarchy of tasks must be considered and replanning cannot be done trivially
+Replanning with HTN Planning is another challenge, since the hierarchy of tasks must be considered and replanning cannot be done trivially.
+
+There are different approaches to preforming acting, depending on the uncertainties in the environment.
+In the most uncertain environments, lookahead planning is common, where only a few of the upcoming steps are used to guide the search. 
+On each new state the planning is repeated.
+When the environment has more certainty, the planning is executed fully and the plan is followed until a state occurs that differs from the state predicted by the planner.
+Then it is attempted to repair the plan by inserting some actions. 
+If that does not work, a full replanning is done.
+
+Acting with a HTN Planner can be done similar, but requires more care, since the hierarchy does not enable a direct replanning.
+\todo[inline]{Silva 2018} has introduced a formalism and algorithm for HTN acting that contains the following steps:
+A configuration represents the current state of the planning.
+Primary Tasks are the tasks that can be executed, which requires that there are no tasks that precede them.
+There are different possibilities for execution:
+Execution via reduction: A task is executed when it is reduced/decomposed using a method body
+Execution via performing an action: A (primary) action can be executed if it is applicable.
+Execution via replacement: A method body
+
 
 
 \subsubsection{ANML Language}
