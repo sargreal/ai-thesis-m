@@ -72,6 +72,13 @@ type Boilable < Ingredient with {
 
 type Rice < Boilable;
 
+
+type Fryable < Ingredient with {
+  fluent boolean fryed;
+};
+
+type Beef < Fryable;
+
 // an object on 'pl' can be manipulated from 'man' and 'man' can be accessed from 'pre'
 constant boolean connected(OccupationArea a, ManArea b);
 constant integer distance(ManArea a, ManArea b);
@@ -81,17 +88,18 @@ constant integer arrangetime(Ingredient i);
 constant integer droptime(Carryable c);
 constant integer pickuptime(Carryable c);
 constant integer givetime(Carryable c);
-constant integer choptime(Choppable a);
-constant integer boiltime(Boilable a);
+constant integer choptime(Choppable c);
+constant integer boiltime(Boilable b);
+constant integer frytime(Fryable f);
 
 /*** Primitive actions ***/
 
 action a_move(Person p, ManArea to) {
   // FIXME: Maybe a person should be able to move without being motivated by a method/decomposition?
   motivated;
-  duration := 5;
+  // duration := 5;
   constant ManArea from;
-  // duration := distance(from, to);
+  duration := distance(from, to);
   from != to;
   [all] {
     p.loc == from :-> to;
@@ -179,26 +187,42 @@ action a_chop(Cook co, Choppable ch, Knife k) {
   };
 };
 
-// action a_boil(Cook c, Boilable b, Pot p) {
-//   motivated;
-//   duration := boiltime(b);
+action a_boil(Cook c, Boilable b, Pot p) {
+  motivated;
+  duration := boiltime(b);
 
-//   constant ManArea man;
-//   connected(p.loc, man);
+  constant ManArea man;
+  connected(p.loc, man);
 
-//   // Cook should be at the pot at the beginning and end
-//   // FIXME: Does not support different cooks at the beginning and end
-//   [start,end] {
-//     c.loc == man;
-//   };
-//   // FIXME: Same as with busy cook
-//   // [start,end] contains p.processing == true;
+  // Cook should be at the pot at the beginning and end
+  [start] c.loc == man;
+  [end] c.loc == man;
 
-//   [all] {
-//     b.loc == p.loc;
-//     b.boiled == false :-> true;
-//   };
-// };
+  [all] {
+    b.loc == p.loc;
+    p.processing == false :-> false;
+    b.boiled == false :-> true;
+  };
+};
+
+
+action a_fry(Cook c, Fryable f, Pan p) {
+  motivated;
+  duration := frytime(f);
+
+  constant ManArea man;
+  connected(p.loc, man);
+
+  // Cook should be at the pot at the beginning and end
+  [start] c.loc == man;
+  [end] c.loc == man;
+
+  [all] {
+    f.loc == p.loc;
+    p.processing == false :-> false;
+    f.fryed == false :-> true;
+  };
+};
 
 /*** Methods ***/
 
@@ -278,28 +302,6 @@ action m_transport_to(Carryable ca, PlArea pl) {
   // };
 };
 
-// action m_boil(Boilable b) {
-//   motivated;
-//   :decomposition {
-
-//     constant Pot p;
-//     constant Cook c;
-//     constant ManArea m;
-//     constant ToolArea ta;
-//     p.loc == ta;
-
-//     connected(ta, m);
-
-//     [all] contains ordered(
-//       m_transport_to(b,ta),
-//       m_get_to(c, m),
-//       a_boil(c, b, p),
-//       // FIXME: No guarantee that the cook is still there?
-//       m_get_to(c, m),
-//       a_pick_up(c, b)
-//     );
-//   };
-// };
 
 action m_chop(Choppable ch) {
   motivated;
@@ -335,6 +337,43 @@ action m_chop(Choppable ch) {
   //     m_get_to(co, currentCookLoc)
   //   );
   // };
+};
+
+action m_boil(Boilable b) {
+  motivated;
+  :decomposition {
+    b.boiled == true;
+  };
+  :decomposition {
+
+    constant Pot p;
+    constant Cook c;
+    constant ToolArea ta;
+    p.loc == ta;
+
+    [all] contains ordered(
+      m_transport_to(b,ta),
+      a_boil(c, b, p)
+    );
+  };
+};
+
+action m_fry(Fryable f) {
+  motivated;
+  :decomposition {
+    f.fryed == true;
+  };
+  :decomposition {
+    constant Pan p;
+    constant Cook c;
+    constant ToolArea ta;
+    p.loc == ta;
+
+    [all] contains ordered(
+      m_transport_to(f,ta),
+      a_fry(c, f, p)
+    );
+  };
 };
 
 /** FIXME: The preparation actions can be fooled by using the m_chop decomposition with being prepared and  **/
@@ -450,7 +489,9 @@ action m_deliver(Tableware t, Client cl) {
 
 /*** Recipes ***/
 
-action order_lettuce_salad(Client cl/*, Lettuce l, Tableware t*/) {
+// Partial Order
+
+action order_po_lettuce_salad(Client cl/*, Lettuce l, Tableware t*/) {
   motivated;
   :decomposition {
     constant Lettuce l;
@@ -466,7 +507,7 @@ action order_lettuce_salad(Client cl/*, Lettuce l, Tableware t*/) {
   };
 };
 
-action order_lettuce_tomato_salad(Client cl/*, Lettuce l, Tomato to, Tableware t*/) {
+action order_po_lettuce_tomato_salad(Client cl/*, Lettuce l, Tomato to, Tableware t*/) {
   motivated;
   // duration :in [0, 600];
   :decomposition {
@@ -490,9 +531,8 @@ action order_lettuce_tomato_salad(Client cl/*, Lettuce l, Tomato to, Tableware t
   };
 };
 
-action order_lettuce_tomato_cucumber_salad(Client cl/*, Lettuce l, Tomato to, Cucumber cu, Tableware t*/) {
+action order_po_lettuce_tomato_cucumber_salad(Client cl/*, Lettuce l, Tomato to, Cucumber cu, Tableware t*/) {
   motivated;
-  // duration :in [0, 900];
   :decomposition {
     constant Lettuce l;
     constant Tomato to;
@@ -508,14 +548,118 @@ action order_lettuce_tomato_cucumber_salad(Client cl/*, Lettuce l, Tomato to, Cu
       t_arr_cu : m_arrange(cu, t);
       t_del : m_deliver(t, cl);
     };
-    end(t_prep) < start(t_arr_l);
-    end(t_prep) < start(t_arr_to);
-    end(t_prep) < start(t_arr_cu);
-    end(t_chop_l) < start(t_arr_l);
-    end(t_chop_to) < start(t_arr_to);
-    end(t_chop_cu) < start(t_arr_cu);
-    end(t_arr_l) < start(t_del);
-    end(t_arr_to) < start(t_del);
-    end(t_arr_cu) < start(t_del);
+    end(t_prep) <= start(t_arr_l);
+    end(t_prep) <= start(t_arr_cu);
+    end(t_prep) <= start(t_arr_to);
+    end(t_chop_l) <= start(t_arr_l);
+    end(t_chop_to) <= start(t_arr_to);
+    end(t_chop_cu) <= start(t_arr_cu);
+    end(t_arr_l) <= start(t_del);
+    end(t_arr_to) <= start(t_del);
+    end(t_arr_cu) <= start(t_del);
+  };
+};
+
+action order_po_lettuce_tomato_burger(Client cl) {
+  motivated;
+  :decomposition {
+    constant Lettuce l;
+    constant Tomato to;
+    constant Beef b;
+    constant Tableware t;
+    [all] contains {
+      t_prep : m_prepare_tableware(t);
+      t_chop_l : m_chop(l);
+      t_arr_l : m_arrange(l, t);
+      t_chop_to : m_chop(to);
+      t_arr_to : m_arrange(to, t);
+      t_fry_b : m_fry(b);
+      t_arr_b : m_arrange(b, t);
+      t_del : m_deliver(t, cl);
+    };
+    end(t_prep) <= start(t_arr_l);
+    end(t_prep) <= start(t_arr_to);
+    end(t_prep) <= start(t_arr_b);
+    end(t_chop_l) <= start(t_arr_l);
+    end(t_chop_to) <= start(t_arr_to);
+    end(t_fry_b) <= start(t_arr_b);
+    end(t_arr_l) <= start(t_del);
+    end(t_arr_to) <= start(t_del);
+    end(t_arr_b) <= start(t_del);
+  };
+};
+
+// Total Order
+
+
+action order_to_lettuce_salad(Client cl/*, Lettuce l, Tableware t*/) {
+  motivated;
+  :decomposition {
+    constant Lettuce l;
+    constant Tableware t;
+    [all] contains ordered(
+      m_prepare_tableware(t),
+      m_chop(l),
+      m_arrange(l, t),
+      m_deliver(t, cl)
+    );
+  };
+};
+
+action order_to_lettuce_tomato_salad(Client cl/*, Lettuce l, Tomato to, Tableware t*/) {
+  motivated;
+  // duration :in [0, 600];
+  :decomposition {
+    constant Lettuce l;
+    constant Tomato to;
+    constant Tableware t;
+    [all] contains ordered(
+      m_prepare_tableware(t),
+      m_chop(l),
+      m_arrange(l, t),
+      m_chop(to),
+      m_arrange(to, t),
+      m_deliver(t, cl)
+    );
+  };
+};
+
+action order_to_lettuce_tomato_cucumber_salad(Client cl/*, Lettuce l, Tomato to, Cucumber cu, Tableware t*/) {
+  motivated;
+  :decomposition {
+    constant Lettuce l;
+    constant Tomato to;
+    constant Cucumber cu;
+    constant Tableware t;
+    [all] contains ordered(
+      m_prepare_tableware(t),
+      m_chop(l),
+      m_arrange(l, t),
+      m_chop(to),
+      m_arrange(to, t),
+      m_chop(cu),
+      m_arrange(cu, t),
+      m_deliver(t, cl)
+    );
+  };
+};
+
+action order_to_lettuce_tomato_burger(Client cl) {
+  motivated;
+  :decomposition {
+    constant Lettuce l;
+    constant Tomato to;
+    constant Beef b;
+    constant Tableware t;
+    [all] contains ordered(
+      m_prepare_tableware(t),
+      m_chop(l),
+      m_arrange(l, t),
+      m_chop(to),
+      m_arrange(to, t),
+      m_fry(b),
+      m_arrange(b, t),
+      m_deliver(t, cl)
+    );
   };
 };

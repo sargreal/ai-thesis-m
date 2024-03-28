@@ -6,6 +6,7 @@ forall(Carryable c) {pickuptime(c) := 5; };
 forall(Carryable c) {givetime(c) := 5; };
 forall(Choppable c) {choptime(c) := 20; };
 forall(Boilable b) {boiltime(l) := 30; };
+forall(Fryable b) {frytime(l) := 30; };
 
 instance Cook cook1;
 // ,cook2;
