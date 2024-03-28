@@ -1,0 +1,15 @@
+\section{Related Work}
+
+There has already been some research in this game that focused on Classical Planning \citep{yuxinliuPlanningOvercookedGame2020}, Human-Robot Interaction \citep{bishopCHAOPTTestbedEvaluating2020,roseroTwoManyCooks2021,ruhdorferMindsChefsUsing2023} and Reinforcement Learning using the Theory of Mind \citep{ruhdorferMindsChefsUsing2023}.
+\cite{bishopCHAOPTTestbedEvaluating2020,roseroTwoManyCooks2021} do not use actual AI techniques, but the Wizard of Oz paradigm where the AI Agent is simulated by a human but the participants are unaware of that.
+The major component of asynchronous receiving of orders has not been considered techniqually in the mentioned research.
+
+Support for Temporal HTN Planning has ben implemented in the two major works CHIMP \citep{stockHierarchicalHybridPlanning2017} and FAPE \citep{bit-monnotFAPEConstraintbasedPlanner2020}.
+CHIMP uses a custom domain definition language based on the SHOP2 language, while FAPE a extended version the Language ANML.
+There is a proposal for HDDL2.1 \citep{pellierHDDLDefiningFormalism2023} that adds support for the durative actions and time constraints from PDDL2.1 \citep{foxPDDL2ExtensionPDDL2003} to the HDDL language \citep{hollerHDDLExtensionPDDL2020}, a hierachical version of PDDL.
+HDDL2.1 is however not supported by any planner yet.
+The planning system most likely implementing the necessary features in the future is Aries \citep{bit-monnotAries2024}, however that is still in active development.
+An interesting project in this context is the Unified-Planning System \citep{frambaUnifiedPlanning2024} by the AIPlan4EU H2020 Project\footnote{https://aiplan4eu-project.eu}, that aims at providing a common python api for calling and interacting with any planner.
+
+Acting has been researched in several ways especially in the Refinement Acting Engine \citep{ghallabAutomatedPlanningActing2016,more} as well as in HTN planning \citep{bit-monnotTemporalHierarchicalModels2017,desilvaHTNActingFormalism2018,patraIntegratingActingPlanning2020,bansodIntegratingPlanningActing2021}.
+Repair and Replanning \citep{bansodHTNReplanningMiddle2022} is also actively researched.

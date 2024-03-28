@@ -1,4 +1,4 @@
-\section{Methodology}\label{sec:methodology}
+\section{Approach}\label{sec:approach}
 
 % Problem definition
 
@@ -192,25 +192,54 @@ This behavior is shown in the following flow chart.
 The receiving of new tasks may occur at any point during the execution, so there are 3 separate points where this may happen.
 When the Acting Engine is in an idle state, the received task is added to the Planning Problem and Planning is started.
 When the Acting Engine is currently planning, the current planning is stopped, the task is added to the Problem and planning is restarted.
-When the Acting Engine is currently acting, the dispatching of new action is stopped, the new task is added to the Problem, Planning is restarted and currently executing actions are finished while planning.
+When the Acting Engine is currently dispatching, the dispatching of new actions is stopped, the new task is added to the Problem, Planning is restarted and currently executing actions are finished while planning.
+If the Planning fails at any point, a plan repair is tried first, by removing inconsistent actions.
+If the Repair fails as well, a replan is tried by removing all pending actions.
+The failing of a action dispatch is not considered.
 For simplicity, the simulated time is stopped during planning, so the planning time does not influence the executability of actions.
 
-Inserting new tasks into an existing plan is handled using the following procedure:
-The current state of the environment is saved to the Problem.
-For each partly executed task, a new method is created in the problem that only includes the not yet executed actions of the hierarchy.
-This method can only be used when exactly these conditions apply, therefore the methods receives the preconditions tied to this execution.
-Each variable used in these method is required to be the instance used in the current plan and they are also required to have the same value as in the current state.
-For tasks that are currently executing, \todo{Do not know how to handle}
-Then the new task is inserted as a new chronicle and the planning is started again.
+The insertion of a new task $t$ at time $t_{insert}$ into an existing plan $\pi$ is done by a simple chronicle insertion.
+The task is converted into a chronicle $c$ with the timepoint constraint $t_{start} + t_{insert} \geq \pi_{start}$ and if a deadline for the task is specified also the constraint $\pi_{start} + t_{deadline} \geq t_{end}$.
+The insertion is then handled by the plan modification ChronicleInsertion.
+
+The modification of an existing and already resolved plan poses a challenge in several aspects.
+The timelines for all instances are already resolved.
+In the fape planner it is not possible to insert a state change between the timelines, but only after or before the timeline.
+This is especially problematic, since then a task with a tight deadline cannot be inserted when an instance needs to be used earlier.
+
+% Inserting new tasks into an existing plan is handled using the following procedure:
+% The current state of the environment is saved to the Problem.
+% For each partly executed task, a new method is created in the problem that only includes the not yet executed actions of the hierarchy.
+% This method can only be used when exactly these conditions apply, therefore the methods receives the preconditions tied to this execution.
+% Each variable used in these method is required to be the instance used in the current plan and they are also required to have the same value as in the current state.
+% For tasks that are currently executing, \todo{Do not know how to handle}
+% Then the new task is inserted as a new chronicle and the planning is started again.
 
 
 \subsection{Robustness heuristic}
 
-The type of Robustness required here is in several ways different to other definitions in the Literature.
+Robustness is defined as followed:
 
 \begin{definition}
-    A Plan is robust if changes in the start or end time points of executed actions do not make the plan inconsistent.  
+    Robustness is the ability of a system to withstand stresses, pressures, perturbations, unpredictable changes, or variations in its operating environment without loss of functionality.
+    A system that is designed to perform functionality in an expected environment is \emph{robust} if it is able to maintain its functionality under a set of incidences. \citep{barberRobustnessStabilityRecoverability2015}
 \end{definition}
+
+As also mentioned in \cite{barberRobustnessStabilityRecoverability2015}, the concrete "formalization depends on the system, on its expected functionality and on the specific set of incidences to be confronted".
+In considerations of robustness in planning \citep{lundRobustExecutionProbabilistic2017}, the incidences are pertubations in the start and end timepoints of actions.
+Most of the time, this leads to the most robust plans being plans that include as much margin between actions as possible.
+
+In this case however, the execution is dynamic and when adding new tasks added during the execution, it is not beneficial if there are large margins between the tasks.
+Therefore, the robustness in respect to adding new tasks is determined by how likely it is that the addition of a new task is possible.
+
+There are two cases that must be considered: All decomposed acctions of the added task will happen after the end of the current plan, or the decomposed actions are at least partially executed during the current plan.
+In the first case, the success of adding the new task is more likely when the current plan has a shorter makespan.
+In the other case, the plan must be changed substantially.
+Some existing action must be pushed back, while the deadline for this order must still be fulfilled.
+This works best, when there are less dependencies between actions, and when the makespan is shorter.
+
+To find plans that have exactly these properties, a new robustness heuristic is introduced, that is used for node selection during planning.
+The 
 
 This definition considers all actions in a plan rigid, which is a common requirement in several application areas of planning.
 A plan that has been generated cannot be changed later, and some resources may also depend on the rigidness of the planned actions. 
@@ -234,8 +263,9 @@ To approximate this, 10 random pertubations are added 10 times and the average i
 
 Preparing parts of a meal is a common strategy in Restaurants to handle high loads.
 
-Due to the nature of the hierarchical plan, the most essential actions for a task can be gathered.
-These actions are added to the current plan with the constraints that they can be executed between the current timepoint and the expected end of the current plan.
+Due to the nature of the hierarchical plan, the essential actions for a task can be gathered.
+These actions are added to the current plan with the constraint that they can be executed between the current timepoint and the expected end of the current plan.
+Otherwise an unlimited amount of preparations could be inserted at any point, which would first block the Acting Engine to receive any new tasks and second would correspond to a restaurant that prepares all of the available ingredients even when ther are only a few orders.
 
 The generation of potentially preparable tasks is shown in algorithm \ref{alg:methodology:preparations}.
 It receives a list of potential task names, in this case the potential orders that may be submitted in the stream of tasks.
@@ -251,7 +281,7 @@ Otherwise they could be included multiple times in the plan without any effect d
 \begin{algorithm}
     \caption{Generation of possible preparations}
     \label{alg:methodology:preparations}
-    \KwIn{plan; potential orders}
+    \KwIn{$\pi$; $T_p$}
     \KwOut{possible preparations}
     $preparations \leftarrow \emptyset$\;
     \ForEach{$o \in$ potential orders}{
@@ -273,29 +303,45 @@ Otherwise they could be included multiple times in the plan without any effect d
     \Return{preparations}
 \end{algorithm}
 
-After generating all possible preparations, they are added randomly to the current plan, and planning is continued.
-If the planning fails, it is likely that it is not possible to prepare any tasks anymore.
+After generating all possible preparations, one perparation is chosen to the current plan, and planning is continued.
+If the planning fails, no preparation is possible anymore.
 Therefore the planning is stopped and the previous plan is returned.
 Otherwise the same procedure is repeated.
 
 \begin{algorithm}
     \caption{Planning with adding preparations}
     \label{alg:methodology:planning}
-    \KwIn{problem; potential orders}
-    \KwOut{plan}
-    $planning \leftarrow 1$\;
-    $sol \leftarrow \emptyset$\;
+    \KwIn{$P = \langle L,C,A,M,s_0,tn_I,\delta \rangle$; $T_p$}
+    \KwOut{$\pi$}
+    $planning \leftarrow true$\;
+    $\pi_{final} \leftarrow \emptyset$\;
     \While{planning}{
-        $solution \leftarrow search(problem)$\;
-        \If{consistent(solution)}{
-            $sol \leftarrow solution$\;
-            $preparations \leftarrow PREPARATION\_TASKS(solution, potential orders)$\;
-            $preparation \leftarrow random(preparations)$\;
-            $problem \leftarrow problem + \{preparation\}$\;
+        $\pi \leftarrow search(P)$\;
+        \If{$consistent(\pi)$}{
+            $\pi_{final} \leftarrow \pi$\;
+            $A_p \leftarrow PREPARATIONS(\pi, T_p)$\;
+            $a_p \leftarrow choose(A_p)$\;
+            $tn_I \leftarrow tn_I + \{a_p\}$\;
         }
         \Else{
-            $planning \leftarrow 0$\;
+            $planning \leftarrow false$\;
         }
     }
-    \Return{sol}
+    \Return{$\pi_{final}$}
 \end{algorithm}
+
+There are several concrete implementations of the non-deterministic choose method in \ref{alg:methodology:planning}.
+
+\begin{itemize}
+  \item A random selection can be used as an approximation.
+    The random selection gives preparations that are present multiple times in the possible preparations a higher likelihood.
+  \item A greedy approach can be used to insert all possible preparations and choose the best one.
+  \item The time and resources required for a preparation task can be used to find the best combination of tasks to insert.
+  \item A statistical model of the environment can be used to predict the most likely tasks and the preparations can be chosen based on the likelihood of being necessary.
+  \item Only the most common preparations are used, to prevent unnecessary processing.
+  \item Further metrics can be included based on the domain, like e.g. the storage life of ingredients after being prepared.
+\end{itemize}
+
+The preparation insertion is similar to task insertion.
+While task insertion is used to support goals or tasks using generative planning instead of HTN planning, preparation insertion supports possible future tasks.
+The properties of preparation insertion varies significantly compared to task insertion.

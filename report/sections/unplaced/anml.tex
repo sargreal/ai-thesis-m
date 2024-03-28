@@ -1,46 +1,3 @@
-\section{Related Work}\label{sec:related-work}
-
-\subsection{Classical planning}\label{sec:classical-planning}
-
-
-\subsection{HTN Planning}\label{sec:htn-planning}
-
-Hierarchical Task Network (HTN) planning is a planning paradigm that allows for the specification of complex tasks by decomposing them into the subtasks.
-The planning is finished when there is no task left that has subtasks and there are no other threats, the result is also called a Decomposition Tree.
-% The HTN planning paradigm was first introduced by \cite{erol1994htn} and has since been used in a variety of domains, including robotics \citep{ghallab1998pddl, nau2003shop2, cashmore2008htn, cashmore2015htn}, video games \citep{ontanon2015survey}, and natural language processing \citep{zettlemoyer2005learning, wang2006learning, wang2007learning, wang2008learning, wang2010learning, wang2011learning, wang2012learning, wang2013learning, wang2014learning, wang2015learning, wang2016learning, wang2017learning, wang2018learning, wang2019learning, wang2020learning}.
-HTN Planning can be seen as a guided form of traditional planning, since the task structure is given.
-HTN Planning problems can be defined in several languages, such as the SHOP syntax, supported by SHOP-Like planners, ANML Language - supported by the FAPE planner and HDDL Syntax which is expected to become the standard.
-While these languages mostly support the same features, it is important to note that HDDL currently only supports a small subset of the PDDL syntax it is based on, primarily because the most HTN planners do not support temporal or resource planning.
-The HDDL 2.1 proposal adds the support for Temporal planning, but there is currently no public system that supports this syntax.
-The most expressive Syntax is the ANML-Language, which also supports dynamic fluents, that change over time.
-This Syntax is used throughout the whole thesis, as it supports Time for HTN Planning and is much less verbose than SHOP.
-The Fape planner is therefore used as a basis for this work.
-
-
-\subsection{Acting}\label{sec:acting}
-
-Acting is a field that executes a plan in a real world environment.
-The challenges here include uncertainty in the environment, failure of actions and therefore replanning, and the need for real-time performance.
-Replanning with HTN Planning is another challenge, since the hierarchy of tasks must be considered and replanning cannot be done trivially.
-
-There are different approaches to preforming acting, depending on the uncertainties in the environment.
-In the most uncertain environments, lookahead planning is common, where only a few of the upcoming steps are used to guide the search. 
-On each new state the planning is repeated.
-When the environment has more certainty, the planning is executed fully and the plan is followed until a state occurs that differs from the state predicted by the planner.
-Then it is attempted to repair the plan by inserting some actions. 
-If that does not work, a full replanning is done.
-
-Acting with a HTN Planner can be done similar, but requires more care, since the hierarchy does not enable a direct replanning.
-\todo[inline]{Silva 2018} has introduced a formalism and algorithm for HTN acting that contains the following steps:
-A configuration represents the current state of the planning.
-Primary Tasks are the tasks that can be executed, which requires that there are no tasks that precede them.
-There are different possibilities for execution:
-Execution via reduction: A task is executed when it is reduced/decomposed using a method body
-Execution via performing an action: A (primary) action can be executed if it is applicable.
-Execution via replacement: A method body
-
-
-
 \subsubsection{ANML Language}
 
 \lstset{
@@ -410,181 +367,177 @@ open-goals flaws on the location of the robot.
 
 A typical planning process for this problem would be the following:
 
-% 1) Refine the `Transport` goal task by inserting a `Transport` action.
-% 2) Refine the `Pick` and `Drop` subtasks of the Transport action by
-% inserting the actions `Pick(PR2,coffee_cup,Kitchen)` and `Drop(PR2,coffee_cup,Bedroom)`
-% 3) Insert a `Move(PR2, Bedroom, Kitchen)` action to support the condition of `Pick` that PR2 is in the Kitchen.
-% 4) Insert a `Move(PR2,Kitchen,Bedroom)` action to support the condition of `Drop` that PR2 is in the Bedromm.
+1) Refine the `Transport` goal task by inserting a `Transport` action.
+2) Refine the `Pick` and `Drop` subtasks of the Transport action by
+inserting the actions `Pick(PR2,coffee_cup,Kitchen)` and `Drop(PR2,coffee_cup,Bedroom)`
+3) Insert a `Move(PR2, Bedroom, Kitchen)` action to support the condition of `Pick` that PR2 is in the Kitchen.
+4) Insert a `Move(PR2,Kitchen,Bedroom)` action to support the condition of `Drop` that PR2 is in the Bedromm.
 
 
-    % type Location;
-    % type NavLocation < Location;
-    % type Robot < Location with {
-    %   function NavLocation at();
-    % };
-    % type Item with {
-    %   function Location at();
-    % };
+    type Location;
+    type NavLocation < Location;
+    type Robot < Location with {
+      function NavLocation at();
+    };
+    type Item with {
+      function Location at();
+    };
 
-    % action Transport(Robot r, Item i, NavLocation a, NavLocation b) {
-    %   motivated;
-    %   [start,t1] Pick(r, i, a); // first subtask
-    %   [t2,end] Drop(r, i, b);   // second subtask
-    %   t1 < t2+0;  // drop comes after pick
-    % };
+    action Transport(Robot r, Item i, NavLocation a, NavLocation b) {
+      motivated;
+      [start,t1] Pick(r, i, a); // first subtask
+      [t2,end] Drop(r, i, b);   // second subtask
+      t1 < t2+0;  // drop comes after pick
+    };
 
-    % action Drop(Robot r, Item i, NavLocation l) {
-    %   motivated;
-    %   duration := 5;
-    %   [all] r.at == l;
-    %   [all] i.at == r :-> l;
-    % };
+    action Drop(Robot r, Item i, NavLocation l) {
+      motivated;
+      duration := 5;
+      [all] r.at == l;
+      [all] i.at == r :-> l;
+    };
 
-    % action Pick(Robot r, Item i, NavLocation l) {
-    %   motivated;
-    %   duration := 5;
-    %   [all] r.at == l;
-    %   [all] i.at == l :-> r;
-    % };
+    action Pick(Robot r, Item i, NavLocation l) {
+      motivated;
+      duration := 5;
+      [all] r.at == l;
+      [all] i.at == l :-> r;
+    };
 
-    % action Move(Robot r, NavLocation from, NavLocation to) {
-    %   duration := 5;
-    %   [all] r.at == from :-> to;
-    % };
+    action Move(Robot r, NavLocation from, NavLocation to) {
+      duration := 5;
+      [all] r.at == from :-> to;
+    };
 
-    % // instances and initial value ....
-    % instance Robot PR2;
-    % instance Item coffee_cup;
-    % instance NavLocation Kitchen, Bedroom;
-    % [start] PR2.at := Bedroom;
-    % [start] coffee_cup.at := Kitchen;
+    // instances and initial value ....
+    instance Robot PR2;
+    instance Item coffee_cup;
+    instance NavLocation Kitchen, Bedroom;
+    [start] PR2.at := Bedroom;
+    [start] coffee_cup.at := Kitchen;
     
-    % // goal task
-    % Transport(PR2, coffee_cup, Kitchen, Bedroom);
+    // goal task
+    Transport(PR2, coffee_cup, Kitchen, Bedroom);
 
-% Replacing the `Transport` goal by `[end] coffee_up.at == Bedroom` would fail because
-% the only resolver would be to insert a Drop action but since Drop is motivated it can not be inserted in the plan (it has to be derived from an action already present in the plan).
-
-
-% ## Goals
-
-% Any condition appearing in the domain is considered as a goal.
-% Indeed, when added to the partial it will result in a flaw that must be solved to enforce
-% plan consistency.
-
-%     // example of goals
-
-%     // at the end of the plan, the PR2 must be in the kitchen
-%     [end] PR2.at == Kitchen;
-
-%     // for at least one time unit between times 30 and 50,
-%     // the coffee cup must be on the table.
-%     [30,50] contains location(coffee_cup) == dining_table;
+Replacing the `Transport` goal by `[end] coffee_up.at == Bedroom` would fail because
+the only resolver would be to insert a Drop action but since Drop is motivated it can not be inserted in the plan (it has to be derived from an action already present in the plan).
 
 
-% Similarly, subtasks in the domain definition will result in the
-% addition of unrefined tasks.  Those unrefined tasks will in turn
-% trigger the insertion of additional actions.
+## Goals
 
-%     // example of objective tasks
+Any condition appearing in the domain is considered as a goal.
+Indeed, when added to the partial it will result in a flaw that must be solved to enforce
+plan consistency.
+
+    // example of goals
+
+    // at the end of the plan, the PR2 must be in the kitchen
+    [end] PR2.at == Kitchen;
+
+    // for at least one time unit between times 30 and 50,
+    // the coffee cup must be on the table.
+    [30,50] contains location(coffee_cup) == dining_table;
+
+
+Similarly, subtasks in the domain definition will result in the
+addition of unrefined tasks.  Those unrefined tasks will in turn
+trigger the insertion of additional actions.
+
+    // example of objective tasks
     
-%     // the PR2 must clean the table
-%     CleanTable(PR2);
+    // the PR2 must clean the table
+    CleanTable(PR2);
 
-%     // the PR2 must give the cup before time 100
-%     [start, 100] contains Give(PR2, Arthur, cup);
+    // the PR2 must give the cup before time 100
+    [start, 100] contains Give(PR2, Arthur, cup);
 
-%     // any robot must transport the coffee cup from the kitchen to the dining room
-%     constant Robot r;
-%     Transport(r, coffee_cup, kitchen, dining_room);
+    // any robot must transport the coffee cup from the kitchen to the dining room
+    constant Robot r;
+    Transport(r, coffee_cup, kitchen, dining_room);
 
 
 
-% ## Search: algorithm and strategies
+## Search: algorithm and strategies
 
-% FAPE uses the PSP (Plan Space Planning) algorithm for search:
+FAPE uses the PSP (Plan Space Planning) algorithm for search:
 
-%     queue <- { initial plan }
+    queue <- { initial plan }
 
-%     while true:
-%       if queue is empty
-%         return failure
+    while true:
+      if queue is empty
+        return failure
 
-%       p <- pop a partial plan in queue
+      p <- pop a partial plan in queue
 
-%       flaws <- getFlaws(p)
+      flaws <- getFlaws(p)
       
-%       if flaws is empty
-%         return p // solution plan
+      if flaws is empty
+        return p // solution plan
 
-%       select any flaw f in flaws
-%       for resolver in GetResolvers(f, p)
-%         child <- Apply(resolver, p)
-%         if child is consistent
-%           queue <- queue U { child }
+      select any flaw f in flaws
+      for resolver in GetResolvers(f, p)
+        child <- Apply(resolver, p)
+        if child is consistent
+          queue <- queue U { child }
 
     
-% The two decisions to be made in this algorithm are:
+The two decisions to be made in this algorithm are:
 
-%  - which flaw to solve in the current partial plan
-%  - which partial plan (or which resolver) to consider for the next iteration.
+ - which flaw to solve in the current partial plan
+ - which partial plan (or which resolver) to consider for the next iteration.
 
-% Those are respectively call *flaw selection strategy* and *plan selection strategy*.
-% The different options for those strategies are describe in the command-line help.
+Those are respectively call *flaw selection strategy* and *plan selection strategy*.
+The different options for those strategies are describe in the command-line help.
 
-% ## Temporal uncertainty handling
+## Temporal uncertainty handling
 
-% Temporal planning under uncertainty is of course of interest to us since we do 
-% not have the exact duration of actions at planning time.
-% Some of our contingent time-points are observable (e.g. end of an action) which makes 
-% enforcing dynamic controllability the natural thing to do.
-% Of course some events might not be observable.
+Temporal planning under uncertainty is of course of interest to us since we do 
+not have the exact duration of actions at planning time.
+Some of our contingent time-points are observable (e.g. end of an action) which makes 
+enforcing dynamic controllability the natural thing to do.
+Of course some events might not be observable.
 
-% Support for temporal uncertainty is still quite limited. We only support 
-% contingent constraints between the start and end of an action (assuming that 
-% the end of the action is observable).
-% Contingency over non-observable events is naturally supported in ANML with the 
-% change-over-an-interval notation (this can be seen as a locally strongly 
-% controllable STNU).
+Support for temporal uncertainty is still quite limited. We only support 
+contingent constraints between the start and end of an action (assuming that 
+the end of the action is observable).
+Contingency over non-observable events is naturally supported in ANML with the 
+change-over-an-interval notation (this can be seen as a locally strongly 
+controllable STNU).
 
-%     // an action with uncertain duration
-%     action Move(Loc a, Loc b) {
-%       duration :in [15,20];
-%       ...
-%     };
+    // an action with uncertain duration
+    action Move(Loc a, Loc b) {
+      duration :in [15,20];
+      ...
+    };
 
-% What we currently support:
-%  - uncertain duration of actions (that's the only place where explicit 
-% contingent constraint are allowed)
-%  - enforcing pseudo controllability during search (there is a implementation 
-% for enforcing DC during search but it is not working yet)
-%  - checking that the plan is dynamically controllable (and keep searching 
-% otherwise)
-%  - dispatching the plan (using the dispatching algorithm for dynamically 
-% controllable STNU)
+What we currently support:
+ - uncertain duration of actions (that's the only place where explicit 
+contingent constraint are allowed)
+ - enforcing pseudo controllability during search (there is a implementation 
+for enforcing DC during search but it is not working yet)
+ - checking that the plan is dynamically controllable (and keep searching 
+otherwise)
+ - dispatching the plan (using the dispatching algorithm for dynamically 
+controllable STNU)
 
-% This guarantees that the plan is executable if:
-%  - we observe the observable contingent events (verified since we are currently 
-% limiting ourselves to the end of actions)
-%  - those happen within the predefined bounds
+This guarantees that the plan is executable if:
+ - we observe the observable contingent events (verified since we are currently 
+limiting ourselves to the end of actions)
+ - those happen within the predefined bounds
 
-% Things you can try in the main class `fape.Planning`:
+Things you can try in the main class `fape.Planning`:
 
-%  - the option `--stnu` gives you control over which type of controllability you 
-% enforce during search (dynamic is still experimental)
-%  - the option `--dispatchable` will check that the plan is dynamically 
-% controllable and make it dispatchable.
+ - the option `--stnu` gives you control over which type of controllability you 
+enforce during search (dynamic is still experimental)
+ - the option `--dispatchable` will check that the plan is dynamically 
+controllable and make it dispatchable.
 
-% In the main class `fape.FAPE` with option `--sim`, you can try to dispatch a plan 
-% and simulate random durations and failure (which will trigger plan 
-% repair/replanning). This environment is still extremely limited, the one we 
-% use at LAAS relies on OpenPRS and is still under research/development.
+In the main class `fape.FAPE` with option `--sim`, you can try to dispatch a plan 
+and simulate random durations and failure (which will trigger plan 
+repair/replanning). This environment is still extremely limited, the one we 
+use at LAAS relies on OpenPRS and is still under research/development.
 
-% # Final note
+# Final note
 
-% FAPE is still in a beta state. There might be some bugs left so, if you run into something weird, ask me about it! You will save time and it will allow me to fix the bug or update the documentation.
-% I'm looking forward to any kind of feedback, so please feel free to harass me =) (arthur.bit-monnot@laas.fr)
-
-
-
-
+FAPE is still in a beta state. There might be some bugs left so, if you run into something weird, ask me about it! You will save time and it will allow me to fix the bug or update the documentation.
+I'm looking forward to any kind of feedback, so please feel free to harass me =) (arthur.bit-monnot@laas.fr)

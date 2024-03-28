@@ -1,0 +1,152 @@
+\section{Background}\label{sec:background}
+
+\subsection{Domain Overcooked}
+
+The application domain is the game "Overcooked!2" developed by Ghost Town Games and Ltd. and Team 17.
+The game models a restaurant kitchen with many simplifications that make the plan abstraction easier and more directly applicable.
+The player is given a small number of recipes in each level, for example a salad with tomatos or a sushi with only rice and fish.
+The ingredients often need to be prepared (e.g. by chopping or boiling), then arranged on a plate and finally delivered to a conveyor belt.
+The core part of the game focuses on collaboration and can be played with up to 4 players.
+During playing, fire may break out that has to be extinguished or the players may be separated through a river and can only throw ingredients to the other cooks for them to be prepared or arranged.
+Additionally, the orders are not known in advance, but are received during play and have a strict deadline.
+The goal of the game is to successfully finish as many orders as possible, when a deadline is missed it counts as a penalty.
+This game is a perfect playground for evaluating and improving planning approaches, as the game poses challenges similar to real live, while offering many optional features that challenge the planning domain creation and planning algorithms.
+With an appropriate interaction layer, the game may also be used to test acting approaches without the need for a physical robot.
+As the game has the option for up to 4 players, the game can be used to evaluate planning for parallel actions when all cooks are supervised by a single planner, or alternatively in a multi agent setting with possible human-robot interaction.
+
+
+\subsection{Classical planning}\label{sec:classical-planning}
+
+Classical planning is the widely adopted approach to planning on which most extensions and other planning approaches build upon.
+% While there are different ways of representing the problem in classical planning exist, they 
+A Planning problem consists of a domain (in our case overcooked) and one or multiple goals e.g. that a client needs to have a salad in the end.
+The domain is modelled by creating variables and state transition functions called actions.
+The planner is given an initial state and the goal state, and then the planner must find a sequence of actions that can transform the initial state to the goal state.
+
+\begin{definition}[Classical Planning]
+  Classical planning is a tuple $P=\langle L,A,M,s_0,\delta \rangle$.
+  L is the set of propositional environment variables. 
+  A is a set of actions that describe state transitions.
+  $s_0 \subset L$ is the initial state.
+  $\delta$ is a set $(prec, add , del )$ of functions $f : A \rightarrow 2^L$ that define the state transitions of actions as preconditions and effects.
+  An action $a \in A$ is applicable if $\delta(a) \neq \emptyset$.
+\end{definition}
+
+\subsection{HTN Planning}\label{sec:htn-planning}
+
+Hierarchical Task Network (HTN) planning is a planning paradigm that allows for the specification of complex tasks by the definition of subtasks.
+Therefore it is viewed as a control strategy for planning \citep{ghallabAutomatedPlanningTheory2004}.
+During planning a decomposition tree is created by decomposing tasks into their subtasks.
+The planning is finished when there is no task left that has subtasks and there are no other threats.
+% The HTN planning paradigm was first introduced by \cite{erol1994htn} and has since been used in a variety of domains, including robotics \citep{ghallab1998pddl, nau2003shop2, cashmore2008htn, cashmore2015htn}, video games \citep{ontanon2015survey}, and natural language processing \citep{zettlemoyer2005learning, wang2006learning, wang2007learning, wang2008learning, wang2010learning, wang2011learning, wang2012learning, wang2013learning, wang2014learning, wang2015learning, wang2016learning, wang2017learning, wang2018learning, wang2019learning, wang2020learning}.
+% HTN Planning can be seen as a guided form of traditional planning, since the task structure is given.
+
+
+\cite{hollerGuidingSearchHTN2019}:
+
+An HTN Planning Problem is defined as a tuple $P=\langle L,C,A,M,s_0,tn_I,\delta \rangle$.
+L, A and $s_0$ are defined as in classical planning, $\delta$ may also apply to methods: $f : A \cup M \rightarrow 2^L$.
+C is a set of compound tasks.
+A task network $tn$ is a triple $(T,\prec,\alpha)$.
+T is a set of unique task identifiers.
+$\prec \subseteq T \times T$ is a set of strict partial ordering relations between the task identifiers.
+$\alpha : T \rightarrow A \cup C$ is a function mapping the task identifiers to task or action names.
+M is a set of methods $(c,tn), c \in C$, that describe possible decompositions from one task into a task network.
+A method $(c,tn)$ decomposes a task network $(T_1,\prec_1,\alpha_1)$ into $(T_2,\prec_2,\alpha_2)$ if there is a task $t \in T_1$ with $\alpha(t_1) = c$.
+A copy $tn' = (T',\prec',\alpha')$ of $tn$ is created that has no overlapping task ids with $tn_1$, i.e. $T_1 \cap T' = \emptyset$.
+Then $tn_2$ is defined as:
+\begin{align*}
+  tn_2 &= ((T_1 \backslash  \{t\}) \cup T', \prec' \cup \prec_D, (\alpha_1 \ \{t \mapsto c\}) \cup \alpha') \\
+  \prec_D &= \{(t_1, t_2) | (t_1, t) \in \prec_1, t_2 \in T'\} \\
+  &\cup \{(t_1, t_2) | (t, t_2) \in \prec_1, t_1 \in T '\} \\
+  &\cup \{(t_1, t_2) | (t_1, t_2) \in \prec_1, t_1 \neq t \land t_2 \neq t\}\\
+\end{align*}
+$tn_I$ is the initial task network, consisting of the tasks that must be executed.
+
+% The search through an HTN Planning problem may be done in two conceptually different ways.
+% A State-Based Search is the classical approach to solving planning problems.
+% A state expansion $f : (L,tn) \rightarrow 2^(L,tn)$ creates a new state for each decomposable task $t$ in the current task network $tn_i$.
+% A task is only decomposable if there exists a method $m = (c,tn) \in M$ such that $\delta(m)$
+% The planning is finished when all task names in the current task network $tn_i$ are primitive and there is a sequence of the tasks in $tn_i$ that is consistent with its ordering relations.
+
+A solution $\pi = tn$ is a task network that support all constraints and fulfills $tn_I$.
+To create $tn$ the HTN Planning Problem is formulated as a search.
+The search may be done in two different ways.
+A State-Based Search is similar to the classical approach of solving planning problems.
+The alternative is a Constraint-Satisfaction-Problem (CSP) based search.
+In this case, the constraints defined by $\delta$ and $M$ are added to a dynamic CSP.
+The current Search node is called a Partial Plan $\hat{\pi}$, and may contain Flaws.
+If there are no Flaws left and the CSP is consistent, then $\hat{\pi}_i = \pi$.
+A Flaw can be one of:
+\begin{itemize}
+  \item Threat: There is a potential inconsistency in the CSP
+  \item UnboundVariable: The domain of a variable in the CSP contains more than one value. This occurs when there are multiple possible instantiations of a task, method or action.
+  \item UnmotivatedAction: An action is not part a task decomposition. This may happend when a task is removed from the network during replanning.
+  \item UnrefinedTask: A task is not yet decomposed.
+\end{itemize}
+
+HTN Planning problems can be defined in several languages, such as the SHOP syntax, supported by SHOP-Like planners, ANML Language - supported by the FAPE planner and HDDL Syntax which is expected to become the standard.
+While these languages mostly support the same features, it is important to note that HDDL currently only supports a small subset of the PDDL syntax it is based on, primarily because the most HTN planners do not support temporal or resource planning.
+The HDDL 2.1 proposal adds the support for Temporal planning, but there is currently no public system that supports this syntax.
+The most expressive Syntax is the ANML-Language, which also supports dynamic fluents, that change over time.
+This Syntax is used throughout the whole thesis, as it supports Time for HTN Planning and is much less verbose than SHOP.
+The Fape planner is therefore used as a basis for this work.
+
+\subsubsection{Temporal HTN Planning}\label{sec:temporal-htn-planning}
+
+Temporal HTN Planning includes explicit information about time in the domain.
+This allows modelling task durations, concurrent execution, start points and deadlines for tasks.
+A Temporal HTN Planner then has to solve as MetaCSP consisting of two constraint satisfaction problems, the normal CSP for variable constraint, and a Temporal Network managing the temporal constraints over timepoints. 
+
+The Temporal Network may be implemented with qualitative or quantitative timepoints.
+\cite{bit-monnotTemporalHierarchicalModels2017} argues that qualitative timpoints in this context have the only benefit of creating instantaneous action effects, which are not necessary in most environments.
+Therefore they use Simple Temporal Networks (STempN) with constraints of the form $t_1 + 5 \leq t_2$ or $t_1 \geq 10$.
+
+Temporally qualified assertions have a timepoint or a range of timepoints assigned to an assertion.
+The assertion may be of the type persistence, change or assigment.
+
+The internal representation can be done using Temporal Operators or Chronicles.
+Temporal Operators have the downside, that \todo[inline]{Don't know how to explain, or if it is necessary here}
+Chronicles on the other hand allow for a more intuitive representation.
+A chronicle for a set of state variables $\{x_i,\dots,x_j\}$ is a pair $\Phi = \langle(F,C)\rangle$.
+$F$ is a set of temporal assertions on state variables and $C$ is a set of constraints on the object and temporal variables appearing in $F$.
+A timeline is a chronicle with a single state variable.
+A state variable is a function $x : time \rightarrow L$ that maps a timepoint to a finite domain.
+
+\subsubsection{Task insertion}
+
+Task insertion is an extension of HTN Planning, where a set of tasks may be inserted independently of the hierarchy.
+This creates a hybrid planning between classical and HTN planning.
+
+
+
+\subsection{Acting}\label{sec:acting}
+
+Acting is a field that executes a plan in a real world environment.
+The challenges here include uncertainty in the environment, failure of actions and therefore replanning, and the need for real-time performance.
+Replanning with HTN Planning is another challenge, since the hierarchy of tasks must be considered and replanning cannot be done trivially.
+
+There are different approaches to preforming acting, depending on the uncertainties in the environment.
+In the most uncertain environments, lookahead planning is common, where only a few of the upcoming steps are used to guide the search. 
+On each new state the planning is repeated.
+When the environment has more certainty, the planning is executed fully and the plan is followed until a state occurs that differs from the state predicted by the planner.
+Then it is attempted to repair the plan. 
+If that does not work, a full replanning is done.
+
+There are different approaches to Plan Repair, the most prominent are to remove 
+
+Acting with a HTN Planner can be done similar, but requires more care, since the hierarchy does not enable a direct replanning.
+\cite{desilvaHTNActingFormalism2018} has introduced a formalism and algorithm for HTN acting that contains the following steps:
+A configuration represents the current state of the planning.
+Primary Tasks are the tasks that can be executed, which requires that there are no tasks that precede them.
+There are different possibilities for execution:
+Execution via reduction: A task is executed when it is reduced/decomposed using a method body
+Execution via performing an action: A (primary) action can be executed if it is applicable.
+Execution via replacement: A method body
+
+Most of the approaches for do not cover the case of new targets explicitly, as it may be handled directly by the repair and replan approach.
+The only reference that touched on this case is \cite{desilvaHTNActingFormalism2018}.
+They introduced an algorithm where it was possible to add tasks at any point during acting.
+These tasks may also describe environment changes, that may be the triggers for replanning.
+
+
