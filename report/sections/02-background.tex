@@ -1,41 +1,73 @@
+\section{Motivation}
+
+The most planning algorithms are doing a strict separation between planning and execution.
+While that is fine in most domains, it does not work everywhere.
+Using online planning, a planner can dynamically receive domain updates and adjust the plan accordingly.
+Most considerations of online planning do mostly consider the case of plan repair or replanning in the case of failures.
+In a dynamic domain it is however very common to receive additional tasks that do sometimes need to be executed in a given time window.
+While replanning approaches may help in the integration of these additional tasks, they will in especially strict deadlines fail, due to the previous tasks being executed too lazy.
+To achieve better success rates, it is necessary to consider the case of new tasks being inserted in the future already during planning.
+
+The problem considered is therefore a planning domain with temporal constraints, a stream of tasks with deadlines and a hierarchical definition of the domain.
+Given this problem, the goal is to create adaptations of the planning algorithm that increases the success rate of the execution of a plan in the case of shorter deadlines in the stream of tasks.
+
+
 \section{Background}\label{sec:background}
+
+Since the Planner Fape \citep{bit-monnotFAPEConstraintbasedPlanner2020} was used for the implementation and evaluation, the definitions from \cite{bit-monnotTemporalHierarchicalModels2017} and \cite{bit-monnotFAPEConstraintbasedPlanner2020} are used as a base throughout the background and approach sections.
+The definitions are additionally inspired by \cite{ghallabAutomatedPlanningTheory2004} and \cite{hollerGuidingSearchHTN2019}.
+The Planning Domain Definition Language ANML is used to represent the Domain, as it is also used by Fape.
 
 \subsection{Domain Overcooked}
 
 The application domain is the game "Overcooked!2" developed by Ghost Town Games and Ltd. and Team 17.
 The game models a restaurant kitchen with many simplifications that make the plan abstraction easier and more directly applicable.
-The player is given a small number of recipes in each level, for example a salad with tomatos or a sushi with only rice and fish.
-The ingredients often need to be prepared (e.g. by chopping or boiling), then arranged on a plate and finally delivered to a conveyor belt.
-The core part of the game focuses on collaboration and can be played with up to 4 players.
+The player is given a small number of recipes in each level, for example a salad with tomatos or a burger with a patty, tomatos and lettuce.
+The ingredients often need to be prepared (e.g. by chopping or boiling), then arranged on a plate and finally delivered to a conveyor belt that represents the clients.
 During playing, fire may break out that has to be extinguished or the players may be separated through a river and can only throw ingredients to the other cooks for them to be prepared or arranged.
 Additionally, the orders are not known in advance, but are received during play and have a strict deadline.
 The goal of the game is to successfully finish as many orders as possible, when a deadline is missed it counts as a penalty.
+The core part of the game focuses on collaboration and can be played with up to 4 players.
 This game is a perfect playground for evaluating and improving planning approaches, as the game poses challenges similar to real live, while offering many optional features that challenge the planning domain creation and planning algorithms.
 With an appropriate interaction layer, the game may also be used to test acting approaches without the need for a physical robot.
 As the game has the option for up to 4 players, the game can be used to evaluate planning for parallel actions when all cooks are supervised by a single planner, or alternatively in a multi agent setting with possible human-robot interaction.
 
+The Domain is defined in the DDL Language ANML.
+In the following I will show the most important aspects of the domain that are also considered later.
+The full domain definition is in Appendix 
 
 \subsection{Classical planning}\label{sec:classical-planning}
 
 Classical planning is the widely adopted approach to planning on which most extensions and other planning approaches build upon.
 % While there are different ways of representing the problem in classical planning exist, they 
-A Planning problem consists of a domain (in our case overcooked) and one or multiple goals e.g. that a client needs to have a salad in the end.
+A Planning problem consists of a domain (in our case overcooked) and one or multiple goals e.g. that a client needs to have a burger in the end.
 The domain is modelled by creating variables and state transition functions called actions.
 The planner is given an initial state and the goal state, and then the planner must find a sequence of actions that can transform the initial state to the goal state.
 
-\begin{definition}[Classical Planning]
-  Classical planning is a tuple $P=\langle L,A,M,s_0,\delta \rangle$.
+\begin{definition}[Classical Planning Domain]
+  A classical planning domain is a tuple $\Sigma=\langle O, L, A, \delta \rangle$.
+  O is a set of constants.
   L is the set of propositional environment variables. 
   A is a set of actions that describe state transitions.
-  $s_0 \subset L$ is the initial state.
   $\delta$ is a set $(prec, add , del )$ of functions $f : A \rightarrow 2^L$ that define the state transitions of actions as preconditions and effects.
   An action $a \in A$ is applicable if $\delta(a) \neq \emptyset$.
+\end{definition}
+
+Types are a commonly used extension for planning that organize the constants $O$.
+A type $O_t \subseteq O$ restricts variables in actions to be of a specific type such as $Cooks$.
+Types can be composed from other types by union or intersection (e.g. $Persons=Cooks\cup Clients$)
+
+\begin{definition}[Classical Planning Problem]
+  A classical planning problem is a tuple $P=\langle \Sigma, s_0, g \rangle$.
+  $\Sigma$ is a classical planning domain.
+  $s_0 \subset L$ is the initial state.
+  $g \subset L$ are the goals.
 \end{definition}
 
 \subsection{HTN Planning}\label{sec:htn-planning}
 
 Hierarchical Task Network (HTN) planning is a planning paradigm that allows for the specification of complex tasks by the definition of subtasks.
-Therefore it is viewed as a control strategy for planning \citep{ghallabAutomatedPlanningTheory2004}.
+Therefore it is viewed as a control strategy for planning \citep[chap.~11]{ghallabAutomatedPlanningTheory2004}.
 During planning a decomposition tree is created by decomposing tasks into their subtasks.
 The planning is finished when there is no task left that has subtasks and there are no other threats.
 % The HTN planning paradigm was first introduced by \cite{erol1994htn} and has since been used in a variety of domains, including robotics \citep{ghallab1998pddl, nau2003shop2, cashmore2008htn, cashmore2015htn}, video games \citep{ontanon2015survey}, and natural language processing \citep{zettlemoyer2005learning, wang2006learning, wang2007learning, wang2008learning, wang2010learning, wang2011learning, wang2012learning, wang2013learning, wang2014learning, wang2015learning, wang2016learning, wang2017learning, wang2018learning, wang2019learning, wang2020learning}.
@@ -44,24 +76,35 @@ The planning is finished when there is no task left that has subtasks and there 
 
 \cite{hollerGuidingSearchHTN2019}:
 
-An HTN Planning Problem is defined as a tuple $P=\langle L,C,A,M,s_0,tn_I,\delta \rangle$.
-L, A and $s_0$ are defined as in classical planning, $\delta$ may also apply to methods: $f : A \cup M \rightarrow 2^L$.
-C is a set of compound tasks.
-A task network $tn$ is a triple $(T,\prec,\alpha)$.
-T is a set of unique task identifiers.
-$\prec \subseteq T \times T$ is a set of strict partial ordering relations between the task identifiers.
-$\alpha : T \rightarrow A \cup C$ is a function mapping the task identifiers to task or action names.
-M is a set of methods $(c,tn), c \in C$, that describe possible decompositions from one task into a task network.
-A method $(c,tn)$ decomposes a task network $(T_1,\prec_1,\alpha_1)$ into $(T_2,\prec_2,\alpha_2)$ if there is a task $t \in T_1$ with $\alpha(t_1) = c$.
-A copy $tn' = (T',\prec',\alpha')$ of $tn$ is created that has no overlapping task ids with $tn_1$, i.e. $T_1 \cap T' = \emptyset$.
-Then $tn_2$ is defined as:
-\begin{align*}
-  tn_2 &= ((T_1 \backslash  \{t\}) \cup T', \prec' \cup \prec_D, (\alpha_1 \ \{t \mapsto c\}) \cup \alpha') \\
-  \prec_D &= \{(t_1, t_2) | (t_1, t) \in \prec_1, t_2 \in T'\} \\
-  &\cup \{(t_1, t_2) | (t, t_2) \in \prec_1, t_1 \in T '\} \\
-  &\cup \{(t_1, t_2) | (t_1, t_2) \in \prec_1, t_1 \neq t \land t_2 \neq t\}\\
-\end{align*}
-$tn_I$ is the initial task network, consisting of the tasks that must be executed.
+\begin{definition}[HTN Planning Domain]
+  An HTN planning domain is a tuple $\Sigma=\langle O, L, C, T, A, M, \delta \rangle$.
+  O, L, A are defined as in classical planning, $\delta$ may also apply to methods: $f : A \cup M \rightarrow 2^L$.
+  C is a set of compound tasks.
+  T is a set of unique task identifiers.
+  A task network $tn$ is a triple $(T,\prec,\alpha)$.
+  $\prec \subseteq T \times T$ is a set of strict partial ordering relations between the task identifiers.
+  $\alpha : T \rightarrow A \cup C$ is a function mapping the task identifiers to task or action names.
+  M is a set of methods $(c,tn), c \in C$, that describe possible decompositions from one task into a task network.
+  A method $(c,tn)$ decomposes a task network $(T_1,\prec_1,\alpha_1)$ into $(T_2,\prec_2,\alpha_2)$ if there is a task $t \in T_1$ with $\alpha(t_1) = c$.
+\end{definition}
+
+\begin{definition}[HTN Planning Problem]
+  An HTN Planning Problem is defined as a tuple $P=\langle \Sigma, tn_I \rangle$.
+  $tn_I$ is the initial task network, consisting of the tasks that must be executed.
+\end{definition}
+
+\begin{definition}[Task Decomposition]
+  A copy $tn' = (T',\prec',\alpha')$ of $tn$ is created that has no overlapping task ids with $tn_1$, i.e. $T_1 \cap T' = \emptyset$.
+  Then $tn_2$ is defined as:
+  \begin{align*}
+    tn_2 = & ((T_1 \backslash  \{t\}) \cup T', \prec' \cup \prec_D, (\alpha_1 \ \{t \mapsto c\}) \cup \alpha') \\
+    \prec_D = & \{(t_1, t_2) | (t_1, t) \in \prec_1, t_2 \in T'\} \\
+    &\cup  \{(t_1, t_2) | (t, t_2) \in \prec_1, t_1 \in T '\} \\
+    &\cup  \{(t_1, t_2) | (t_1, t_2) \in \prec_1, t_1 \neq t \land t_2 \neq t\}\\
+  \end{align*}
+\end{definition}
+
+
 
 % The search through an HTN Planning problem may be done in two conceptually different ways.
 % A State-Based Search is the classical approach to solving planning problems.
@@ -96,27 +139,71 @@ The Fape planner is therefore used as a basis for this work.
 
 Temporal HTN Planning includes explicit information about time in the domain.
 This allows modelling task durations, concurrent execution, start points and deadlines for tasks.
-A Temporal HTN Planner then has to solve as MetaCSP consisting of two constraint satisfaction problems, the normal CSP for variable constraint, and a Temporal Network managing the temporal constraints over timepoints. 
+CSP Encodings of the planning problem are a popular strategy, and make even more sense here.
+\cite{stockHierarchicalHybridPlanning2015} introduced the notion of a MetaCSP, that solves two constraint satisfaction problems, the normal CSP for variable constraint, and a Temporal Network managing the temporal constraints over timepoints.
+This Approach is also used in FAPE.
+The main components required to model the Temporal HTN Planning Problem are introduced in the following paragraphs. 
 
-The Temporal Network may be implemented with qualitative or quantitative timepoints.
-\cite{bit-monnotTemporalHierarchicalModels2017} argues that qualitative timpoints in this context have the only benefit of creating instantaneous action effects, which are not necessary in most environments.
-Therefore they use Simple Temporal Networks (STempN) with constraints of the form $t_1 + 5 \leq t_2$ or $t_1 \geq 10$.
+Time is represented quantitatively using time points. % as in Simple Temporal Networks (STempN)  \citep{dechterTemporalConstraintNetworks1991}.
+A time point is designeted by a temporal variable (e.g. $t_1$).
+Constraints over temporal variables can be expressed using the simple arithmetic operators $=,\leq,\geq$ to specify absolute  (e.g. $t_1 \geq 10$) or relative constraints (e.g. $t_1 + 5 \leq t_2$).
+The temporal variables are attached to events like the start of an action or an instant at which a condition must hold.
 
-Temporally qualified assertions have a timepoint or a range of timepoints assigned to an assertion.
-The assertion may be of the type persistence, change or assigment.
+A nontemporal variable $o \in O_t$ is a variable with a domain $dom(o) \subseteq O_t$.
+A numeric variable $i$ has a domain $dom(i) \subset \mathbb{N}$ which is a finite subset of integers.
+A constraint over a set of variables $\{x_1,\dots ,x_n \}$ is a pair $(\langle x_1, \dots , x_n \rangle, \gamma_R)$ where $\gamma_R \subseteq dom(x_1) \times \dots \times dom(x_n)$ is the relation of the constraint, giving the allowed values for the tuple of variables.
+$\gamma_R$ can be given as a table of allowed values or a function, e.g., $\textit{distance}(d, d') = \Delta$ is met when $\Delta$ is the distance between $d$ and $d'$.
+Numeric variables can also appear in temporal constraints.
+For instance $(\textit{distance}(d, d') = \Delta) \land (t_s + \Delta \leq t_e)$ describes a constraint that defines that the delay between $t_s$ and $t_e$ is equal to the distance $\Delta$ between $d$ and $d'$.
+This constraint may occur as the duration of an action $move(d,d')$, with time points $t_s$ as the actions start and $t_e$ as the actions end.
 
-The internal representation can be done using Temporal Operators or Chronicles.
-Temporal Operators have the downside, that \todo[inline]{Don't know how to explain, or if it is necessary here}
-Chronicles on the other hand allow for a more intuitive representation.
-A chronicle for a set of state variables $\{x_i,\dots,x_j\}$ is a pair $\Phi = \langle(F,C)\rangle$.
-$F$ is a set of temporal assertions on state variables and $C$ is a set of constraints on the object and temporal variables appearing in $F$.
-A timeline is a chronicle with a single state variable.
-A state variable is a function $x : time \rightarrow L$ that maps a timepoint to a finite domain.
+The state evolution over time is captured using multi-valued state variables.
+A state variable is a function $x : Time \times O_t \rightarrow o$ that maps a timepoint and a set of objects to an object.
+For instance $loc : Time \times Ingredients \rightarrow \textit{Persons} \cup \textit{Placement Areas} \cup \textit{Tablewares}$ specifies the location of an ingredient at any point in time, which may be in a persons hand, in an area or on a tableware.
+Time in a state variable $sv(x_1,...,x_n)$ is usually kept implicit and we say that $sv$ has the value $v$ at time $t$ if $sv(t,x_1,...,x_n) = v$.
+A fluent is a pair of a state variable $sv$ and a value $v$, denoted $\langle sv=v \rangle$ and is said to hold at time $t$ if $sv$ has the value $v$ at time $t$.
+
+A temporally qualified assertion $\alpha$ extends the notion of a fluent by specifying a temporal interval $[t_s,t_e]$ and allowing different types of assertions.
+The temporal interval may also describe an instant $t$ denoted as $[t]$.
+A persistence assertion, denoted $\alpha = \langle [t_s,t_e] sv=v \rangle$, requires $sv$ to keep the same value $v$ over the temporal interval $t_s,t_e$.
+Persistence assertions are typically used to express requirements such as goals or pre-conditions of actions.
+For instance $\langle[100,200] loc(lettuce1) = counter1\rangle$ requires the instance $lettuce1$ to be at the location $counter1$ from time 100 until time 200.
+A change assertion, denoted $\alpha = \langle [t_s,t_e] sv : v_1 \mapsto v_2 \rangle$ describes that $sv$ changes its value from $v_1$ at time $t_s$ to $v_2$ at time $t_e$.
+The change assertion is typically used to combine pre an post conditions of most planners into one and additionally to explicitly describe the value change as a process rather than an instantaneous effect.
+For instance $\langle [100,200] chopped(lettuce1) : false \mapsto true \rangle$ describes that the instance $lettuce1$ is getting chopped from time 100 until time 200.
+A temporally qualified assignment, denoted $\alpha = \langle [t] sv := v \rangle$ describes that $sv$ has the value $v$ at time $t$.
+For instance $\langle [0] chopped(lettuce1) := false \rangle$ states that the instance $lettuce1$ is not chopped at time 0.
+An assignment is a special case of a change assertion $\alpha = \langle [t-1,t] sv : any \mapsto v \rangle$ where $any$ is a variable with an infinite domain \todo{unsure if infinite domain can be said here}.
+
+A timeline is a pair $(\mathcal{F},\mathcal{C})$ where $F$ is a set of temporal assertions on a state variable and $\mathcal{C}$ is a set of constraints on object an temporal variables appearing in $\mathcal{F}$.
+It describes a partial evolution of the state variable over time.
+It is only a partial, because the timeline is supposed to be consistent in itself.
+Due to the inconsistent states while planning, several timelines for a single state variable for a partial plan may exist during planning, but they must be combined at the end.
+For the details on consistency, see \cite{bit-monnotTemporalHierarchicalModels2017}.
+\todo[inline]{More on timelines, like example and support?}
+
+A chronicle in \cite{bit-monnotFAPEConstraintbasedPlanner2020} is a triple $\Phi = \langle(\pi,F,C)\rangle$ where $\pi$ is a partial plan composed of action instances and unrefined tasks and $(F,C)$ is a set of timelines.
+It is a temporal and hierarchical extension of partial plans in plan-space planning approaches \citep[chap.~5]{ghallabAutomatedPlanningTheory2004} and extends the notion of chronicles in \cite[sec.~4.2.4]{ghallabAutomatedPlanningActing2016} with the member $\pi$ to keep track of tasks and actions for the repsective chronicle.
+
+A temporal HTN planning domain is a tuple $\Sigma = \langle O,SV,T,M,A \rangle$.
+O,T,M and A are defined 
+
+A temporal HTN planning problem is a pair $P = \langle \Sigma, \phi_0 \rangle$.
+
+
+
+
 
 \subsubsection{Task insertion}
 
-Task insertion is an extension of HTN Planning, where a set of tasks may be inserted independently of the hierarchy.
-This creates a hybrid planning between classical and HTN planning.
+HTN Planning with task insertion is a formalism that lies between classical planning and HTN planning.
+The idea here is to allow the insertion of tasks into the task network during planning, whithout requiring them to be valid decompositions of compound tasks.
+This approach is helpful for example in domains where not all possible hierarchical tasks can be captured, and allows an agent to respond to unforseen situations.
+Additionally it allows the usage of heuristics used in classical planning in combination with heuristics in HTN Planning.
+
+Fape supports task insertion directly.
+The initial chronicle can define persistence assertions as the goals a planner needs to achieve.
+Tasks can be marked as insertable by removing the \verb|:motivated| keyword from the action definition.
 
 
 

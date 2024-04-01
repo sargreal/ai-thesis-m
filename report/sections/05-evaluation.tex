@@ -1,5 +1,15 @@
 \section{Experimental Evaluation}\label{sec:evaluation}
 
+An Acting system, the Robustness Heuristics and the Task Perperations were implemented directly inside the system Fape \citep{bit-monnotFAPEConstraintbasedPlanner2020}.
+The Statement around Fape supporting acting made in \cite{bit-monnotTemporalHierarchicalModels2017} were not present in the current system as they have apperently only been discussed theoretically or parts were deleted because of the domain dependent implementation.
+Due to technical difficulties, planning of tasks by interleaving with already planned tasks and replanning could not be implemented in time.
+Evaluation regarding these parts is done manually.
+
+The evaluation was done in a LXC container with 12 Intel(R) Xeon(R) Gold 6334 CPU 3.60GHz Cores, 32 GB RAM.
+The planning itself is however a single threaded process, so only one CPU Core can be used.
+
+It has to be mentioned that Fape is not the most performant HTN planner, but besides CHIMP the only one supporting all required features.
+
 Quantitative Metrics:
 Plan time
 Search Nodes
@@ -13,3 +23,14 @@ Possible Comparisons:
 HTN PO vs HTN TO vs Classical \citep{yuxinliuPlanningOvercookedGame2020}
 HTN vs HTN + Robustness
 HTN Oracle vs HTN Acting vs HTN Acting + Robustness vs HTN + Preparations
+
+
+\subsection{HTN vs Classical Planning in Overcooked}
+
+\bild{fig:eval-mapB}{pddl_mapB}{Map}{10}
+
+The standard Fape Planner is compared to the Temporal Fast Downward Planner used in \cite{yuxinliuPlanningOvercookedGame2020} in the Domain Overcooked.
+The problem considered is the map B from \cite{yuxinliuPlanningOvercookedGame2020} shown in figure \ref{fig:eval-mapB}.
+They call it a complex map, as it incentivices the cooks to use the counters for faster transportation.
+The tasks in the domain are to prepare one or two burgers.
+The task for creating a burger is modeled as both a Partial Order and a Total Order network in HTN.
