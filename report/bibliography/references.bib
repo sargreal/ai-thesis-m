@@ -223,6 +223,25 @@
   file = {C\:\\Users\\haase\\Zotero\\storage\\GAIN8EES\\Cavrel et al. - 2023 - On Guiding Search in HTN Temporal Planning with no.pdf;C\:\\Users\\haase\\Zotero\\storage\\S2MAQMWK\\Cavrel et al. - On Guiding Search in HTN Temporal Planning with no.pdf}
 }
 
+@incollection{charakornInvestigatingPartnerDiversification2020,
+  title = {Investigating {{Partner Diversification Methods}} in {{Cooperative Multi-agent Deep Reinforcement Learning}}},
+  booktitle = {Neural {{Information Processing}}},
+  author = {Charakorn, Rujikorn and Manoonpong, Poramate and Dilokthanakul, Nat},
+  editor = {Yang, Haiqin and Pasupa, Kitsuchart and Leung, Andrew Chi-Sing and Kwok, James T. and Chan, Jonathan H. and King, Irwin},
+  year = {2020},
+  volume = {1333},
+  pages = {395--402},
+  publisher = {Springer International Publishing},
+  address = {Cham},
+  doi = {10.1007/978-3-030-63823-8_46},
+  url = {https://link.springer.com/10.1007/978-3-030-63823-8_46},
+  urldate = {2024-04-02},
+  abstract = {Overfitting to learning partners is a known problem, in multiagent reinforcement learning (MARL), due to the co-evolution of learning agents. Previous works explicitly add diversity to learning partners for mitigating this problem. However, since there are many approaches for introducing diversity, it is not clear which one should be used under what circumstances. In this work, we clarify the situation and reveal that widely used methods such as partner sampling and population-based training are unreliable at introducing diversity under fully cooperative multi-agent Markov decision process. We find that generating pre-trained partners is a simple yet effective procedure to achieve diversity. Finally, we highlight the impact of diversified learning partners on the generalization of learning agents using cross-play and ad-hoc team performance as evaluation metrics.},
+  isbn = {978-3-030-63822-1 978-3-030-63823-8},
+  langid = {english},
+  file = {C:\Users\haase\Zotero\storage\TGD8DB4G\Charakorn et al. - 2020 - Investigating Partner Diversification Methods in C.pdf}
+}
+
 @article{climentRobustnessDynamicConstraint2012,
   title = {Robustness in Dynamic Constraint Satisfaction Problems},
   author = {Climent, Laura and Salido, Miguel A. and Barber, Federico},
@@ -325,6 +344,23 @@
   abstract = {For automated planning robot behaviour in a rather unexplored world, often there are exogenous events introducing new objects triggered by the actions that were unforeseen in the initial state of the planning domain model. This suggests extending PDDL, on every of its language levels, by a feature for dynamic object creation. Syntactically, this is dealt with by adding a keyword new to PDDL. Semantically, the core challenge in dealing with dynamically created objects is that they lead to a growing state representation during the plan space exploration. As almost all existing automated planners are not designed to deal with varying state vectors ---mainly due to relying on grounding of the lifted PDDL input in their static analysis stage--- in this short paper we present a first solution to solve the dynamic object creation problem via a translation of PDDL model into a term rewriting tool, where plans can be found.},
   langid = {english},
   file = {C:\Users\haase\Zotero\storage\3F3TH4DE\Edelkamp et al. - Introducing Dynamic Object Creation to PDDL Planni.pdf}
+}
+
+@misc{fontaineImportanceEnvironmentsHumanRobot2021,
+  title = {On the {{Importance}} of {{Environments}} in {{Human-Robot Coordination}}},
+  author = {Fontaine, Matthew C. and Hsu, Ya-Chuan and Zhang, Yulun and Tjanaka, Bryon and Nikolaidis, Stefanos},
+  year = {2021},
+  month = jun,
+  number = {arXiv:2106.10853},
+  eprint = {2106.10853},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  url = {http://arxiv.org/abs/2106.10853},
+  urldate = {2024-04-02},
+  abstract = {When studying robots collaborating with humans, much of the focus has been on robot policies that coordinate fluently with human teammates in collaborative tasks. However, less emphasis has been placed on the effect of the environment on coordination behaviors. To thoroughly explore environments that result in diverse behaviors, we propose a framework for procedural generation of environments that are (1) stylistically similar to human-authored environments, (2) guaranteed to be solvable by the human-robot team, and (3) diverse with respect to coordination measures. We analyze the procedurally generated environments in the Overcooked benchmark domain via simulation and an online user study. Results show that the environments result in qualitatively different emerging behaviors and statistically significant differences in collaborative fluency metrics, even when the robot runs the same planning algorithm.},
+  archiveprefix = {arxiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Robotics},
+  file = {C\:\\Users\\haase\\Zotero\\storage\\RISAJDPV\\Fontaine et al. - 2021 - On the Importance of Environments in Human-Robot C.pdf;C\:\\Users\\haase\\Zotero\\storage\\ZAXJ3ZXN\\2106.html}
 }
 
 @article{foxPDDL2ExtensionPDDL2003,
@@ -572,6 +608,24 @@
   file = {C:\Users\haase\Zotero\storage\W5ECXQZU\Knight et al. - 2001 - Casper Space exploration through continuous plann.pdf}
 }
 
+@misc{knottEvaluatingRobustnessCollaborative2021,
+  title = {Evaluating the {{Robustness}} of {{Collaborative Agents}}},
+  author = {Knott, Paul and Carroll, Micah and Devlin, Sam and Ciosek, Kamil and Hofmann, Katja and Dragan, A. D. and Shah, Rohin},
+  year = {2021},
+  month = jan,
+  number = {arXiv:2101.05507},
+  eprint = {2101.05507},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2101.05507},
+  url = {http://arxiv.org/abs/2101.05507},
+  urldate = {2024-04-02},
+  abstract = {In order for agents trained by deep reinforcement learning to work alongside humans in realistic settings, we will need to ensure that the agents are {\textbackslash}emph\{robust\}. Since the real world is very diverse, and human behavior often changes in response to agent deployment, the agent will likely encounter novel situations that have never been seen during training. This results in an evaluation challenge: if we cannot rely on the average training or validation reward as a metric, then how can we effectively evaluate robustness? We take inspiration from the practice of {\textbackslash}emph\{unit testing\} in software engineering. Specifically, we suggest that when designing AI agents that collaborate with humans, designers should search for potential edge cases in {\textbackslash}emph\{possible partner behavior\} and {\textbackslash}emph\{possible states encountered\}, and write tests which check that the behavior of the agent in these edge cases is reasonable. We apply this methodology to build a suite of unit tests for the Overcooked-AI environment, and use this test suite to evaluate three proposals for improving robustness. We find that the test suite provides significant insight into the effects of these proposals that were generally not revealed by looking solely at the average validation reward.},
+  archiveprefix = {arxiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Human-Computer Interaction,Computer Science - Machine Learning,Computer Science - Multiagent Systems},
+  file = {C\:\\Users\\haase\\Zotero\\storage\\MX8PZ7ED\\Knott et al. - 2021 - Evaluating the Robustness of Collaborative Agents.pdf;C\:\\Users\\haase\\Zotero\\storage\\6P3TAW57\\2101.html}
+}
+
 @article{kvarnstromTALplannerTemporalLogic2000,
   title = {{{TALplanner}}: {{A}} Temporal Logic Based Forward Chaining Planner},
   shorttitle = {{{TALplanner}}},
@@ -672,6 +726,15 @@
   url = {https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=212940aa8f6e02705b26fd40f6e363c969c82b97},
   urldate = {2023-11-24},
   file = {C:\Users\haase\Zotero\storage\36BVLHY8\Myers - 1998 - Towards a framework for continuous planning and ex.pdf}
+}
+
+@inproceedings{nalepkaInteractionFlexibilityArtificial2021,
+  title = {Interaction {{Flexibility}} in {{Artificial Agents Teaming}} with {{Humans}}},
+  author = {Nalepka, Patrick and {Gregory-Dunsmore}, Jordan and Simpson, James and Patil, Gaurav and Richardson, Michael},
+  year = {2021},
+  month = jul,
+  abstract = {Team interaction involves the division of labor and coordination of actions between members to achieve a shared goal. Although the dynamics of interactions that afford effective coordination and performance have been a focus in the cognitive science community, less is known about how to generate these flexible and adaptable coordination patterns. This is important when the goal is to design artificial agents that can augment and enhance team coordination as synthetic teammates. Although previous research has demonstrated the negative impact of model-based agents on the pattern of interactions between members using recurrence quantification methods, more recent work utilizing deep reinforcement learning has demonstrated a promising approach to bootstrap the design of agents to team with humans effectively. This paper explores the impact of artificial agent design on the interaction patterns that are exhibited in human-autonomous agent teams and discusses future directions that can facilitate the design of human-compatible artificial agents.},
+  file = {C:\Users\haase\Zotero\storage\J3CKCUBI\Nalepka et al. - 2021 - Interaction Flexibility in Artificial Agents Teami.pdf}
 }
 
 @inproceedings{neumannHanKAEnrichedKnowledge2022,
@@ -776,6 +839,24 @@
   file = {C:\Users\haase\Zotero\storage\YNJ27YFG\Rao and Georgeff - 1995 - BDI agents from theory to practice..pdf}
 }
 
+@misc{ribeiroAssistingUnknownTeammates2022,
+  title = {Assisting {{Unknown Teammates}} in {{Unknown Tasks}}: {{Ad Hoc Teamwork}} under {{Partial Observability}}},
+  shorttitle = {Assisting {{Unknown Teammates}} in {{Unknown Tasks}}},
+  author = {Ribeiro, Jo{\~a}o G. and Martinho, Cassandro and Sardinha, Alberto and Melo, Francisco S.},
+  year = {2022},
+  month = jan,
+  number = {arXiv:2201.03538},
+  eprint = {2201.03538},
+  primaryclass = {cs},
+  publisher = {arXiv},
+  url = {http://arxiv.org/abs/2201.03538},
+  urldate = {2024-04-02},
+  abstract = {In this paper, we present a novel Bayesian online prediction algorithm for the problem setting of ad hoc teamwork under partial observability (ATPO), which enables on-the-fly collaboration with unknown teammates performing an unknown task without needing a pre-coordination protocol. Unlike previous works that assume a fully observable state of the environment, ATPO accommodates partial observability, using the agent's observations to identify which task is being performed by the teammates. Our approach assumes neither that the teammate's actions are visible nor an environment reward signal. We evaluate ATPO in three domains -- two modified versions of the Pursuit domain with partial observability and the overcooked domain. Our results show that ATPO is effective and robust in identifying the teammate's task from a large library of possible tasks, efficient at solving it in near-optimal time, and scalable in adapting to increasingly larger problem sizes.},
+  archiveprefix = {arxiv},
+  keywords = {Computer Science - Artificial Intelligence,Computer Science - Machine Learning,Computer Science - Multiagent Systems},
+  file = {C\:\\Users\\haase\\Zotero\\storage\\M4V8XNDK\\Ribeiro et al. - 2022 - Assisting Unknown Teammates in Unknown Tasks Ad H.pdf;C\:\\Users\\haase\\Zotero\\storage\\4SXMSSNZ\\2201.html}
+}
+
 @misc{roseroTwoManyCooks2021,
   title = {Two {{Many Cooks}}: {{Understanding Dynamic Human-Agent Team Communication}} and {{Perception Using Overcooked}} 2},
   shorttitle = {Two {{Many Cooks}}},
@@ -820,6 +901,19 @@
   url = {https://apps.dtic.mil/sti/citations/ADA458627},
   urldate = {2023-12-05},
   file = {C:\Users\haase\Zotero\storage\ZZWRTC8N\Sacerdoti - 1975 - The nonlinear nature of plans.pdf}
+}
+
+@inproceedings{sarkarPantheonrlMarlLibrary2022,
+  title = {Pantheonrl: {{A}} Marl Library for Dynamic Training Interactions},
+  shorttitle = {Pantheonrl},
+  booktitle = {Proceedings of the {{AAAI Conference}} on {{Artificial Intelligence}}},
+  author = {Sarkar, Bidipta and Talati, Aditi and Shih, Andy and Sadigh, Dorsa},
+  year = {2022},
+  volume = {36},
+  pages = {13221--13223},
+  url = {https://ojs.aaai.org/index.php/AAAI/article/view/21734},
+  urldate = {2024-04-02},
+  file = {C:\Users\haase\Zotero\storage\EVBIIDDT\Sarkar et al. - 2022 - Pantheonrl A marl library for dynamic training in.pdf}
 }
 
 @inproceedings{satoMimiCookCookingAssistant2014,
@@ -1037,4 +1131,16 @@
   abstract = {A typical Overcooked planning problem that requires agent to process ingredients and deliver dishes composed of multiple ingredients is addressed in this paper by utilizing the powerful planning language, PDDL. Compared to the original game, the basic problem is simplified to be single-agent, deterministic and fully-observable, with temporal features preserved. A solver that consists of a PDDL encoding of the problem along with an automatic encoder that encodes an initial game environment into a planning problem is designed and tested. On base of that, an attempt on using the encoding to solve multi-agent problems was presented, where certain level of cooperative behavior was obtained but obvious deficiencies also appeared in the plans.},
   langid = {english},
   file = {C:\Users\haase\Zotero\storage\4IPYJU6E\ICJE-6-12-315-325.pdf}
+}
+
+@inproceedings{zhaoMaximumEntropyPopulationbased2023,
+  title = {Maximum Entropy Population-Based Training for Zero-Shot Human-Ai Coordination},
+  booktitle = {Proceedings of the {{AAAI Conference}} on {{Artificial Intelligence}}},
+  author = {Zhao, Rui and Song, Jinming and Yuan, Yufeng and Hu, Haifeng and Gao, Yang and Wu, Yi and Sun, Zhongqian and Yang, Wei},
+  year = {2023},
+  volume = {37},
+  pages = {6145--6153},
+  url = {https://ojs.aaai.org/index.php/AAAI/article/view/25758},
+  urldate = {2024-04-02},
+  file = {C:\Users\haase\Zotero\storage\D2ENGNRH\Zhao et al. - 2023 - Maximum entropy population-based training for zero.pdf}
 }
