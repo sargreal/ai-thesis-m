@@ -1,1 +1,15 @@
 \section{Introduction}\label{sec:introduction}
+
+
+\subsection{Problem Statement}
+
+The most planning algorithms are doing a strict separation between planning and execution.
+While that is fine in most domains, it does not work everywhere.
+Using online planning, a planner can dynamically receive domain updates and adjust the plan accordingly.
+Most considerations of online planning do mostly consider the case of plan repair or replanning in the case of failures.
+In a dynamic domain it is however very common to receive additional tasks that do sometimes need to be executed in a given time window.
+While replanning approaches may help in the integration of these additional tasks, they will in especially strict deadlines fail, due to the previous tasks being executed too lazy.
+To achieve better success rates, it is necessary to consider the case of new tasks being inserted in the future already during planning.
+
+The problem considered is therefore a planning domain with temporal constraints, a stream of tasks with deadlines and a hierarchical definition of the domain.
+Given this problem, the goal is to create adaptations of the planning algorithm that increases the success rate of the execution of a plan in the case of shorter deadlines in the stream of tasks.

@@ -1,15 +1,36 @@
 \section{Related Work}
 
-There has already been some research in this game that focused on Classical Planning \citep{yuxinliuPlanningOvercookedGame2020}, Human-Robot Interaction \citep{bishopCHAOPTTestbedEvaluating2020,roseroTwoManyCooks2021,ruhdorferMindsChefsUsing2023} and Reinforcement Learning using the Theory of Mind \citep{ruhdorferMindsChefsUsing2023}.
-\cite{bishopCHAOPTTestbedEvaluating2020,roseroTwoManyCooks2021} do not use actual AI techniques, but the Wizard of Oz paradigm where the AI Agent is simulated by a human but the participants are unaware of that.
-The major component of asynchronous receiving of orders has not been considered techniqually in the mentioned research.
+The game Overcooked has seen some attraction as an application domain in recent years.
+Classical Planning using PDDL has been considered \citep{yuxinliuPlanningOvercookedGame2020} as well as Human-Robot Interaction \citep{bishopCHAOPTTestbedEvaluating2020,roseroTwoManyCooks2021}, Human-AI Interaction with Reinforcement Learning \citep{carrollUtilityLearningHumans2019,charakornInvestigatingPartnerDiversification2020,knottEvaluatingRobustnessCollaborative2021,nalepkaInteractionFlexibilityArtificial2021,fontaineImportanceEnvironmentsHumanRobot2021,zhaoMaximumEntropyPopulationbased2023,sarkarPantheonrlMarlLibrary2022,ruhdorferMindsChefsUsing2023} and Bayesian Learning \citep{ribeiroAssistingUnknownTeammates2022}.
+% Several bachelor theses at the TU Delft have focused this topic, also mostly concerned about human robot interaction \citep{ordonezcardenasFictionalCoPlayHumanAgent2022,vanveenCoupledModelbasedCooperative2022,vosTrainingHumanAIAgent2022,antonScriptedAIOvercooked2023,herbenEffectsHeuristicOptimisations2023,niemantsverdrietImprovementsImitationLearning2023}.
+The Overcooked AI benchmark introduced by \cite{carrollUtilityLearningHumans2019} is however only concerned with cooperation and does not take more complex tasks into account.
+The domain only includes a single recipe that is supposed to be produced as often as possible.
+The Reinforcement Learning Agents can not correspond to individual tasks, but can only continually perform a single task.
+Additionally, the Agents need to be trained for each possible task, making the Agents infeasible for supporting many different tasks.
+The Bayesian Learning approach is more flexible, as it can adjust online to the domain, but it cannot respond to individual tasks either.
 
-Support for Temporal HTN Planning has ben implemented in the two major works CHIMP \citep{stockHierarchicalHybridPlanning2017} and FAPE \citep{bit-monnotFAPEConstraintbasedPlanner2020}.
-CHIMP uses a custom domain definition language based on the SHOP2 language, while FAPE a extended version the Language ANML.
-There is a proposal for HDDL2.1 \citep{pellierHDDLDefiningFormalism2023} that adds support for the durative actions and time constraints from PDDL2.1 \citep{foxPDDL2ExtensionPDDL2003} to the HDDL language \citep{hollerHDDLExtensionPDDL2020}, a hierachical version of PDDL.
-HDDL2.1 is however not supported by any planner yet.
-The planning system most likely implementing the necessary features in the future is Aries \citep{bit-monnotAries2024}, however that is still in active development.
-An interesting project in this context is the Unified-Planning System \citep{frambaUnifiedPlanning2024} by the AIPlan4EU H2020 Project\footnote{https://aiplan4eu-project.eu}, that aims at providing a common python api for calling and interacting with any planner.
+Support for Temporal HTN Planning has been implemented in the systems CHIMP \citep{stockHierarchicalHybridPlanning2017} and FAPE \citep{bit-monnotFAPEConstraintbasedPlanner2020}.
+CHIMP uses a custom domain definition language based on the SHOP2 language, while FAPE uses an extended version of the Language ANML.
+There is a proposal for HDDL2.1 \citep{pellierHDDLDefiningFormalism2023} that adds support for the durative actions and time constraints from PDDL2.1 \citep{foxPDDL2ExtensionPDDL2003} to the HDDL language \citep{hollerHDDLExtensionPDDL2020}, a hierarchical version of PDDL.
+The HDDL2.1 proposal is however not supported by any planner yet.
+The planning system most likely implementing the necessary features for the Overcooked domain in the future is Aries \citep{bit-monnotAries2024}, however, that is still in active development.
+An interesting project in this context is the Unified-Planning System \citep{frambaUnifiedPlanning2024} by the AIPlan4EU H2020 Project\footnote{https://aiplan4eu-project.eu}, which aims at providing a common Python API for calling and interacting with any planner.
 
-Acting has been researched in several ways especially in the Refinement Acting Engine \citep{ghallabAutomatedPlanningActing2016,more} as well as in HTN planning \citep{bit-monnotTemporalHierarchicalModels2017,desilvaHTNActingFormalism2018,patraIntegratingActingPlanning2020,bansodIntegratingPlanningActing2021}.
-Repair and Replanning \citep{bansodHTNReplanningMiddle2022} is also actively researched.
+Acting and Online Planning have been considered in several ways.
+The Refinement Acting Engine \citep{ghallabAutomatedPlanningActing2016} introduces a general framework for acting using refinement methods.
+Refinement Methods are similar to HTN methods in the definition, but the actor will only execute one refinement, so there is no plan created for the whole problem.
+It is possible to use online planning in RAE, however they only consider classical planners. 
+Lastly, RAE focuses on a single-actor model, which is not directly considered here
+FAPE \citep{bit-monnotTemporalHierarchicalModels2016a} implements Acting and Planning with temporal HTN domains, but can not react to messages from users or other actors and can therefore also not add tasks during the execution.
+Additionally, it does not support online planning with fully hierarchical domains.
+\cite{patraIntegratingActingPlanning2020} integrates RAE with learning and planning, but because they use offline learning it can only be used in known domains.
+\cite{bansodIntegratingPlanningActing2021} present a reentrant HTN planner, building on the Algorithms for classical planning provided in RAE.
+They do however not include Temporal HTN Planning.
+\cite{turiGuidanceRefinementbasedActing2022} integrates Temporal HTN Planning and RAE, but they only present preliminary results as they use the unfinished planning system Aries \citep{bit-monnotAries2024}.
+\cite{boellaReplanningAlgorithmReactive2002} introduce an Algorithm for replanning by keeping the plan mostly intact and removing actions until the partial plan subsumes more promising refinements. Then the planning process is restarted.
+\cite{bansodHTNReplanningMiddle2022} use a similar approach for replanning in HTN, but remove all pending actions from the hierarchy.
+Plan Repair on the other hand tries to only remove a minimal part of a failing plan.
+\cite{vanderkrogtPlanRepairExtension2005} introduce Plan Repair as an extension of planning, by considering the removal of actions from a plan as a valid plan modification during plan repair.
+A similar approach is used by \cite{bajadaTemporalPlanQuality2014}, while using a plan quality metric as a target.
+Task Merging \citep{stockOnlineTaskMerging2015} allows the combination and utilization of multiple actions for the same tasks and thus optimizing plans with new tasks during execution.
+To our knowledge, no approach has yet used heuristics or task insertion for future tasks, to improve success rates of execution in dynamic environments with new tasks.
