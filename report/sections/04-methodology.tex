@@ -18,35 +18,193 @@ There are several options to consider in solving this issue:
 
 \begin{enumerate}
     \item optimizing the existing plan directly for the case of adding additional actions. This is achieved by adding a heuristic for "Robustness" of a plan during the search phase of planning.
-    \item The addition of preparation tasks for possible future tasks. 
-    \item \todo{Maybe another one like replanning}
+    \item The addition of preparation tasks for possible future tasks.
 \end{enumerate}
 
 
-\subsection{Stream of Tasks}
+\subsection{Acting and Online Planning with a Stream of Tasks}
 
-The core element around which this thesis is built, is that tasks may be received during the execution of a plan, so during the acting phase.
-This behavior is shown in the following flow chart.
+The core element around which this thesis is built is that tasks may be received during the execution of a plan, so during the acting phase.
+This has been considered in RAE, but has not been implemented in the FAPE planner.
+We extend the Actor Model in FAPE (see figure \ref{fig:background-acting-fape}) with a task stream connecting the Activity Manager to other actors or users (see figure \ref{fig:approach-acting-architecture}).
+Technically this interaction exists in FAPE already through the message $newgoal(g)$, but was not made explicit in the architecture.
+Additionally, it was only supported to add new goals before starting dispatching.
 
-\missingfigure{Flowchart}
+\bild{fig:approach-acting-architecture}{architecture}{Architecture of FAPE with a Stream of Tasks}{12}
 
-The receiving of new tasks may occur at any point during the execution, so there are 3 separate points where this may happen.
-When the Acting Engine is in an idle state, the received task is added to the Planning Problem and Planning is started.
-When the Acting Engine is currently planning, the current planning is stopped, the task is added to the Problem and planning is restarted.
-When the Acting Engine is currently dispatching, the dispatching of new actions is stopped, the new task is added to the Problem, Planning is restarted and currently executing actions are finished while planning.
-If the Planning fails at any point, a plan repair is tried first, by removing inconsistent actions.
-If the Repair fails as well, a replan is tried by removing all pending actions.
-The failing of a action dispatch is not considered.
-For simplicity, the simulated time is stopped during planning, so the planning time does not influence the executability of actions.
-
-The insertion of a new task $t$ at time $t_{insert}$ into an existing plan $\pi$ is done by a simple chronicle insertion.
-The task is converted into a chronicle $c$ with the timepoint constraint $t_{start} + t_{insert} \geq \pi_{start}$ and if a deadline for the task is specified also the constraint $\pi_{start} + t_{deadline} \geq t_{end}$.
-The insertion is then handled by the plan modification ChronicleInsertion.
+The interactions between the components are implemented as in FAPE using message passing, with each component being a state machine.
+The observation database and the execution of skills are not considered in this work, as no interaction with a platform was introduced.
+For more details on that see \cite{bit-monnotTemporalHierarchicalModels2016a}.
 
 The modification of an existing and already resolved plan poses a challenge in several aspects.
 The timelines for all instances are already resolved.
 In the fape planner it is not possible to insert a state change between the timelines, but only after or before the timeline.
 This is especially problematic, since then a task with a tight deadline cannot be inserted when an instance needs to be used earlier.
+
+\subsubsection{Stream of Tasks}
+
+Each task that is managed by the Activity Manager is received through the stream of tasks.
+A task in this stream has an optional deadline $t_{deadline}$ and is received by the Activity Manager at a specific time $t_{receive}$.
+The task is a temporally qualified ground task $\langle[t_{receive},t_{deadline}] \tau(r_1,\dots,r_n)\rangle$.
+If no deadline is specified, it is $max(\mathbb{N})$.
+Specifically, the task is sent to the Activity Manager using the message $newtask(t)$.
+
+\subsubsection{Activity Manager}
+
+The Activity Manager is the core component of this model, managing all interactions between the other components.
+It is a state machine with the states IDLE, WAITING\_FOR\_PLAN and DISPATCHING.
+In the idle state, it is waiting for tasks to be submitted.
+This is also the initial state.
+It switches from the idle state to the planning state when receiving a task.
+A planning request is sent to the Planner component, and the activity manager waits until a plan has been found.
+Once a plan has been found, the state switches to dispatching, where the plan is continuously dispatched to the available skills.
+When the plan has been fully executed, the state switches back to idle.
+
+The messages that are available to the Activity Manager are as follows:
+\begin{itemize}
+    \item Incoming:
+    \begin{itemize}
+        \item $newtask(t)$: A new task that should be executed. 
+        \item $newplan(\phi)$: A new plan is received from the planner.
+        \item $noplan$: Planning failed.
+        \item $dispatchsuccess(a)$ An action instance was successfully executed.
+    \end{itemize}
+    \item Outgoing:
+    \begin{itemize}
+        \item $planrequest(\phi)$: A request sent to the planner to search for a solution of $\phi$.
+        \item $dispatch(a)$: Dispatch an action instance a.
+    \end{itemize}
+\end{itemize}
+
+With these messages, 
+
+\begin{itemize}
+    \item IDLE
+    \begin{itemize}
+        \item receive $newtask(t)$:
+        \begin{enumerate}
+            \item integrate $t$ into current plan $\phi$
+            \item send $planrequest(\phi)$
+            \item switch state to WAITING\_FOR\_PLAN
+        \end{enumerate}
+        % \item receive $dispatchsuccess(a)$:
+        % \begin{enumerate}
+        %     \item mark $a$ as executed
+        %     \item stay in state IDLE
+        % \end{enumerate}
+    \end{itemize}
+    \item WAITING\_FOR\_PLAN
+    \begin{itemize}
+        \item receive $newplan(\phi)$:
+        \begin{enumerate}
+            \item verify that $\phi$ corresponds to latest plan request sent
+            \item switch state to DISPATCHING
+        \end{enumerate}
+        \item receive $noplan$:
+        \begin{enumerate}
+            \item shutdown
+        \end{enumerate}
+        \item receive $newtask(t)$:
+        \begin{enumerate}
+            \item integrate $t$ into current plan $\phi$
+            \item send $planrequest(\phi)$
+            \item stay in state WAITING\_FOR\_PLAN
+        \end{enumerate}
+        \item receive $dispatchsuccess(a)$:
+        \begin{enumerate}
+            \item mark $a$ as executed
+            \item stay in state WAITING\_FOR\_PLAN
+        \end{enumerate}
+    \end{itemize}
+    \item DISPATCHING
+    \begin{enumerate}
+        \item for all actions $a$ that can be executed 
+        \begin{enumerate}
+            \item send $dispatch(a)$
+            \item mark $a$ as executing
+        \end{enumerate} 
+        \item if all actions executed: switch to state IDLE
+    \end{enumerate}
+    \begin{itemize}
+        \item receive $dispatchsuccess(a)$:
+        \begin{enumerate}
+            \item mark $a$ as executed
+            \item stay in state DISPATCHING
+        \end{enumerate}
+        \item receive $newtask(t)$:
+        \begin{enumerate}
+            \item integrate $t$ into current plan $\phi$
+            \item send $planrequest(\phi)$
+            \item switch state to WAITING\_FOR\_PLAN
+        \end{enumerate}
+    \end{itemize}
+\end{itemize}
+
+\bild{fig:approach-acting-architecture}{state_activity_manager}{State machine diagram of the Activity Manager component}{10}
+
+% The receiving of new tasks may occur at any point during the execution, so there are 3 separate points where this may happen.
+% \begin{enumerate}
+%     \item When the Acting Engine is in an idle state, the received task is added to the Planning Problem and Planning is started.
+%     \item When the Acting Engine is currently planning, the current planning is stopped, the task is added to the Problem and planning is restarted.
+%     \item When the Acting Engine is currently dispatching, the dispatching of new actions is stopped, the new task is added to the Problem, Planning is restarted and currently executing actions are finished while planning.
+% \end{enumerate}
+
+The insertion of a new task $t = \langle[t_{receive},t_{deadline}] \tau\rangle$ is handled by the plan modification Task Insertion:
+
+\begin{definition}[Task Insertion]
+    A chronicle $\phi_1 = (\pi_1,\mathcal{F}_1,\mathcal{C}_1)$ can be extended to a chronicle $\phi_2 = (\pi_2,\mathcal{F}_2,\mathcal{C}_2)$ by inserting a new temporally qualified task instance $t = \langle[t_{receive},t_{deadline}] \tau\rangle$. This transformation is denoted $\phi_1 \xrightarrow{\tau}_I \phi_2$ and does the following modifications to $\phi_2$
+  \begin{align*}
+    \pi_2 \leftarrow & \pi_1 \cup \{\tau\} \\
+    \mathcal{F}_2 \leftarrow & \mathcal{F}_1 \cup \{t\} \\
+    \mathcal{C}_2 \leftarrow & \mathcal{C}_1 \\
+  \end{align*}
+\end{definition}
+
+\subsubsection{Planner component}
+
+The planner component executes the planning algorithm, and on failure tries first repairing and then replanning.
+
+
+The planner uses the following messages.
+
+\begin{itemize}
+    \item Incoming:
+    \begin{itemize}
+        \item $planrequest(\phi)$: A request to search for a solution of $\phi$.
+    \end{itemize}
+    \item Outgoing:
+    \begin{itemize}
+        \item $newplan(\phi)$: Send a plan that is a solution back to the Activity Manager.
+        \item $noplan$: Indicate to the Activity Manager that no plan exists.
+    \end{itemize}
+\end{itemize}
+
+The planner has only 2 different states, IDLE and PLANNING.
+If it receives a new $planrequest(\phi)$, it initiates a search asynchronously and moves to the PLANNING state.
+In the PLANNING state it waits for the search to complete.
+If a search finishes successfully, the planner sends a $newplan(\phi)$ message.
+If the search fails, the planner issues a repair search and stay in the PLANNING state.
+If the repair search fails as well, the planner issues a replanning search and stay in the PLANNING state.
+If replanning fails as well, the planner sends a $noplan$ message.
+If the planner receives a new $planrequest(\phi)$ in the PLANNING state, any running search is canceled and a new search for the new request is started asynchronously.
+
+\subsubsection{Skills component}
+
+A Skill breaks down the abstract definition of an action into direct manipulations of the environment.
+In the Overcooked Domain, this results in 4 basic manipulations, that can be executed in the game.
+
+\textbf{Movement}: The action \verb|a_move(Person p, ManArea to)| only describes a destination to go to and not the path to take. 
+A shortest path algorithm should be used to find a path that the person can walk until it is at the destination. 
+The path also needs to be translated into individual keypresses on W,A,S and D for the character's movement in the game.
+
+\textbf{Arranging, Picking Up and Dropping}: All of these actions require the pressing of the space bar in the game.
+
+\textbf{Chopping}: Chopping requires holding the CTRL key.
+
+\textbf{Boiling and Frying}: These actions do not require any input. 
+However, the cooking state should be monitored to avoid overcooking.
+
+
 
 % Inserting new tasks into an existing plan is handled using the following procedure:
 % The current state of the environment is saved to the Problem.
@@ -67,37 +225,48 @@ Robustness is defined as followed:
 \end{definition}
 
 As also mentioned in \cite{barberRobustnessStabilityRecoverability2015}, the concrete "formalization depends on the system, on its expected functionality and on the specific set of incidences to be confronted".
-In considerations of robustness in planning \citep{lundRobustExecutionProbabilistic2017}, the incidences are pertubations in the start and end timepoints of actions.
+In considerations of robustness in planning \citep{lundRobustExecutionProbabilistic2017}, the incidences are perturbations in the start and end time points of actions.
 Most of the time, this leads to the most robust plans being plans that include as much margin between actions as possible.
 
-In this case however, the execution is dynamic and when adding new tasks added during the execution, it is not beneficial if there are large margins between the tasks.
-Therefore, the robustness in respect to adding new tasks is determined by how likely it is that the addition of a new task is possible.
+In this case, the execution is dynamic and when adding new tasks added during the execution, it is not beneficial if there are large margins between the tasks.
+Therefore, the robustness with respect to adding new tasks is determined by how likely it is that the addition of a new task is possible.
 
-There are two cases that must be considered: All decomposed acctions of the added task will happen after the end of the current plan, or the decomposed actions are at least partially executed during the current plan.
+Two cases that must be considered: All decomposed actions of the added task will happen after the end of the current plan, or the decomposed actions are at least partially executed during the current plan.
 In the first case, the success of adding the new task is more likely when the current plan has a shorter makespan.
 In the other case, the plan must be changed substantially.
-Some existing action must be pushed back, while the deadline for this order must still be fulfilled.
-This works best, when there are less dependencies between actions, and when the makespan is shorter.
+Some existing actions must be pushed back, while the deadline for those tasks must still be fulfilled.
+This works best when there are fewer dependencies between actions, and when the makespan is shorter.
 
 To find plans that have exactly these properties, a new robustness heuristic is introduced, that is used for node selection during planning.
-The 
+A plan is in our case considered more robust than another, if it can survive more perturbations.
+A perturbation is our case a delay for start and end time points of actions.
 
-This definition considers all actions in a plan rigid, which is a common requirement in several application areas of planning.
-A plan that has been generated cannot be changed later, and some resources may also depend on the rigidness of the planned actions. 
-This makes the most robust plans always include padding between the individual actions.
+\begin{definition}[Delay Perturbation]
+    A delay perturbation on an action $a$ by an amount $x$ is the addition of a temporal constraint $t^a_{start} - x > t^p_{start}$ where $t^a_{start}$ is the starting time point of action $a$ and $t^p_{start}$ is the starting time point of the temporal HTN Planning Problem.
+\end{definition}
 
-In this context that definition still holds, however the assumptions are different.
-Actions in this context may be delayed until the final deadline is missed.
-These delays may come from the insertion of new tasks into the existing plan.
-Therefore the actions in the plan are not rigid and padding does not make the plan more robust.
-Instead the robustness is calculated using pertubations similarly to the robustness in QCNs.
+% This definition considers all actions in a plan rigid, which is a common requirement in several application areas of planning.
+% A plan that has been generated cannot be changed later, and some resources may also depend on the rigidness of the planned actions. 
+% This makes the most robust plans always include padding between the individual actions.
 
-The pertubations in this case are random delays of action starts.
+% In this context that definition still holds, however the assumptions are different.
+% Actions in this context may be delayed until the final deadline is missed.
+% These delays may come from the insertion of new tasks into the existing plan.
+% Therefore the actions in the plan are not rigid and padding does not make the plan more robust.
+% Instead the robustness is calculated using pertubations similarly to the robustness in QCNs.
+
+The perturbations in this case are random delays of action starts.
 The most robust plans are then the plans with the shortest makespan with the additional metric of least dependencies between parallel actions.
 
+\todo[inline]{WIP}
 
-The Robustness is the number of random pertubations that can be added on average until the plan is inconsistent.
-To approximate this, 10 random pertubations are added 10 times and the average is taken.
+\begin{align}
+    \hat{\phi} = \underset{\phi \in \Phi}{\argmax} \textit{ count of perturbations possible on } \phi
+\end{align}
+
+
+The Robustness is the number of random perturbations that can be added on average until the plan is inconsistent.
+To approximate this, 10 random perturbations are added 10 times and the average is taken.
 
 
 \subsection{Preparations}
@@ -105,8 +274,8 @@ To approximate this, 10 random pertubations are added 10 times and the average i
 Preparing parts of a meal is a common strategy in Restaurants to handle high loads.
 
 Due to the nature of the hierarchical plan, the essential actions for a task can be gathered.
-These actions are added to the current plan with the constraint that they can be executed between the current timepoint and the expected end of the current plan.
-Otherwise an unlimited amount of preparations could be inserted at any point, which would first block the Acting Engine to receive any new tasks and second would correspond to a restaurant that prepares all of the available ingredients even when ther are only a few orders.
+These actions are added to the current plan with the constraint that they can be executed between the current time point and the expected end of the current plan.
+Otherwise an unlimited amount of preparations could be inserted at any point, which would first block the Acting Engine to receive any new tasks and second would correspond to a restaurant that prepares all of the available ingredients even when there are only a few orders.
 
 The generation of potentially preparable tasks is shown in algorithm \ref{alg:methodology:preparations}.
 It receives a list of potential task names, in this case the potential orders that may be submitted in the stream of tasks.
@@ -120,55 +289,55 @@ Otherwise they could be included multiple times in the plan without any effect d
 
 
 \begin{algorithm}
-    \caption{Generation of possible preparations}
+    \caption{PREPARATIONS: Generation of possible preparations}
     \label{alg:methodology:preparations}
-    \KwIn{$\pi$; $T_p$}
-    \KwOut{possible preparations}
-    $preparations \leftarrow \emptyset$\;
-    \ForEach{$o \in$ potential orders}{
-        \ForEach{$t \in subtasks(o)$}{
-            \If{$arguments(t) \nsubseteq arguments(o)$}{
-                \ForEach{$p \in instantions(t)$}{
-                    \If{$dependencies(o,t) \neq \emptyset$}{
-                        \If{dependenciesExecuted(o,p)} {
-                            $preparations \leftarrow preparations + \{p\}$
+    \KwIn{$\phi' = \langle \pi,\mathcal{F},\mathcal{C} \rangle$; $\mathcal{T}_p$}
+    \KwOut{$T_p$}
+    $T_p \leftarrow \emptyset$\;
+    \ForEach{$\tau \in$ $T_p$}{
+        \ForEach{$\text{action template } A \text{ for } \tau$}{
+            \ForEach{$\tau_s \in subtasks(A)$}{
+                \If{$parameters(\tau_s) \nsubseteq parameters(\tau)$}{
+                    \ForEach{$t_p \in \text{ground instances  of } \tau_s, t_p \notin \pi$}{
+                        $T_d \leftarrow dependencies(A,t_p)$\;
+                        \If{$T_d \neq \varnothing$}{
+                            \If{all $T_d$ executed} {
+                                $T_p \leftarrow T_p + \{t_p\}$
+                            }
                         }
-                    }
-                    \Else{
-                        $preparations \leftarrow preparations + \{p\}$
+                        \Else{
+                            $T_p \leftarrow T_p + \{t_p\}$
+                        }
                     }
                 }
             }
         }
     }
-    \Return{preparations}
+    \Return{$T_p$}
 \end{algorithm}
 
-After generating all possible preparations, one perparation is chosen to the current plan, and planning is continued.
+After generating all possible preparations, one preparation is chosen to the current plan, and planning is continued.
 If the planning fails, no preparation is possible anymore.
 Therefore the planning is stopped and the previous plan is returned.
 Otherwise the same procedure is repeated.
 
 \begin{algorithm}
-    \caption{Planning with adding preparations}
+    \caption{PrepPSP: Planning with adding preparations}
     \label{alg:methodology:planning}
-    \KwIn{$P = \langle L,C,A,M,s_0,tn_I,\delta \rangle$; $T_p$}
-    \KwOut{$\pi$}
-    $planning \leftarrow true$\;
-    $\pi_{final} \leftarrow \emptyset$\;
-    \While{planning}{
-        $\pi \leftarrow search(P)$\;
-        \If{$consistent(\pi)$}{
-            $\pi_{final} \leftarrow \pi$\;
-            $A_p \leftarrow PREPARATIONS(\pi, T_p)$\;
-            $a_p \leftarrow choose(A_p)$\;
-            $tn_I \leftarrow tn_I + \{a_p\}$\;
-        }
-        \Else{
-            $planning \leftarrow false$\;
-        }
+    \KwIn{$P = \langle \Sigma,\phi \rangle$; $\mathcal{T}_p$}
+    \KwOut{$\phi'$}
+    $\phi' \leftarrow PSP(P)$\;
+    \If{$\phi' =$ FAIL}{
+        \Return{FAIL}
     }
-    \Return{$\pi_{final}$}
+    \Else{
+        $T_p \leftarrow PREPARATIONS(\phi', \mathcal{T}_p)$\;
+        nondeterministically choose $t_p \in T_p$\;
+        $\phi' \xrightarrow{t_p}_I \phi''$\;
+        $\phi'' \leftarrow PrepPSP(\langle \Sigma,\phi'' \rangle,\mathcal{T}_p)$\;
+        \If{$\phi'' =$ FAIL}{\Return{$\phi'$}}
+        \Else{\Return{$\pi''$}}
+    }
 \end{algorithm}
 
 There are several concrete implementations of the non-deterministic choose method in \ref{alg:methodology:planning}.
