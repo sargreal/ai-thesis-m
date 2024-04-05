@@ -2,33 +2,30 @@
 
 % Problem definition
 
-A temporal htn planning problem is defined as a tuple $\langle X,X,X \rangle$.
+The planning problem in the domain Overcooked is defined as a temporal HTN planning problem as defined in \ref{sec:temporal-htn-planning}.
+It is used in a dynamic environment as acting to be able to respond to tasks that are received after the beginning of execution.
+The architecture used for acting is presented in section \ref{sec:approach-acting}.
 
-A temporal planning problem with a stream of tasks is defined as $\langle X,X,X,S \rangle$.
-
-$S$ is a stream of tasks that is unknown at the beginning of acting, and new tasks are added to the stream during acting.
-
-The new tasks need to be added to the current plan, where some actions may have been already executed, are currently executing or are still pending.
-
-The addition of theses tasks to the current problem may be straightforward in most cases, but sometimes it may be impossible to add the new task to the problem, although it would be possible if the tasks had been known in advance.
-
-This thesis evaluates the different options for optimizing plans for the case of adding new tasks.
-
-There are several options to consider in solving this issue:
+The particular problem to solve is that the received tasks have associated deadlines, that may prove impossible to achieve.
+The goal is to optimize the current plans, such that the new tasks can be inserted successfully.
+We consider two options for solving this optimization problem:
 
 \begin{enumerate}
-    \item optimizing the existing plan directly for the case of adding additional actions. This is achieved by adding a heuristic for "Robustness" of a plan during the search phase of planning.
-    \item The addition of preparation tasks for possible future tasks.
+    \item In section \ref{sec:approach-robustness} we introduce a heuristic for the robustness of a plan. This is expected to increase the ability to insert a new task at a later time point
+    \item In section \ref{sec:approach-preparation} we then introduce a preparation algorithm that uses the hierarchical domain definition to determine which tasks can be prepared given a set of possible tasks that may be received.
 \end{enumerate}
 
+\subsection{Domain Definition}
+\label{sec:approach-domain}
 
 \subsection{Acting and Online Planning with a Stream of Tasks}
+\label{sec:approach-acting}
 
 The core element around which this thesis is built is that tasks may be received during the execution of a plan, so during the acting phase.
-This has been considered in RAE, but has not been implemented in the FAPE planner.
+This has been considered in RAE \citep{ghallabAutomatedPlanningActing2016}, but has not been implemented in the FAPE planner \citep{bit-monnotTemporalHierarchicalModels2016a}.
 We extend the Actor Model in FAPE (see figure \ref{fig:background-acting-fape}) with a task stream connecting the Activity Manager to other actors or users (see figure \ref{fig:approach-acting-architecture}).
 Technically this interaction exists in FAPE already through the message $newgoal(g)$, but was not made explicit in the architecture.
-Additionally, it was only supported to add new goals before starting dispatching.
+In the implementation, it is also only supported to add new goals before starting dispatching.
 
 \bild{fig:approach-acting-architecture}{architecture}{Architecture of FAPE with a Stream of Tasks}{12}
 
@@ -38,7 +35,7 @@ For more details on that see \cite{bit-monnotTemporalHierarchicalModels2016a}.
 
 The modification of an existing and already resolved plan poses a challenge in several aspects.
 The timelines for all instances are already resolved.
-In the fape planner it is not possible to insert a state change between the timelines, but only after or before the timeline.
+In the FAPE planner it is not possible to insert a state change between the timelines, but only after or before the timeline.
 This is especially problematic, since then a task with a tight deadline cannot be inserted when an instance needs to be used earlier.
 
 \subsubsection{Stream of Tasks}
@@ -76,7 +73,8 @@ The messages that are available to the Activity Manager are as follows:
     \end{itemize}
 \end{itemize}
 
-With these messages, 
+With these messages, the state machine of the Activity Manager is defined as follows.
+A visual representation of the state machine is shown in figure \ref{fig:approach-activity-manager}.
 
 \begin{itemize}
     \item IDLE
@@ -140,7 +138,7 @@ With these messages,
     \end{itemize}
 \end{itemize}
 
-\bild{fig:approach-acting-architecture}{state_activity_manager}{State machine diagram of the Activity Manager component}{10}
+\bild{fig:approach-activity-manager}{state_activity_manager}{State machine diagram of the Activity Manager component}{10}
 
 % The receiving of new tasks may occur at any point during the execution, so there are 3 separate points where this may happen.
 % \begin{enumerate}
@@ -152,7 +150,7 @@ With these messages,
 The insertion of a new task $t = \langle[t_{receive},t_{deadline}] \tau\rangle$ is handled by the plan modification Task Insertion:
 
 \begin{definition}[Task Insertion]
-    A chronicle $\phi_1 = (\pi_1,\mathcal{F}_1,\mathcal{C}_1)$ can be extended to a chronicle $\phi_2 = (\pi_2,\mathcal{F}_2,\mathcal{C}_2)$ by inserting a new temporally qualified task instance $t = \langle[t_{receive},t_{deadline}] \tau\rangle$. This transformation is denoted $\phi_1 \xrightarrow{\tau}_I \phi_2$ and does the following modifications to $\phi_2$
+    A chronicle $\phi_1 = (\pi_1,\mathcal{F}_1,\mathcal{C}_1)$ can be extended to a chronicle $\phi_2 = (\pi_2,\mathcal{F}_2,\mathcal{C}_2)$ by inserting a new temporally qualified task instance $t = \langle[t_{receive},t_{deadline}] \tau\rangle$. This transformation is denoted $\phi_1 \xrightarrow{t}_I \phi_2$ and does the following modifications to $\phi_2$
   \begin{align*}
     \pi_2 \leftarrow & \pi_1 \cup \{\tau\} \\
     \mathcal{F}_2 \leftarrow & \mathcal{F}_1 \cup \{t\} \\
@@ -163,9 +161,7 @@ The insertion of a new task $t = \langle[t_{receive},t_{deadline}] \tau\rangle$ 
 \subsubsection{Planner component}
 
 The planner component executes the planning algorithm, and on failure tries first repairing and then replanning.
-
-
-The planner uses the following messages.
+The planner uses the following messages:
 
 \begin{itemize}
     \item Incoming:
@@ -190,6 +186,7 @@ If the planner receives a new $planrequest(\phi)$ in the PLANNING state, any run
 
 \subsubsection{Skills component}
 
+While the skill component was not implemented, the basics are introduced here as a reference.
 A Skill breaks down the abstract definition of an action into direct manipulations of the environment.
 In the Overcooked Domain, this results in 4 basic manipulations, that can be executed in the game.
 
@@ -216,10 +213,12 @@ However, the cooking state should be monitored to avoid overcooking.
 
 
 \subsection{Robustness heuristic}
+\label{sec:approach-robustness}
 
-Robustness is defined as followed:
+The robustness heuristic introduces a plan selection strategy that more likely chooses plans where the addition of new tasks in the plan is more likely to succeed.
+Robustness is generally defined as follows.
 
-\begin{definition}
+\begin{definition}[Robustness]
     Robustness is the ability of a system to withstand stresses, pressures, perturbations, unpredictable changes, or variations in its operating environment without loss of functionality.
     A system that is designed to perform functionality in an expected environment is \emph{robust} if it is able to maintain its functionality under a set of incidences. \citep{barberRobustnessStabilityRecoverability2015}
 \end{definition}
@@ -231,18 +230,24 @@ Most of the time, this leads to the most robust plans being plans that include a
 In this case, the execution is dynamic and when adding new tasks added during the execution, it is not beneficial if there are large margins between the tasks.
 Therefore, the robustness with respect to adding new tasks is determined by how likely it is that the addition of a new task is possible.
 
-Two cases that must be considered: All decomposed actions of the added task will happen after the end of the current plan, or the decomposed actions are at least partially executed during the current plan.
+Two cases must be considered: All decomposed actions of the added task will happen after the end of the current plan, or the decomposed actions are at least partially executed during the current plan.
 In the first case, the success of adding the new task is more likely when the current plan has a shorter makespan.
 In the other case, the plan must be changed substantially.
 Some existing actions must be pushed back, while the deadline for those tasks must still be fulfilled.
 This works best when there are fewer dependencies between actions, and when the makespan is shorter.
 
-To find plans that have exactly these properties, a new robustness heuristic is introduced, that is used for node selection during planning.
-A plan is in our case considered more robust than another, if it can survive more perturbations.
-A perturbation is our case a delay for start and end time points of actions.
+We use perturbations directly as a metric for the robustness of a plan, similar to \cite{wehnerRobustVsFast2023}.
+In our case, a perturbation is the delay of the start point of an action.
+While the end time point of an action may also be delayed, that is not possible due to the insertion of a new task, but due to a delay in the execution.
+Additionally, the end time point is automatically delayed when the start time point is delayed.
 
 \begin{definition}[Delay Perturbation]
-    A delay perturbation on an action $a$ by an amount $x$ is the addition of a temporal constraint $t^a_{start} - x > t^p_{start}$ where $t^a_{start}$ is the starting time point of action $a$ and $t^p_{start}$ is the starting time point of the temporal HTN Planning Problem.
+    A chronicle $\phi_1 = (\pi_1,\mathcal{F}_1,\mathcal{C}_1)$ can be changed into a chronicle $\phi_2 = (\pi_2,\mathcal{F}_2,\mathcal{C}_2)$ with a delay perturbation on an action $a \in \pi_1$ by an amount $x$ denoted as $\phi_1 \xrightarrow{a,x}_P \phi_2$ by the addition of a temporal constraint as follows, where $t^a_{start}$ is the starting time point of action $a$, $t^p_{start}$ is the starting time point of the temporal HTN Planning Problem and $mindelay(\phi_1,t^p_{start},t^a_{start})$ is the minimum delay between $t^p_{start}$ and $t^a_{start}$ in $\phi_1$.
+    \begin{align*}
+        \pi_2 \leftarrow & \pi_1 \\
+        \mathcal{F}_2 \leftarrow & \mathcal{F}_1 \\
+        \mathcal{C}_2 \leftarrow & \mathcal{C}_1 \cup \{t^p_{start} + (mindelay(\phi_1,t^p_{start},t^a_{start}) + x) \leq t^a_{start}\} \\
+    \end{align*}
 \end{definition}
 
 % This definition considers all actions in a plan rigid, which is a common requirement in several application areas of planning.
@@ -255,38 +260,51 @@ A perturbation is our case a delay for start and end time points of actions.
 % Therefore the actions in the plan are not rigid and padding does not make the plan more robust.
 % Instead the robustness is calculated using pertubations similarly to the robustness in QCNs.
 
-The perturbations in this case are random delays of action starts.
-The most robust plans are then the plans with the shortest makespan with the additional metric of least dependencies between parallel actions.
-
-\todo[inline]{WIP}
+A new robustness heuristic is then introduced, that is used for node selection during planning.
+A heuristic in FAPE includes the two functions $g(\pi)$ and $h(\pi)$ as it uses the A* search algorithm for node selection.
+$g(\pi)$ describes the current cost and $h(\pi)$ describes the remaining cost of the plan.
+$h(\pi)$ can not be estimated for robustness and is therefore left at 0.
 
 \begin{align}
-    \hat{\phi} = \underset{\phi \in \Phi}{\argmax} \textit{ count of perturbations possible on } \phi
+    % \hat{\phi} = \underset{\phi \in \Phi}{\argmax} \textit{ count of perturbations possible on } \phi \\
+    % \phi_1 \xrightarrow{a_1,x_1}_P \dots \xrightarrow{a_n,x_n}_P \phi_{n+1}  \\
+    % g(\phi) = \textit{ count of perturbations possible on } \phi \\
+    g(\phi) &= \begin{cases}
+        0 &\text{if } inconsistent(\phi) \\
+        1 + g(\phi \xrightarrow{a,x}_P \phi') &\text{otherwise}
+    \end{cases} \\
+    h(\phi) &= 0
 \end{align}
 
+In this equation, $a$ and $x$ are arbitrarily chosen, to get the most representative outcome.
+As it is infeasible to calculate this representative outcome, $a$ and $x$ are chosen randomly in practice, with $A$ being a randomly chosen action in $\pi$ and $X$ being a random variable using a half-normal distribution.
+The distribution variance is chosen as the minimum delay between the start of the action and the end of the plan.
+Additionally, $x$ is at least $1$, as else there would not be a perturbation.
+The randomly distributed $\hat{g}(\phi,m)$ additionally receives a parameter $m$ that allows only a maximum of m perturbations.
 
-The Robustness is the number of random perturbations that can be added on average until the plan is inconsistent.
-To approximate this, 10 random perturbations are added 10 times and the average is taken.
+\begin{align}
+    A &\sim \text{randomly choosen action } a \in \pi\\
+    X &\sim  1 + |\mathcal{N}(0,mindelay(\phi_1,t^a_{start},t^p_{end}))| \\
+    \hat{g}(\phi,m) &= \begin{cases}
+        0 &\text{if } inconsistent(\phi) \lor m = 0 \\
+        1 + \hat{g}(\phi \xrightarrow{A,X}_P \phi', m - 1) &\text{otherwise}
+    \end{cases}
+\end{align}
 
+The arithmetic mean over a fixed amount of perturbations $m$ and a fixed number of repetitions $n$ is used as an approximation for $g(\phi)$.
+This heuristic can then be included during planning.
 
-\subsection{Preparations}
+\begin{align}
+    g(\phi) \approx \frac{1}{n} \sum_{i=1}^{n} \hat{g}(\phi,m)
+\end{align}
+
+\subsection{Preparation insertion}
+\label{sec:approach-preparation}
 
 Preparing parts of a meal is a common strategy in Restaurants to handle high loads.
-
-Due to the nature of the hierarchical plan, the essential actions for a task can be gathered.
-These actions are added to the current plan with the constraint that they can be executed between the current time point and the expected end of the current plan.
-Otherwise an unlimited amount of preparations could be inserted at any point, which would first block the Acting Engine to receive any new tasks and second would correspond to a restaurant that prepares all of the available ingredients even when there are only a few orders.
-
-The generation of potentially preparable tasks is shown in algorithm \ref{alg:methodology:preparations}.
-It receives a list of potential task names, in this case the potential orders that may be submitted in the stream of tasks.
-These should be known at the at the beginning of acting, but could be changed during acting.
-For each potential order if a subtask does not require any argument of the order, it is independent of the individual order and is a potential subject for preparation.
-If the task depends on a previous task, this previous task has to have been executed with the matching arguments.
-All of these tasks in the domain also need to have one possible decomposition that is fulfilled if all postconditions are met.
-Otherwise the prepared instances could not be used in future orders.
-The arguments for these tasks need to be instantiated statically and cannot overlap with already existing preparations or task executions.
-Otherwise they could be included multiple times in the plan without any effect due to the previous condition.
-
+Due to the nature of the hierarchical plan, the essential subtasks for a task can be gathered.
+These tasks are added to the current plan $\phi$ as a temporally qualified task $\langle[t_{current}, mindelay(\phi,t^p_{start}, t^p_{end})] \tau \rangle$.
+Otherwise, an unlimited amount of preparations could be inserted, which would first block the Acting Engine from receiving any new tasks and second would correspond to a restaurant that prepares all of the available ingredients even when there are only a few orders.
 
 \begin{algorithm}
     \caption{PREPARATIONS: Generation of possible preparations}
@@ -298,7 +316,7 @@ Otherwise they could be included multiple times in the plan without any effect d
         \ForEach{$\text{action template } A \text{ for } \tau$}{
             \ForEach{$\tau_s \in subtasks(A)$}{
                 \If{$parameters(\tau_s) \nsubseteq parameters(\tau)$}{
-                    \ForEach{$t_p \in \text{ground instances  of } \tau_s, t_p \notin \pi$}{
+                    \ForEach{$t_p \in \text{temporally qualified ground instances  of } \tau_s, t_p \notin \pi$}{
                         $T_d \leftarrow dependencies(A,t_p)$\;
                         \If{$T_d \neq \varnothing$}{
                             \If{all $T_d$ executed} {
@@ -316,14 +334,29 @@ Otherwise they could be included multiple times in the plan without any effect d
     \Return{$T_p$}
 \end{algorithm}
 
-After generating all possible preparations, one preparation is chosen to the current plan, and planning is continued.
-If the planning fails, no preparation is possible anymore.
-Therefore the planning is stopped and the previous plan is returned.
-Otherwise the same procedure is repeated.
+The generation of potentially preparable tasks is shown in algorithm \ref{alg:methodology:preparations}.
+It receives a list of potential task symbols $\mathcal{T}_p$, in our case the potential orders that may be received through the stream of tasks.
+$\mathcal{T}_p$ may be known at the start but could be changed during the execution.
+For each $\tau_p \in \mathcal{T}_p$ the possible subtasks are gathered through all possible action templates.
+Subtasks that do not require any of the parameters of $\tau_p$ are independent of the individual order and thus potential subjects for preparation.
+A subtask may require that one or more previous tasks have been executed first.
+Then these previous tasks to have been executed with the matching arguments before this task is subject to preparation.
+The parameters for these tasks have to be ground and there cannot exist another task with the same parameters in $\pi$.
+Otherwise, a preparation could be included multiple times.
+
+To be able to use a preparation later, the subtask needs to have one possible decomposition that is fulfilled if all postconditions are met.
+Otherwise, the prepared instances could not be used in future submitted tasks due to the hierarchical decomposition.
+
+
+Planning with preparations is done as in algorithm \ref{alg:methodology:prep-planning}
+When a plan has been found for a problem, possible preparations are generated.
+One preparation is nondeterministically chosen to be included in the current plan, and planning is continued.
+This procedure is repeated recursively until no plan is found.
+Then the last plan is returned.
 
 \begin{algorithm}
     \caption{PrepPSP: Planning with adding preparations}
-    \label{alg:methodology:planning}
+    \label{alg:methodology:prep-planning}
     \KwIn{$P = \langle \Sigma,\phi \rangle$; $\mathcal{T}_p$}
     \KwOut{$\phi'$}
     $\phi' \leftarrow PSP(P)$\;
@@ -336,11 +369,15 @@ Otherwise the same procedure is repeated.
         $\phi' \xrightarrow{t_p}_I \phi''$\;
         $\phi'' \leftarrow PrepPSP(\langle \Sigma,\phi'' \rangle,\mathcal{T}_p)$\;
         \If{$\phi'' =$ FAIL}{\Return{$\phi'$}}
-        \Else{\Return{$\pi''$}}
+        \Else{\Return{$\phi''$}}
     }
 \end{algorithm}
 
-There are several concrete implementations of the non-deterministic choose method in \ref{alg:methodology:planning}.
+The preparation insertion is similar to action insertion.
+While action insertion is used to support goals or preconditions of tasks using generative planning instead of HTN planning, preparation insertion supports possible future tasks.
+The properties of preparation insertion vary significantly compared to task insertion.
+
+There are several concrete implementations of the non-deterministic choose method in algorithm \ref{alg:methodology:prep-planning}.
 
 \begin{itemize}
   \item A random selection can be used as an approximation.
@@ -351,7 +388,3 @@ There are several concrete implementations of the non-deterministic choose metho
   \item Only the most common preparations are used, to prevent unnecessary processing.
   \item Further metrics can be included based on the domain, like e.g. the storage life of ingredients after being prepared.
 \end{itemize}
-
-The preparation insertion is similar to task insertion.
-While task insertion is used to support goals or tasks using generative planning instead of HTN planning, preparation insertion supports possible future tasks.
-The properties of preparation insertion varies significantly compared to task insertion.
