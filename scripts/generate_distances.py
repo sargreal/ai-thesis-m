@@ -21,7 +21,7 @@ mapBlocations = {
   "manKnife2": (5,7),
 }
 
-mapWalkable = [
+mapBWalkable = [
   [0,0,0,0,0,0,0,0,0],
   [0,1,1,1,0,1,1,1,0],
   [0,1,1,1,0,1,1,1,0],
@@ -38,17 +38,40 @@ mapWalkable = [
 ]
 
 
-locations = {
-  "manLettuceDispenser": (2,0),
-  "manTomatoDispenser": (3,0),
-  "manCucumberDispenser": (7,0),
-  "manPlateDispenser": (8,0),
-  "manCounterTopLeftTop": (0,7),
-  "manCounterTopLeftBottom": (0,2),
-  "manCounterTopRightTop": (10,7),
-  "manCounterTopRightBottom": (10,2),
-  "manDeliver": (5,0),
+tutorialLocations = {
+  "manLettuceDispenser": (1,1),
+  "manTomatoDispenser": (2,1),
+  "manPlateDispenser": (4,1),
+  "manDeliver": (6,1),
+  "manCucumberDispenser": (10,1),
+  "manKnife1": (1,5),
+  "manKnife2": (1,7),
+  "manKnife3": (11,5),
+  "manKnife4": (11,7),
+  "manCounterLeftBottom": (3,1),
+  "manCounterRightBottom": (9,1),
+  "manCounterMiddle1Top": (4,3),
+  "manCounterMiddle1Bottom": (4,5),
+  "manCounterMiddle2Top": (10,3),
+  "manCounterMiddle2Bottom": (10,5),
 }
+
+tutorialWalkable = [
+  [0,0,0,0,0,1,1,1,0],
+  [1,1,1,1,0,1,1,1,0],
+  [1,1,1,1,0,1,1,1,0],
+  [1,1,1,1,0,1,1,1,0],
+  [1,1,1,1,0,1,1,1,0],
+  [1,1,1,1,0,1,1,1,0],
+  [1,1,1,1,1,1,1,1,0],
+  [1,1,1,1,0,1,1,1,0],
+  [1,1,1,1,0,1,1,1,0],
+  [1,1,1,1,0,1,1,1,0],
+  [1,1,1,1,0,1,1,1,0],
+  [1,1,1,1,0,1,1,1,0],
+  [0,0,0,0,0,1,1,1,0],
+]
+
 
 def euclidean_distance(a, b):
   return abs(b[0] - a[0]) + abs(b[1] - a[1])
@@ -115,7 +138,7 @@ def euclidean_distances(locations):
 
 
 # distances = euclidean_distances(locations)
-distances = distances_with_obstacles(mapWalkable, mapBlocations)
+distances = distances_with_obstacles(tutorialWalkable, tutorialLocations)
 
 for locations, value in distances.items():
   print(f"distance({locations[0]},{locations[1]}) := {value};")

@@ -15,7 +15,7 @@ common_params = [
   "--interval", "100",
   "--planning-timeout", "120",
   "-v",
-  "/root/master-thesis/ai-thesis-m/problem/anml/overcooked2-min.tutorial.pb.anml",
+  "/root/master-thesis/ai-thesis-m/problem/anml/overcooked2-min.burgers.pb.anml",
 ]
 
 clients = [
@@ -134,4 +134,5 @@ def main():
 #   main()
           
 # execute_task_list(['order_lettuce_salad(client1)@delay=0@deadline=300', 'order_lettuce_salad(client2)@delay=10@deadline=150', 'order_lettuce_tomato_salad(client3)@delay=284@deadline=441', 'order_lettuce_tomato_salad(client4)@delay=391@deadline=622', 'order_lettuce_tomato_salad(client5)@delay=495@deadline=779'], ["--plan-selection", "dfs,ord-dec,soca"])
-execute_task_list(['m_chop(lettuce1)@delay=0@deadline=150', 'm_chop(lettuce2)@delay=1@deadline=150', 'm_chop(lettuce3)@delay=10@deadline=110' ], ["--plan-selection", "dfs,ord-dec,soca", "-v"])
+# execute_task_list(['m_chop(lettuce1)@delay=0@deadline=150', 'm_chop(lettuce2)@delay=1@deadline=150', 'm_chop(lettuce3)@delay=10@deadline=110' ], ["--plan-selection", "dfs,ord-dec,soca", "--flaw-selection", "hier,ogf,abs,lcf,eogf", "-v"])
+execute_task_list(['order_to_lettuce_tomato_burger(client1)@delay=0@deadline=300'])
