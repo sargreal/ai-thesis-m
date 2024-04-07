@@ -283,31 +283,6 @@ pan2.loc := taPan2;
   tomato3.arranged := false;
   tomato4.arranged := false;
   tomato5.arranged := false;
-  beef1.loc := beefDispenser;
-  beef2.loc := beefDispenser;
-  beef3.loc := beefDispenser;
-  beef4.loc := beefDispenser;
-  beef5.loc := beefDispenser;
-  beef1.fryed := false;
-  beef2.fryed := false;
-  beef3.fryed := false;
-  beef4.fryed := false;
-  beef5.fryed := false;
-  beef1.arranged := false;
-  beef2.arranged := false;
-  beef3.arranged := false;
-  beef4.arranged := false;
-  beef5.arranged := false;
-  bun1.loc := burgerBunDispenser;
-  bun2.loc := burgerBunDispenser;
-  bun3.loc := burgerBunDispenser;
-  bun4.loc := burgerBunDispenser;
-  bun5.loc := burgerBunDispenser;
-  bun1.arranged := false;
-  bun2.arranged := false;
-  bun3.arranged := false;
-  bun4.arranged := false;
-  bun5.arranged := false;
   plate1.loc := plateDispenser;
   plate2.loc := plateDispenser;
   plate3.loc := plateDispenser;
@@ -320,8 +295,6 @@ pan2.loc := taPan2;
   // plate5.empty := true;
   knife1.processing := false;
   knife2.processing := false;
-  pan1.processing := false;
-  pan2.processing := false;
   client1.carrying := false;
   client2.carrying := false;
   client3.carrying := false;
@@ -348,4 +321,6 @@ pan2.loc := taPan2;
 
 /** TASKS **/
 
-[start, start+340] contains ordered(order_po_lettuce_tomato_burger(client1));
+[start, start+200] contains {
+  order_po_lettuce_tomato_salad(client1);
+};

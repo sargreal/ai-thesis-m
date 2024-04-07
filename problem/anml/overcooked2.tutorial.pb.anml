@@ -1,10 +1,10 @@
 /** Tutorial Environment **/
 
 forall(Ingredient i) {arrangetime(i) := 10; };
-forall(Carryable c) {droptime(c) := 5; };
-forall(Carryable c) {pickuptime(c) := 5; };
+forall(Carryable c) {droptime(c) := 4; };
+forall(Carryable c) {pickuptime(c) := 6; };
 forall(Carryable c) {givetime(c) := 5; };
-forall(Choppable c) {choptime(c) := 20; };
+forall(Choppable c) {choptime(c) := 11; };
 forall(Boilable b) {boiltime(l) := 30; };
 
 instance Cook cook1,cook2;

@@ -5,8 +5,12 @@ forall(Carryable c) {droptime(c) := 4; };
 forall(Carryable c) {pickuptime(c) := 6; };
 forall(Carryable c) {givetime(c) := 5; };
 forall(Choppable c) {choptime(c) := 11; };
-forall(Boilable b) {boiltime(l) := 30; };
-forall(Fryable f) {frytime(f) := 30; };
+forall(Boilable b) {
+  boiltime(b) := 30; 
+};
+forall(Fryable f) {
+  frytime(f) := 30; 
+};
 
 instance Cook cook1,cook2;
 instance Client client1,client2,client3,client4,client5;
@@ -348,4 +352,4 @@ pan2.loc := taPan2;
 
 /** TASKS **/
 
-[start, start+340] contains ordered(order_po_lettuce_tomato_burger(client1));
+[start, end] contains unordered(order_po_lettuce_tomato_burger(client1),order_po_lettuce_tomato_burger(client2));

@@ -97,11 +97,9 @@ constant integer frytime(Fryable f);
 /*** Primitive actions ***/
 
 action a_move(Person p, ManArea to) {
-  // FIXME: Maybe a person should be able to move without being motivated by a method/decomposition?
   motivated;
-  duration := 5;
   constant ManArea from;
-  // duration := distance(from, to);
+  duration := distance(from, to);
   from != to;
   [all] {
     p.loc == from :-> to;
@@ -189,16 +187,12 @@ action a_chop(Cook co, Choppable ch, Knife k) {
   };
 };
 
-action a_boil(Cook c, Boilable b, Pot p) {
+action a_boil(Boilable b, Pot p) {
   motivated;
   duration := boiltime(b);
 
   constant ManArea man;
   connected(p.loc, man);
-
-  // Cook should be at the pot at the beginning and end
-  [start] c.loc == man;
-  [end] c.loc == man;
 
   [all] {
     b.loc == p.loc;
@@ -208,16 +202,12 @@ action a_boil(Cook c, Boilable b, Pot p) {
 };
 
 
-action a_fry(Cook c, Fryable f, Pan p) {
+action a_fry(Fryable f, Pan p) {
   motivated;
   duration := frytime(f);
 
   constant ManArea man;
   connected(p.loc, man);
-
-  // Cook should be at the pot at the beginning and end
-  [start] c.loc == man;
-  [end] c.loc == man;
 
   [all] {
     f.loc == p.loc;
@@ -378,10 +368,14 @@ action m_boil(Boilable b) {
     constant ToolArea ta;
     p.loc == ta;
 
-    [all] contains ordered(
-      m_transport_to(b,ta),
-      a_boil(c, b, p)
-    );
+    [all] contains {
+      transp: m_transport_to(b,ta);
+      boil: a_boil(b, p);
+      fetch: m_fetch(c, b);
+    };
+    end(transp) <= start(boil);
+    end(boil) <= start(fetch);
+    end(fetch) <= end(boil) + 30; 
   };
 };
 
@@ -396,10 +390,15 @@ action m_fry(Fryable f) {
     constant ToolArea ta;
     p.loc == ta;
 
-    [all] contains ordered(
-      m_transport_to(f,ta),
-      a_fry(c, f, p)
-    );
+    [all] contains {
+      transp: m_transport_to(f,ta);
+      fry: a_fry(f, p);
+      fetch: m_fetch(c, f);
+    };
+
+    end(transp) <= start(fry);
+    end(fry) <= start(fetch);
+    end(fetch) <= end(fry) + 30; 
   };
 };
 
