@@ -2,7 +2,7 @@
 
 This section introduces concepts and definitions relevant to this work.
 Section \ref{sec:background-domain} introduces the applocation domain ``Overcooked'' that is used as a benchmark,
-Section \ref{sec:classical-planning} then introduces classical planning.
+Section \ref{sec:classical-planning} then introduces classical planning to illustrate the background of HTN planning.
 Then, Section \ref{sec:htn-planning} introduces HTN planning as an extension of Classical planning that is used in this work.
 Section \ref{sec:acting} concludes this section by introducing acting and online planning.
 
@@ -46,10 +46,15 @@ The following definitions are based on \cite{ghallabAutomatedPlanningTheory2004}
     \item $\mathcal{O}$ is a set of operator symbols.
     \item $\delta$ is a triple $(prec, add, del )$ of functions $f: \mathcal{O} \rightarrow 2^\mathcal{L}$ that define the state transitions of actions as preconditions $prec$ and effects $add, del$.
   \end{itemize}
-  An action symbol $a \in \mathcal{O}$ is applicable in a state $s \subseteq L$ iff $prec(a) \subseteq s$. When it is applicable, the resulting state is defined by the function $\gamma: A \times 2^L \rightarrow 2^L$ with $\gamma(a,s) = (s~\backslash~del(a))~\cup~add(a)$.
+  An action symbol $a \in \mathcal{O}$ is applicable in a state $s \subseteq L$ iff $prec(a) \subseteq s$.
+  When it is applicable, the resulting state is defined by the function $\gamma: A \times 2^L \rightarrow 2^L$ with $\gamma(a,s) = (s~\backslash~del(a))~\cup~add(a)$. \\
+  A plan $\pi = \{a_1,\dots,a_n\}$ is a sequence of actions.
+  $\pi$ is executable in a state $s_0$ iff all actions $a_1,\dots,a_n$ are applicable in $s_0,\dots,s_{n-1}$, where $s_k=\gamma(a_k,s_{k-1})$.
+  $s_n$ is then defined as the state produced by applying $\pi$ in state $s$, denoted as $\gamma(\pi,s)$.
 \end{definition}
 
 An action is an expression of the form $a(r_1,\dots,r_n)$ where $a$ is the action symbol and $r_1,\dots,r_n$ are terms (also called parameters).
+The parameters define the exact preconditions and effects of an action.
 Constant symbols $D$ are symbols that describe Objects in the domain such as a $Cook$ and are possible instantiations for terms $r$.
 Typing is a commonly used extension for planning that organizes constants in the set $L$.
 A type $D_t \subseteq D$ restricts variables in actions to be of a specific type such as $Cooks$.
@@ -60,9 +65,12 @@ Types can be composed of other types by union or intersection (e.g. $Persons=Coo
   \begin{itemize}
     \item $\Sigma$ is a classical planning domain.
     \item $s_0 \subseteq L$ is the initial state.
-    \item $g \subseteq L$ are the goals.
+    \item $g \subseteq L$ is the goal state.
   \end{itemize}
 \end{definition}
+
+Given a Problem $P$, the task in classical planning is to find a sequence of actions $\pi = \{a_1,\dots,a_n\}$ that transform the initial state into the goal state.
+The goal state $g$ only defines which propositional environment variables must be included in the final state, but other variables may be present as well.
 
 \subsection{HTN Planning}\label{sec:htn-planning}
 
@@ -72,6 +80,9 @@ Generally, the goal in HTN planning is to decompose complex tasks into primitive
 For instance, preparing a simple burger in ``Overcooked'' requires a bun, a burger patty and lettuce.
 Each of these ingredients may involve multiple preparation steps like chopping or frying, that again can be grouped into subtasks themselves.
 Eventually, we are left with an executable sequence of simple steps to create the requested burger.
+This is conceptually different from classical planning, as it defines tasks to execute instead of a goal state to achieve.
+
+
 % The HTN planning paradigm was first introduced by \cite{erol1994htn} and has since been used in a variety of domains, including robotics \citep{ghallab1998pddl, nau2003shop2, cashmore2008htn, cashmore2015htn}, video games \citep{ontanon2015survey}, and natural language processing \citep{zettlemoyer2005learning, wang2006learning, wang2007learning, wang2008learning, wang2010learning, wang2011learning, wang2012learning, wang2013learning, wang2014learning, wang2015learning, wang2016learning, wang2017learning, wang2018learning, wang2019learning, wang2020learning}.
 % HTN Planning can be seen as a guided form of traditional planning, since the task structure is given.
 
@@ -103,7 +114,7 @@ A task network $tn$ is called primitive if all of the task nodes refer to primit
 
 
 \begin{definition}[Task Decomposition]
-  A method $m = (\tau,tn)$ decomposes a task network $tn_1 = (T_1,\prec_1,\alpha_1)$ into $tn_2 = (T_2,\prec_2,\alpha_2)$ denoted $tn_1 \xrightarrow{t,m}_D tn_2$, if there is a task node $t_1 \in T_1$ with $\alpha(t_1) = \tau$.
+  A method $m = (\tau,tn)$ decomposes a task network $tn_1 = (T_1,\prec_1,\alpha_1)$ into $tn_2 = (T_2,\prec_2,\alpha_2)$ denoted $tn_1 \xrightarrow{t,m}_D tn_2$, if there is a task node $t \in T_1$ with $\alpha_1(t) = \tau$.
   A copy $tn' = (T',\prec',\alpha')$ of $tn$ is created that has no overlapping task with $tn_1$, i.e. $T_1 \cap T' = \emptyset$.
   Then $tn_2$ is defined as:
   \begin{align*}
@@ -121,6 +132,8 @@ A task network $tn$ is called primitive if all of the task nodes refer to primit
     \item $s_0 \subset L$ is the initial state.
     \item $tn_I$ is the initial task network, consisting of the tasks that must be executed.
   \end{itemize}
+  A problem is called total order iff $\prec$ in $tn_I$ and all task networks in methods $(\tau,tn) \in \Sigma$ defines a total ordering.
+  Otherwise, it is called partial order. 
 \end{definition}
 
 
@@ -130,9 +143,9 @@ A task network $tn$ is called primitive if all of the task nodes refer to primit
 % A task is only decomposable if there exists a method $m = (c,tn) \in M$ such that $\delta(m)$
 % The planning is finished when all task names in the current task network $tn_i$ are primitive and there is a sequence of the tasks in $tn_i$ that is consistent with its ordering relations.
 
-An important distinction to make is the difference between total order and partial order HTN problems.
-In total order problems, $\prec$ is a total order over the tasks, which has double EXPTIME and EXPSPACE-hard complexity.
-A partial order problem on the other hand is undecidable \citep{erolHTNPlanningComplexity1994}.
+The HTN planning problem is solved by decomposing the initial task network into an executable plan.
+Solving total order problems has double EXPTIME and EXPSPACE-hard complexity, while partial order problems are undecidable \citep{erolHTNPlanningComplexity1994}.
+\todo{reference for EXPTIME?}
 
 
 \begin{definition}[HTN Planning Solution]
@@ -153,13 +166,13 @@ A partial order problem on the other hand is undecidable \citep{erolHTNPlanningC
   \If{$tn = \varnothing$}{\Return{$\varnothing$}}
   $\tau \leftarrow$ first task in $tn$\;
   $tn' \leftarrow$ remaining tasks in $tn$\;
-  \If{$\tau$ is primitive $\land$ there is an action for $\tau$ applicable in $s$}{
+  \If{$\tau$ is primitive and there is an action for $\tau$ applicable in $s$}{
     nondeterministically choose an action $a$ for $\tau$\;
     $\pi \leftarrow$ SHOP($\gamma(s,a)$,$tn'$,$\Sigma$)\;
     \If{$\pi$ = FAIL}{\Return{FAIL}}
     \Return{cons(p,$\pi$)}
   }
-  \ElseIf{$\tau$ is not primitive $\land$ there is a decomposition of $\tau$ applicable in $s$}{
+  \ElseIf{$\tau$ is not primitive and there is a decomposition of $\tau$ applicable in $s$}{
     nondeterministically choose a decomposition $m$ of $\tau$ in $s$\;
     $tn \xrightarrow{\tau,m}_D tn'$\;
     \Return{SHOP($s$,$tn'$,$\Sigma$)}
@@ -170,7 +183,9 @@ A partial order problem on the other hand is undecidable \citep{erolHTNPlanningC
 There are two conceptually different approaches to arriving at a plan $\pi$ for an HTN Planning Problem. 
 First, the State-Space approach as in \cite{nauSHOPSimpleHierarchical1999} is shown in algorithm \ref{alg:background:shop}.
 The search is executed as a forward search and is started with an initial state $s_0$.
+The first task in the task network is selected based on the ordering $\prec$ in the forward search.
 Primitive tasks are applied directly and change the state, nonprimitive tasks are decomposed and change the task network.
+The algorithm is then applied recursively for the new state and task network.
 
 Second, the Plan-Space approach as in \citet[chap.~5]{ghallabAutomatedPlanningTheory2004} is shown in algorithm \ref{alg:background:psp}.
 The search problem here is abstracted from states and the search space consists of partial plans.
@@ -273,9 +288,9 @@ Fluents are used to define and are extended by temporally qualified assertions.
 Persistence assertions are typically used to express requirements such as goals or pre-conditions of actions.
 For instance $\langle[100,200] loc(lettuce1) = counter1\rangle$ requires the instance $lettuce1$ to be at the location $counter1$ from time 100 until time 200.
 The change assertion is typically used to combine pre and post-conditions of most planners into one and additionally to explicitly describe the value change as a process rather than an instantaneous effect.
-For instance, $\langle [100,200] chopped(lettuce1) : false \mapsto true \rangle$ describes that the instance $lettuce1$ is getting chopped from time 100 until time 200.
+For instance, $\langle [100,200] chopped(lettuce1) : \mathit{false} \mapsto \mathit{true} \rangle$ describes that the instance $lettuce1$ is getting chopped from time 100 until time 200.
 An assignment is a special case of a change assertion $\alpha = \langle [t-1,t] sv: any \mapsto v \rangle$ where $any$ is a variable with a possibly infinite domain.
-For instance $\langle [0] chopped(lettuce1) := false \rangle$ states that the instance $lettuce1$ is not chopped at time 0.
+For instance $\langle [0] chopped(lettuce1) := \mathit{false} \rangle$ states that the instance $lettuce1$ is not chopped at time 0.
 
 State variables are a replacement for the propositional variables $\mathcal{L}$ and therefore also states.
 They make time explicit and move change states along individual variables instead of globally.
@@ -288,8 +303,8 @@ Lastly, they do not have to be the result of an action but value changes can be 
 \end{definition}
 A timeline describes a partial evolution of the state variable over time.
 It is only partial because the timeline is supposed to be consistent in itself.
-Due to the inconsistent states while planning, several timelines for a single state variable may exist during planning in a partial plan, but they must be combined at the end.
-For the details on consistency, see \cite{bit-monnotTemporalHierarchicalModels2016a}.
+Due to the inconsistent states while planning, several timelines for a single state variable may exist in a partial plan, but they must be combined at the end.
+A timeline is consistent if there exists a consistent instantiation of it, and it is necessarily consistent if all instantiations are consistent \cite{bit-monnotTemporalHierarchicalModels2016a}.
 
 
 \begin{definition}[Chronicle]
@@ -334,7 +349,7 @@ A task is primitive, if there is only one action template $A$ that achieves it a
   \label{def:htn-task-dec-fape}
 \end{definition}
 
-This decomposition definition is much more straightforward than \ref{def:htn-task-dec}, as it leaves the burden of constraint solving on the MetaCSP.
+This decomposition definition is much more straightforward compared to Def. \ref{def:htn-task-dec}, as it leaves the burden of constraint solving on the MetaCSP.
 Contrary to the traditional approach with methods, a high-level action instance $a$ is added to the partial plan, since it may also define state variable changes and may thus be required for the execution.
 The additional constraint $\{task(a) = \tau\}$ ensures that $a$ does refine $\tau$ correctly by unifying the parameters and time points of $a$ and $\tau$.
 
@@ -431,9 +446,9 @@ The Observation Database tracks changes in the environment and informs the Activ
 
 
 
-Online planning is an algorithm that can update and refine a plan when a plan modification occurs.
+Online planning \citep[sec.~2.6.2]{ghallabAutomatedPlanningActing2016} is an algorithm that can update and refine a plan when a plan modification occurs.
 A plan modification in this case can be a failed action that has to be removed, a change in the environment or a new task.
-Online HTN planning has to take the already executed actions and hierarchy into account.
+Online HTN planning \citep{dvorakPlanningActingTemporal2014} has to take the already executed actions and the task hierarchy into account.
 There are 2 possible procedures:
 \begin{itemize}
   \item Replanning: Remove all pending actions and find an alternative plan.

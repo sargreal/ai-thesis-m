@@ -13,8 +13,8 @@ Support for Temporal HTN Planning has been implemented in the systems CHIMP \cit
 CHIMP uses a custom domain definition language based on the SHOP2 language, while FAPE uses an extended version of the Language ANML.
 There is a proposal for HDDL2.1 \citep{pellierHDDLDefiningFormalism2023} that adds support for the durative actions and time constraints from PDDL2.1 \citep{foxPDDL2ExtensionPDDL2003} to the HDDL language \citep{hollerHDDLExtensionPDDL2020}, a hierarchical version of PDDL.
 The HDDL2.1 proposal is however not supported by any planner yet.
-The planning system most likely implementing the necessary features for the Overcooked domain in the future is Aries \citep{bit-monnotAries2024}, however, that is still in active development.
-An interesting project in this context is the Unified-Planning System \citep{frambaUnifiedPlanning2024} by the AIPlan4EU H2020 Project\footnote{https://aiplan4eu-project.eu}, which aims at providing a common Python API for calling and interacting with any planner.
+Aries \citep{bit-monnotAries2024} is a promising planning system that supports temporal HTN planning, however, at the time of writing it was still in active development.
+The Unified-Planning System \citep{frambaUnifiedPlanning2024} by the AIPlan4EU H2020 Project\footnote{https://aiplan4eu-project.eu} is an interesting project in this context, as it aims at implementing a common Python API that can interact with any planner.
 
 Acting and Online Planning have been considered in several ways.
 The Refinement Acting Engine \citep{ghallabAutomatedPlanningActing2016} introduces a general framework for acting using refinement methods.
@@ -30,7 +30,7 @@ They do however not include Temporal HTN Planning.
 \cite{boellaReplanningAlgorithmReactive2002} introduce an Algorithm for replanning by keeping the plan mostly intact and removing actions until the partial plan subsumes more promising refinements. Then the planning process is restarted.
 \cite{bansodHTNReplanningMiddle2022} use a similar approach for replanning in HTN, but remove all pending actions from the hierarchy.
 Plan Repair on the other hand tries to only remove a minimal part of a failing plan.
-\cite{vanderkrogtPlanRepairExtension2005} introduce Plan Repair as an extension of planning, by considering the removal of actions from a plan as a valid plan modification during plan repair.
+\cite{vanderkrogtPlanRepairExtension2005} implement plan repair as an extension of planning, by considering the removal of actions from a plan as a valid plan modification during plan repair.
 A similar approach is used by \cite{bajadaTemporalPlanQuality2014}, while using a plan quality metric as a target.
 Plan commitment \citep{babliPlanCommitmentReplanning2023} keeps the commitments made in a multi-agent setting intact and reduces the revisions necessary between agents.
 Task Merging \citep{stockOnlineTaskMerging2015} allows the combination and utilization of multiple actions for the same tasks and thus optimizing plans with new tasks during execution.
