@@ -11,4 +11,14 @@ The use of STNUs for contingent time points - technically implemented, but not d
 The insertion of timelines in between an existing timeline is not supported.
 
 
+FAPE included only some parts of the theoretical actor model as a domain-specific implementation that was removed in the stable release.
+It was only supported to add new goals before starting dispatching.
+Additionally replanning and plan repair were only considered in non-hierarchical domains.
+
+The modification of an existing and already resolved plan poses a challenge in several aspects.
+The timelines for all instances are already resolved.
+In the FAPE planner it is not possible to insert a state change between timelines, but only after or before them.
+This is especially problematic, since then a task with a tight deadline cannot be inserted when an instance needs to be used earlier.
+
+
 It has to be mentioned that Fape is not the most performant HTN planner, but besides CHIMP the only one supporting all required features.
