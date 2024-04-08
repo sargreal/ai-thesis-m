@@ -336,6 +336,8 @@ knife4.loc := taKnife4;
   // plate5.empty := true;
   knife1.processing := false;
   knife2.processing := false;
+  knife3.processing := false;
+  knife4.processing := false;
   client1.carrying := false;
   client2.carrying := false;
   client3.carrying := false;
@@ -362,4 +364,4 @@ knife4.loc := taKnife4;
 
 /** TASKS **/
 
-[start, start+300] contains {order_po_lettuce_salad(client1);};
+[start, start+150] contains order_po_lettuce_salad(client1);

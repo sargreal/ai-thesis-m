@@ -2,9 +2,9 @@
 
 problems=(
   problem/anml/overcooked-hier-dur.tutorial-salad.pb.anml
-  problem/anml/overcooked-hier-dur.tutorial-salads.pb.anml
-  problem/anml/overcooked-hier-dur.tutorial-tomato-salad.pb.anml
-  problem/anml/overcooked-hier-dur.burger-deadline.pb.anml
+  # problem/anml/overcooked-hier-dur.tutorial-salads.pb.anml
+  # problem/anml/overcooked-hier-dur.tutorial-tomato-salad.pb.anml
+  # problem/anml/overcooked-hier-dur.burger-deadline.pb.anml
 )
 
 heuristics=(
