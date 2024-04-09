@@ -345,7 +345,8 @@ A subtask may require that one or more previous tasks have been executed first.
 Those previous tasks have to be executed with the matching arguments before this task is subject to preparation.
 The parameters for the preparable tasks have to be ground and there cannot exist another task with the same parameters in $\pi$.
 Otherwise, a preparation could be added multiple times to a plan.
-It is however allowed that the same task is present multiple times in the result of the algorithm, as that information ma.
+It is however allowed that the same task is present multiple times in the result of the algorithm.
+Knowing how often a specific preparation is included can be helpful when choosing a preparation.
 
 To be able to use a preparation later, tasks need to have one possible decomposition that is fulfilled if all postconditions are met.
 Otherwise, the prepared instances could not be used in future submitted tasks due to the hierarchical decomposition.
@@ -382,15 +383,17 @@ While action insertion is used to support goals or preconditions of tasks using 
 The properties of preparation insertion vary significantly compared to task insertion.
 
 We propose several concrete implementations of the non-deterministic choose method in algorithm \ref{alg:methodology:prep-planning}.
-We call thes
-\todo{wording}
+We call these implementations preparation selection strategies.
 
 \begin{itemize}
   \item A random selection can be used as an approximation.
-    The random selection gives preparations that are present multiple times in the possible preparations a higher likelihood.
-  \item A greedy approach can be used to insert all possible preparations and choose the best one.
+    The random selection gives preparations that are present multiple times in $T_p$ a higher likelihood.
+  \item A greedy approach can be used to insert all possible preparations and then choose the best resulting plan.
   \item The time and resources required for a preparation task can be used to find the best combination of tasks to insert.
-  \item A statistical model of the environment can be used to predict the most likely tasks and the preparations can be chosen based on the likelihood of being necessary.
-  \item Only the most common preparations are used, to prevent unnecessary processing.
+  The time and resource usage should be calculated as a static analysis before planning.
+  \item Only the most common preparations are used.
+    This prevents unnecessary further processing and it is unlikely that 
+  \item A statistical or learning model of the environment can be used to predict the most likely tasks.
+    Then the preparations can be chosen based on the likelihood of being necessary.
   \item Further metrics can be included based on the domain, like e.g. the storage life of ingredients after being prepared.
 \end{itemize}

@@ -1,5 +1,26 @@
 \section{Discussion}\label{sec:discussion}
 
+In this section, we will discuss the results of the evaluation and thus the validity of our approach.
+Additionally, we go into some of the issues that we encountered with the system FAPE.
+Lastly, we will discuss the replan and repair approach, as that could not be evaluated. 
+
+
+Planning using the fully hierarchical domain proves to be more efficient than a partial hierarchy.
+
+
+The robustness heuristic we introduced does not perform as good as we had proposed.
+While it succeeds at parallelizing tasks, it has arbitrary waiting times included.
+This problem comes probably from the fact that many options for variable bindings are kept in place for too long.
+During planning, the timelines are created incrementally.
+When threats occur between timelines, the timelines are separated.
+When the variable bindings are then resolved to be ground, these separations are kept in place and cannot be changed anymore.
+Through the robustness heuristic, some of the variable bindings are resolved earlier, but not enough.
+
+Additionally, the heuristic results in high variance for the planning time and also the makespan.
+This variance is most likely related to the low value of 10 we chose for $n$ and $m$.
+While a more thorough evaluation could reveal the best values for these parameters, we already see an decrease by over  of the number of nodes generated in the same 
+This high variance makes the approach not viable in environments 
+
 
 \cite{bit-monnotTemporalHierarchicalModels2017} argues that qualitative time points in this context have the only benefit of creating instantaneous action effects, which are not necessary in most environments.
 

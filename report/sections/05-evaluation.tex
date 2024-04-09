@@ -1,20 +1,33 @@
 \section{Experimental Evaluation}\label{sec:evaluation}
 
-An Acting system, the Robustness Heuristics and the task preparations were implemented directly inside the system Fape \citep{bit-monnotFAPEConstraintbasedPlanner2020}.
-The Statement around Fape supporting acting made in \cite{bit-monnotTemporalHierarchicalModels2016a} were not present in the current system as they have only been discussed theoretically or parts were deleted because of a domain-dependent implementation.
-Due to technical difficulties, the planning of tasks by interleaving with already planned tasks and replanning could not be implemented in time.
+The acting system, the robustness heuristic and the task preparations were implemented directly inside the system FAPE \citep{bit-monnotTemporalHierarchicalModels2016a}.
+The statement that FAPE supports acting \citep{dvorakPlanningActingTemporal2014,bit-monnotTemporalHierarchicalModels2016a,bit-monnotFAPEConstraintbasedPlanner2020} does not hold.
+The acting implementation is not present in the current version of the system, and the original acting implementation was domain-dependent and only supported non-hierarchical problems.
+Additionally, the removal of actions from a chronicle is not implemented, which makes replanning and plan repair impossible.
+Lastly, when adding new tasks, they could not create actions during the current plan, as the timeline implementation does not allow splitting timelines to support a new timeline.
+Changes to a timeline can only be added before its first or after its last component.
+While we tried to fix these issues, they could not be implemented in time for the end of the thesis.
+It was considered to regard the planner as a black box and adapt the original problem to include already executed actions, however in that case it was not possible to plan due to problems with the hierarchical representation.
+Therefore the planning of tasks by interleaving with already planned tasks and replanning could not be finished in time.
 Evaluation regarding these parts is done manually.
 
-We consider four different variants of our domain definition:
-\begin{itemize}
-  \item Full Hier.: All action templates are task-dependent and the duration of the action template \verb|a_move| is fixed at 5.
-  \item Full Hier. + Dur: All action templates are task-dependent and the duration of the action template \verb|a_move| is the shortest distance in the map calculated using the A* search algorithm. 
-  \item Part. Hier.: The action template \verb|a_move| is not task-dependent, so agents can move freely in the domain if necessary and the duration of the action template \verb|a_move| is fixed at 5.
-  \item Part. Hier. + Dur: The action template \verb|a_move| is not task-dependent, so agents can move freely in the domain if necessary and the duration of the action template \verb|a_move| is the shortest distance in the map calculated using the A* search algorithm. 
-\end{itemize}
+We evaluate our implementation in three aspects.
+First, we compare our hierarchical domain definition to the classical domain definition by \cite{yuxinliuPlanningOvercookedGame2020} in Section \ref{sec:evaluation-htn}.
+In Section \ref{sec:evaluation-robustness} we evaluate our robustness heuristic in comparison to the default and makespan heuristic.
+Last, we manually evaluate the robustness heuristic and preparations in an acting environment in Section \ref{sec:evaluation-acting}
 
 The evaluation was done in an LXC container with 12 Intel(R) Xeon(R) Gold 6334 CPU 3.60GHz Cores, 32 GB RAM.
 Planning in FAPE is however a single-threaded process, so only one CPU Core can be used.
+Each planning iteration was given 1000 seconds to complete.
+
+We consider four different variants of our domain definition:
+\begin{itemize}
+  \item Fully Hierarchical: All action templates are task-dependent and the duration of the action template \verb|a_move| is fixed at 5.
+  \item Fully Hierarchical with Durations: All action templates are task-dependent and the duration of the action template \verb|a_move| is the shortest distance in the map calculated using the A* search algorithm. 
+  \item Partially Hierarchical: The action template \verb|a_move| is not task-dependent, so agents can move freely in the domain if necessary and the duration of the action template \verb|a_move| is fixed at 5.
+  \item Partially Hierarchical with Durations: The action template \verb|a_move| is not task-dependent, so agents can move freely in the domain if necessary and the duration of the action template \verb|a_move| is the shortest distance in the map calculated using the A* search algorithm. 
+\end{itemize}
+
 
 % Quantitative Metrics:
 % Plan time
@@ -34,6 +47,7 @@ Planning in FAPE is however a single-threaded process, so only one CPU Core can 
 \subsection{Environments}
 
 We consider two environments in this evaluation.
+The formal environment definition is included in Appendix \ref{app:environments}.
 
 
 \bild{fig:eval-overcooked}{overcooked2_tutorial}{Overcooked!2 Tutorial level}{10}
@@ -47,25 +61,29 @@ All of the ingredients have to be chopped using a knife before they are assemble
 Each ingredient and tableware is present five times, there are four knives and two cooks available.
 The map has a narrow path to get to the locations of the knives.
 We define four possible arrange areas, two in the middle on each side and two on the bottom on each side.
+We chose this environment, as it contains all of the properties we consider and provides simple to complex tasks.
+Also, it is the first environment human players encounter when learning the game, so can serve as an example if the planning system is viable for this domain.
 
 \bild{fig:eval-mapB}{pddl_mapB}{Map}{10}
 
 Second, we consider the ``complex map'' shown in Figure \ref{fig:eval-mapB} from \cite{yuxinliuPlanningOvercookedGame2020}.
-This environment is not from the official game.
+This environment is not from the official game but was introduced by them.
 It provides the ingredients beef, lettuce, tomato and burger bun, the tableware plate and the tools knife and pan.
 The orders received here are burgers with a burger bun, a steak, lettuce and tomato.
 The lettuce and tomato have to be chopped and the steak fried in the pan before they are assembled on a plate.
 Each ingredient and tableware is again present five times, there are two knives, two pans and two cooks available.
 The map has a long counter and cooks must walk around it to move between the ingredient locations and the tools, so the cooks are encouraged to pass ingredients over the counter.
-There are two arrange areas at the same place as seen in Figure \ref{fig:eval-mapB}. 
+There are two arrange areas at the same place as seen in Figure \ref{fig:eval-mapB}.
+This environment provides a more complex recipe and an additional optimization goal with the transportation of ingredients over a counter.
 
 \subsection{HTN vs Classical Planning in Overcooked}
+\label{sec:evaluation-htn}
 
 
 In this section, we compare our HTN domain definition for ``Overcooked'' with the PDDL domain definition by \cite{yuxinliuPlanningOvercookedGame2020}.
 It is not possible to directly compare the makespan between the domains, as not all of the action durations were provided.
 To plan using the HTN domain definition, we use FAPE \citep{bit-monnotTemporalHierarchicalModels2016a} and they use the Temporal Fast Downward planner \citep{eyerichUsingContextenhancedAdditive2009}.
-The environment is the ``complex map'' shown in figure \ref{fig:eval-mapB}.
+The environment is the ``complex map'' shown in Figure \ref{fig:eval-mapB}.
 The goal of this problem is to prepare either one or two burgers.
 
 
@@ -110,29 +128,34 @@ TFD does consider more search nodes than FAPE, as in the previous comparison.
     & Success & search time  & generated nodes & makespan         \\
   \hline
   TFD             & no & $1000s+$ & 1000000+ &  -       \\
-  FAPE            & no & $1000s+$ & 5360+    &  -          \\
-  FAPE + Dur      & no & $1000s+$ & 7430+    &  -    \\
-  FAPE + TI       & no & $1000s+$ & 3800+    &  - \\
-  FAPE + Dur + TI & no & $1000s+$ & 3071+    &  -          \\
+  Full Hier.            & no & $1000s+$ & 5360+    &  -          \\
+  Full Hier. + Dur      & no & $1000s+$ & 7430+    &  -    \\
+  Part. Hier.       & no & $1000s+$ & 3800+    &  - \\
+  Part. Hier. + Dur & no & $1000s+$ & 3071+    &  -          \\
   \end{tabular}
   \caption{Produce two burgers}
   \label{tab:eval-burgers}
 \end{table}
 
 \subsection{Robustness Heuristic}
+\label{sec:evaluation-robustness}
 
 In this section, we evaluate the Robustness Heuristic introduced in Section \ref{sec:approach-robustness}.
 Heuristics can be provided as a list in FAPE, to assign a priority.
 The additional heuristics are used to break ties between previous heuristics.
 
-The default heuristics used are depth-first search (``dfs''), ordered decomposition (``ord-dec'') and ``soca'' which is a simple comparison between the number of flaws and actions.
+The default heuristics of FAPE are depth-first search (``dfs''), ordered decomposition (``ord-dec'') and ``soca'' which is a simple comparison between the number of flaws and actions.
 We compare this default heuristic with four different combinations of adding either the shortest makespan or the robustness heuristic at index 2 or 3.
-The depth-first search should always be at the first index for fully hierarchical problems, as the search would otherwise not resolve tasks first.
+The depth-first search should always be at index 1 for fully hierarchical problems, as the search would otherwise not finish in a reasonable timeframe.
+We choose $n=m=10$ for the robustness heuristic as a tradeoff between accuracy and feasibility.
 
 
-We compare the heuristic combinations in the following four different simple problems using the ``Full Hier. + Dur'' domain.
+We compare the heuristic combinations in the following four different simple problems in the domain variant ``Fully Hierarchichal with Durations''.
+This domain is chosen, as the previous evaluation showed that our partially hierarchical domain is not tractable and the durations are relevant for optimizations.
 The environment for the salads is the ``tutorial level'' (see Figure \ref{fig:eval-overcooked}).
 For the burger it is the ``complex map'' (see Figure \ref{fig:eval-mapB}).
+The deadlines are necessary for the robustness heuristic, as it requires some point of failure.
+We choose the deadlines for each task such that all tasks can be completed by a single cook in sequence.
 \begin{enumerate}
   \item a lettuce salad, with a deadline of 150:\\ 
     \verb|[start, start+150] contains order_po_lettuce_salad(client1);|
@@ -148,7 +171,7 @@ For the burger it is the ``complex map'' (see Figure \ref{fig:eval-mapB}).
 \begin{table}[]
   \centering
   \begin{tabular}{p{1.5cm}rrrrr}
-  \multicolumn{1}{l}{}         & \multicolumn{1}{l}{heuristic} & success & \multicolumn{1}{l}{plantime} & \multicolumn{1}{l}{generated states} & \multicolumn{1}{l}{makespan} \\ \hline \hline
+  \multicolumn{1}{l}{}         & \multicolumn{1}{l}{heuristic} & success & \multicolumn{1}{l}{plantime} & \multicolumn{1}{l}{generated nodes} & \multicolumn{1}{l}{makespan} \\ \hline \hline
   \multirow{5}{*}{salad}        & default                       & yes     & $11.8s\pm1.5 $              & $46.0\pm0.0$                         & $115.0 \pm0.0$               \\ 
                                 & makespan@2                    & yes     & $11.4s\pm1.5 $              & $53.0\pm0.0$                         & $79.0  \pm0.0$               \\ 
                                 & makespan@3                    & yes     & $11.1s\pm1.7 $              & $53.0\pm0.0$                         & $79.0  \pm0.0$               \\
@@ -182,27 +205,67 @@ The arithmetic mean value is shown first and the standard deviation second.
 When the standard deviation is $?$, the calculation of the standard deviation returned nan.
 
 Producing a single salad takes only around 10 seconds for all of the heuristics.
+The number of generated nodes is similar for all heuristics.
 The makespan heuristic combinations achieve a significant decrease in the makespan of the plan.
 The makespan of the robustness heuristics is not better than the default and has a high standard deviation.
 
 None of the heuristics can provide a plan for two salads at the same time in under 1000 seconds.
-The default and makespan heuristics do however generate more states than the robustness heuristics.
+The default and makespan heuristics do however generate more nodes than the robustness heuristics.
 
 All heuristics succeed with the tomato salad, the planning times are between 10 and 15 seconds, with the robustness@2 having the longest mean planning time at 15 seconds.
-The highest number of generated states has the robustness@2 heuristic, while robustness@3 and the default heuristic generate a similar number of states.
+The highest number of generated nodes has the robustness@2 heuristic, while robustness@3 and the default heuristic generate a similar number of nodes.
 The makespan values show a similar picture as with the simple salad.
-The makespan heuristics have the shortest one, and the robustness heuristic ones are only not much different than the default one.
+The makespan heuristics have the shortest one, and the robustness heuristic ones are not much different than the default one.
 
 The burger is only planned successfully by the default heuristic and the robustness@2 heuristic.
 The robustness@3 heuristic succeeds only partially \todo{how often?} in the 1000 seconds and the makespan heuristics do not finish.
 The robustness@2 heuristic has however a very high standard deviation.
-The default heuristic generates the lowest number of states, while the mean for the robustness@2 heuristic is much higher, but also with a very high standard deviation.
-The highest number of states are generated by the makespan heuristics, but around 7 times fewer states than in the two salads problem in the same time frame.
+The default heuristic generates the lowest number of nodes, while the mean for the robustness@2 heuristic is much higher, but also with a very high standard deviation.
+The highest number of nodes are generated by the makespan heuristics, but around 7 times fewer nodes than in the two salads problem in the same time frame.
 The lowest makespan here is by the robustness@2 heuristic, but again with a high variance.
 
-\todo[inline]{go in depth on an example for robustness}
+We now consider one planning result of the robustness@2 for the problem of one tomato salad in detail.
+The total makespan of this solution is 161, which is the shortest result for this problem using the robustness@2 heuristic.
+The low-level actions that are performed are shown in the following code snippet.
+The overall timeline for high-level actions is shown for each cook in Figure \ref{fig:eval-robustness}.
+
+This result shows that the tasks are split between the two cooks.
+One prepares the plate, chops and arranges the lettuce and delivers the salad, while the other one chops and arranges the tomato.
+Some of the high-level actions like the arranging of the tomato take very long.
+The low-level actions reveal that \verb|cook2| remains at \verb|manCounterMiddle2Bottom| between time 52 and 110, but only places the lettuce on the plate at time 110.
+Similarly, \verb|cook1| stands waiting between time 22 and 52 before transporting the lettuce.
+
+\bild{fig:eval-robustness}{robustness-tomato-salad}{High-level actions divided by cook for a single tomato salad using the robustness@2 heuristic}{16}
+
+\begin{anmlcode}
+[0,2]     a_move(cook1, manPlateDispenser)
+[0,10]    a_move(cook2, manTomatoDispenser)
+[2,8]     a_pick_up(cook1, plate4)
+[8,18]    a_move(cook1, manCounterMiddle2Bottom)
+[10,16]   a_pick_up(cook2, tomato1)
+[16,29]   a_move(cook2, manKnife3)
+[18,22]   a_drop(cook1, plate4)
+[29,33]   a_drop(cook2, tomato1)
+[33,44]   a_chop(cook2, tomato1, knife3)
+[45,51]   a_pick_up(cook2, tomato1)
+[51,52]   a_move(cook2, manCounterMiddle2Bottom)
+[52,65]   a_move(cook1, manLettuceDispenser)
+[65,71]   a_pick_up(cook1, lettuce1)
+[71,87]   a_move(cook1, manKnife4)
+[87,91]   a_drop(cook1, lettuce1)
+[91,102]  a_chop(cook1, lettuce1, knife4)
+[103,109] a_pick_up(cook1, lettuce1)
+[109,122] a_move(cook1, manCounterMiddle2Top)
+[110,120] a_arrange(cook2, tomato1, plate4)
+[122,122] a_arrange(cook1, lettuce1, plate4)
+[132,142] a_move(cook1, manCounterMiddle2Bottom)
+[142,148] a_pick_up(cook1, plate4)
+[148,156] a_move(cook1, manDeliver)
+[156,161] a_give(cook1, client1, plate4)
+\end{anmlcode}
 
 \subsection{Acting}
+\label{sec:evaluation-acting}
 
 In this section, we evaluate the impact of the robustness heuristic and the task preparations on acting.
 We use the environment ``tutorial level'' in the ``Full Hier. + Dur'' domain with the following tasks:
@@ -213,6 +276,9 @@ We use the environment ``tutorial level'' in the ``Full Hier. + Dur'' domain wit
 \end{itemize}
 
 Each task is received by the Activity Manager at the start of the temporal interval it is contained in.
+We chose the task \verb|order_po_lettuce_tomato_salad|, as it is more complex than the simple salad and provides enough opportunity for parallelization.
+The burger could give a more representative result, but simulating it by hand is not feasible.
+The temporal intervals were chosen such that a solution exists, but it is not possible to have each cook fulfill an order sequentially on their own.
 
 We consider four different configurations:
 \begin{itemize}
@@ -254,7 +320,7 @@ The default configuration has the lowest margins and reaches the deadline for ta
                 & success & \multicolumn{3}{c}{margin}  & avg margin     & total makespan  \\
                 &         &  task 1 & task 2  & task 3  &                &  \\ \hline
   default       & yes     & $25$    & $32$    &  $0$    & $19$           & $350$     \\
-  makespan      & yes     & $87$    & $87$    &  $58$   & $77.3$         & $292$       \\
+  makespan      & yes     & $87$    & $87$    &  $44$   & $72.7$         & $306$       \\
   preparations  & yes     & $25$    & $62$    &  $19$   & $35.3$         & $331$    \\
   robustness    & yes     & $39$    & $46$    &  $3$    & $29.3$         & $347$ \\
   \end{tabular}
