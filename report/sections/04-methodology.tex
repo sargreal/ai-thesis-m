@@ -18,6 +18,163 @@ We consider two options for solving this optimization problem:
 \subsection{Domain Definition}
 \label{sec:approach-domain}
 
+In this Section, we define the ``Overcooked'' domain in the language ANML \cite{smithANMLLanguage2008} that is used by FAPE.
+We only present an overview and the relevant decisions here, the full domain is available in Appendix \ref{app:domain}.
+
+The constants of the domain such as cooks or ingredients are defined as a type hierarchy.
+FAPE does not support multiple inheritance, so an ingredient cannot be choppable and fryable at the same time.
+We add relevant fluents to the types such as the location of an ingredient.
+
+We define the durations of actions as constant functions so that they can be set for each problem and also be changed between different instances.
+Additionally, all of our actions are task-dependent (marked by the keyword \verb|motivated|), unless stated otherwise.
+
+
+We define 7 low-level actions listed in Table \ref{tab:approach-domain-basic-actions}.
+All low-level actions are prefixed with \verb|a_| to differentiate them from high-level actions with the same name.
+The low-level actions include only the necessary arguments to specify the action, the variables necessary for the completion are included as constants in the action.
+For instance the action \verb|a_drop| only specifies a person that drops something it carries.
+The new location of the carryable is defined as the placement area that is connected to the manipulation area where the cook is during this action (see Listing \ref{lst:approach-constants}).
+
+
+\begin{table}
+  \centering
+  \begin{tabular}{ll}
+    \verb|a_move(Person,ManArea)| &  \verb|a_drop(Person,Carryable)|\\
+    \verb|a_arrange(Person,Ingredient,Tableware)| & \verb|a_pick_up(Person,Carryable)| \\
+    \verb|a_chop(Cook,Choppable,Knife)| & \verb|a_boil(Boilable,Pot)| \\
+    \verb|a_fry(Fryable,Pan)|
+  \end{tabular}
+  \caption{Low-level actions in the domain ``Overcooked''}
+  \label{tab:approach-domain-basic-actions}
+\end{table}
+
+\begin{figure}
+  \begin{anmlcode}
+  constant PlArea pl;
+  constant ManArea man;
+  connected(pl, man);
+  [all] person.loc == man; 
+  [all] carryable.loc == p :-> pl; 
+  \end{anmlcode}
+  \captionof{lstlisting}{Constant variables in the action \texttt{a\_drop}}
+  \label{lst:approach-constants}
+\end{figure}
+
+We define the action \verb|a_move(Person,ManArea)| only with a target, to reduce the planning cost spent on it.
+It is then like a teleportation from the current area to the destination, but the duration can be set using \verb|distance(ManArea,ManArea)|.
+If some duration is not defined, it is not possible to move between those locations.
+This duration can then be the cost of moving between these areas.
+We also consider two modifications of the action \verb|a_move|.
+First, we can set the duration to a fixed amount, and second, we can make the action not task-dependent.
+
+The action \verb|a_chop(Cook,Choppable,Knife)| requires that the cook does not carry anything while chopping and is marked as busy so they cannot chop multiple things at once.
+Similarly, tools are marked as processing during the actions \verb|a_chop|,\verb|a_boil| and \verb|a_fry|.
+This is achieved using the change assertion \verb|[all] sv == false :-> false|.
+A cook is not directly necessary for the actions \verb|a_boil| and \verb|a_fry|.
+
+\begin{table}
+  \centering
+  \begin{tabular}{ll}
+    \verb|m_get_to(Person,ManArea)| &  \verb|m_fetch(Cook,Carryable)|\\
+    \verb|m_transport_to(Carryable,PlArea)| & \verb|m_chop(Choppable)| \\
+    \verb|m_boil(Boilable)| & \verb|m_fry(Fryable)| \\
+    \verb|m_prepare_tableware(Tableware)| & \verb|m_arrange(Ingredient,Tableware)| \\
+    \verb|m_deliver(Tableware,Client)|
+  \end{tabular}
+  \caption{High-level actions in the domain ``Overcooked''}
+  \label{tab:approach-domain-combined-actions}
+\end{table}
+
+We define 9 high-level totally-ordered actions listed in Table \ref{tab:approach-domain-combined-actions} that define all possible interactions required by an order.
+The two actions \verb|m_get_to| and \verb|m_fetch| require a specific cook or person, while the other actions abstract from a specific cook.
+
+We use several common patterns to define these actions.
+\todo{do we use more?}
+First, all of these high-level actions have a first empty decomposition that only includes the actions post conditions.
+For example, the action \verb|m_get_to| has as the first decomposition the persistence assertion that the person is at the target area (see Listing \ref{lst:approach-default}).
+
+\begin{figure}
+  \begin{anmlcode}
+  :decomposition {
+    person.loc == target;
+  };
+  \end{anmlcode} 
+  \captionof{lstlisting}{Empty decomposition as default for action \texttt{m\_get\_to}}
+  \label{lst:approach-default}
+\end{figure}
+
+As we have previously defined that the actions \verb|a_boil| and \verb|a_fry| do not require a cook, we need to enforce that the processed ingredient is picked up before it becomes overcooked.
+This is done by adding a time constraint on the subtasks.
+For the action \verb|m_fry|, this time constraint is \verb|end(fetch) <= end(fry) + 30|, meaning that the ingredient must be picked up at most 30 time steps after the end of frying (see Listing \ref{lst:approach-fry}).
+FAPE does not allow using functions here, so the time, until something is overcooked has to be fixed here.
+We use the value 30.
+
+\begin{figure}
+  \begin{anmlcode}
+  [all] contains {
+    transport: m_transport_to(fryable,toolArea);
+    fry: a_fry(fryable, pan);
+    fetch: m_fetch(cook, fryable);
+  };
+  
+  end(transport) <= start(fry);
+  end(fry) <= start(fetch);
+  end(fetch) <= end(fry) + 30; 
+  \end{anmlcode}
+  \captionof{lstlisting}{Subtask constraints in the action \texttt{m\_fry}}
+  \label{lst:approach-fry}
+\end{figure}
+
+\begin{table}
+  \centering
+  \begin{tabular}{l}
+    \verb|order_lettuce_salad(Client)|\\
+    \verb|order_lettuce_tomato_salad(Client)| \\
+    \verb|order_lettuce_tomato_cucumber_salad(Client)|  \\
+    \verb|order_lettuce_tomato_burger(Client)|
+  \end{tabular}
+  \caption{Orders in the domain ``Overcooked''. These are also high-level actions}
+  \label{tab:approach-domain-orders}
+\end{table}
+
+
+Last, we define the orders, that have as subtasks the high-level actions that are needed to fulfill a specific order (see Table \ref{tab:approach-domain-orders}).
+The orders are all partially-ordered.
+While it is possible to define the orders in total order, that is not an interesting problem to solve under the condition that tasks are received dynamically.
+If all tasks are totally-ordered, it is not beneficial to use different cooks as the subtasks still need to be executed sequentially.
+
+For instance, the order \verb|order_lettuce_tomato_salad| must prepare a plate, a lettuce and a tomato must each be chopped and arranged on the plate, then the plate can be delivered to the client (see Listing \ref{lst:approach-order}).
+We enforce the constraints that before something can be arranged, the plate has to be prepared, lettuce and tomato have to be chopped before they are arranged, and finally, everything has to be arranged before the plate can be delivered.
+
+\begin{figure}
+  \begin{anmlcode}
+  action order_lettuce_tomato_salad(Client cl) {
+    motivated;
+    :decomposition {
+      constant Lettuce l;
+      constant Tomato to;
+      constant Plate p;
+      [all] contains {
+        t_prep : m_prepare_tableware(p);
+        t_chop_l : m_chop(l);
+        t_arr_l : m_arrange(l, p);
+        t_chop_to : m_chop(to);
+        t_arr_to : m_arrange(to, p);
+        t_del : m_deliver(p, cl);
+      };
+      end(t_prep) <= start(t_arr_l);
+      end(t_prep) <= start(t_arr_to);
+      end(t_chop_l) <= start(t_arr_l);
+      end(t_chop_to) <= start(t_arr_to);
+      end(t_arr_l) <= start(t_del);
+      end(t_arr_to) <= start(t_del);
+    };
+  };
+  \end{anmlcode}
+  \captionof{lstlisting}{The order \texttt{order\_lettuce\_tomato\_salad}}
+  \label{lst:approach-order}
+\end{figure}
+
 \subsection{Acting and Online Planning with a Stream of Tasks}
 \label{sec:approach-acting}
 
@@ -308,7 +465,7 @@ Then, when an order for a salad is received, the lettuce only needs to be put on
 However, the preparations should remain within the bounds of the current plan.
 Otherwise, an unlimited amount of preparations could be inserted, which would first block the Acting Engine from receiving any new tasks and second would correspond to a restaurant that prepares all of the available ingredients even when there are only a few orders.
 
-\begin{algorithm}
+\begin{algorithm}[t]
     \caption{PREPARATIONS: Generation of possible preparations}
     \label{alg:methodology:preparations}
     \KwIn{$\phi' = \langle \pi,\mathcal{F},\mathcal{C} \rangle$; $\mathcal{T}_p$}
@@ -339,8 +496,9 @@ Otherwise, an unlimited amount of preparations could be inserted, which would fi
 The generation of potentially preparable tasks is shown in Algorithm \ref{alg:methodology:preparations}.
 It receives a list of potential task symbols $\mathcal{T}_p$, in our case the potential orders that may be received through the stream of tasks.
 $\mathcal{T}_p$ may be known at the start but could be changed during the execution.
-For each $\tau_p \in \mathcal{T}_p$ the possible subtasks are gathered through all possible action templates.
+For each $\tau_p \in \mathcal{T}_p$ the possible subtasks $\tau_s$ are gathered through all possible action templates.
 Subtasks that do not require any of the parameters of $\tau_p$ are independent of the individual order and thus potential subjects for preparation.
+We then generate all possible temporally qualified ground instances $\langle[t_{current}, mindelay(\phi,t^p_{start}, t^p_{end})] \tau_s(r_1,\dots,r_n) \rangle$.
 A subtask may require that one or more previous tasks have been executed first.
 Those previous tasks have to be executed with the matching arguments before this task is subject to preparation.
 The parameters for the preparable tasks have to be ground and there cannot exist another task with the same parameters in $\pi$.
@@ -348,18 +506,27 @@ Otherwise, a preparation could be added multiple times to a plan.
 It is however allowed that the same task is present multiple times in the result of the algorithm.
 Knowing how often a specific preparation is included can be helpful when choosing a preparation.
 
+
+\begin{example}
+  Suppose we have $\mathcal{T}_p = \{\mathtt{order\_lettuce\_tomato\_salad}\}$, \\ $\pi=\{\mathtt{m\_chop(lettuce1)}\}$ and the typed ground instances of the problem $D_{Plate}=\{plate1\}$, $D_{Lettuce}=\{lettuce1\}$, $D_{Tomato}=\{tomato1\}$.
+  The task \verb|order_lettuce_tomato_salad| has only one action template, corresponding to Listing \ref{lst:approach-order}.
+  The ground instances that can be prepared are then $\mathcal{T}_s=\{\mathtt{m\_prepare\_tableware(plate1)}, \mathtt{m\_chop(lettuce1)},\\ \mathtt{m\_chop(tomato1)}, \mathtt{m\_arrange(lettuce1)}, \mathtt{m\_arrange(tomato1)}\}$.
+  Of these ground instances, $\mathtt{m\_chop(lettuce1)}$ cannot be prepared, as it is already included in $\pi$ and $\mathtt{m\_arrange(tomato1)}$ cannot be prepared, as the dependency $\mathtt{m\_chop(tomato1)}$ is not in $\pi$.
+  So the final list of preparable tasks is $T_p=\{\mathtt{m\_prepare\_tableware(plate1)}, \mathtt{m\_chop(tomato1)},\\ \mathtt{m\_arrange(lettuce1)}\}$.
+\end{example}
+
 To be able to use a preparation later, tasks need to have one possible decomposition that is fulfilled if all postconditions are met.
 Otherwise, the prepared instances could not be used in future submitted tasks due to the hierarchical decomposition.
 
 
 Planning with preparations is done as depicted in Algorithm \ref{alg:methodology:prep-planning}.
 When a plan has been found for a problem, possible preparations are generated.
-One preparation is nondeterministically chosen to be included in the current chronicle and added as a temporally qualified task $\langle[t_{current}, mindelay(\phi,t^p_{start}, t^p_{end})] \tau \rangle$.
+One preparation is nondeterministically chosen to be included in the current chronicle and added as a temporally qualified task.
 Planning is continued with the modified chronicle.
 This procedure is repeated recursively until no plan is found.
 Then the last valid plan is returned.
 
-\begin{algorithm}
+\begin{algorithm}[t]
     \caption{PrepPSP: Planning with adding preparations}
     \label{alg:methodology:prep-planning}
     \KwIn{$P = \langle \Sigma,\phi \rangle$; $\mathcal{T}_p$}
@@ -381,6 +548,7 @@ Then the last valid plan is returned.
 The preparation insertion is similar to action insertion.
 While action insertion is used to support goals or preconditions of tasks using generative planning instead of HTN planning, preparation insertion supports possible future tasks.
 The properties of preparation insertion vary significantly compared to task insertion.
+
 
 We propose several concrete implementations of the non-deterministic choose method in algorithm \ref{alg:methodology:prep-planning}.
 We call these implementations preparation selection strategies.

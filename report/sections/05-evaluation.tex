@@ -158,14 +158,14 @@ The deadlines are necessary for the robustness heuristic, as it requires some po
 We choose the deadlines for each task such that all tasks can be completed by a single cook in sequence.
 \begin{enumerate}
   \item a lettuce salad, with a deadline of 150:\\ 
-    \verb|[start, start+150] contains order_po_lettuce_salad(client1);|
+    \verb|[start, start+150] contains order_lettuce_salad(client1);|
   \item two lettuce salads, with a deadline of 300 each:\\
-    \verb|[start, start+300] contains order_po_lettuce_salad(client1);|\\
-    \verb|[start, start+300] contains order_po_lettuce_salad(client2);|\\
+    \verb|[start, start+300] contains order_lettuce_salad(client1);|\\
+    \verb|[start, start+300] contains order_lettuce_salad(client2);|\\
   \item a tomato salad with a deadline of 200:\\
-    \verb|[start, start+200] contains order_po_lettuce_tomato_salad(client1);|
+    \verb|[start, start+200] contains order_lettuce_tomato_salad(client1);|
   \item a burger with a deadline of 200:\\
-    \verb|[start, start+400] contains order_po_lettuce_tomato_burger(client1);|
+    \verb|[start, start+400] contains order_lettuce_tomato_burger(client1);|
 \end{enumerate}
 
 \begin{table}[]
@@ -235,34 +235,37 @@ Some of the high-level actions like the arranging of the tomato take very long.
 The low-level actions reveal that \verb|cook2| remains at \verb|manCounterMiddle2Bottom| between time 52 and 110, but only places the lettuce on the plate at time 110.
 Similarly, \verb|cook1| stands waiting between time 22 and 52 before transporting the lettuce.
 
-\bild{fig:eval-robustness}{robustness-tomato-salad}{High-level actions divided by cook for a single tomato salad using the robustness@2 heuristic}{16}
+\bild{fig:eval-robustness}{robustness-tomato-salad}{High-level actions divided by cook for the task \texttt{order\_tomato\_lettuce\_salad} using the robustness@2 heuristic}{16}
 
-\begin{anmlcode}
-[0,2]     a_move(cook1, manPlateDispenser)
-[0,10]    a_move(cook2, manTomatoDispenser)
-[2,8]     a_pick_up(cook1, plate4)
-[8,18]    a_move(cook1, manCounterMiddle2Bottom)
-[10,16]   a_pick_up(cook2, tomato1)
-[16,29]   a_move(cook2, manKnife3)
-[18,22]   a_drop(cook1, plate4)
-[29,33]   a_drop(cook2, tomato1)
-[33,44]   a_chop(cook2, tomato1, knife3)
-[45,51]   a_pick_up(cook2, tomato1)
-[51,52]   a_move(cook2, manCounterMiddle2Bottom)
-[52,65]   a_move(cook1, manLettuceDispenser)
-[65,71]   a_pick_up(cook1, lettuce1)
-[71,87]   a_move(cook1, manKnife4)
-[87,91]   a_drop(cook1, lettuce1)
-[91,102]  a_chop(cook1, lettuce1, knife4)
-[103,109] a_pick_up(cook1, lettuce1)
-[109,122] a_move(cook1, manCounterMiddle2Top)
-[110,120] a_arrange(cook2, tomato1, plate4)
-[122,122] a_arrange(cook1, lettuce1, plate4)
-[132,142] a_move(cook1, manCounterMiddle2Bottom)
-[142,148] a_pick_up(cook1, plate4)
-[148,156] a_move(cook1, manDeliver)
-[156,161] a_give(cook1, client1, plate4)
-\end{anmlcode}
+\begin{figure}
+  \begin{anmlcode}
+  [0,2]     a_move(cook1, manPlateDispenser)
+  [0,10]    a_move(cook2, manTomatoDispenser)
+  [2,8]     a_pick_up(cook1, plate4)
+  [8,18]    a_move(cook1, manCounterMiddle2Bottom)
+  [10,16]   a_pick_up(cook2, tomato1)
+  [16,29]   a_move(cook2, manKnife3)
+  [18,22]   a_drop(cook1, plate4)
+  [29,33]   a_drop(cook2, tomato1)
+  [33,44]   a_chop(cook2, tomato1, knife3)
+  [45,51]   a_pick_up(cook2, tomato1)
+  [51,52]   a_move(cook2, manCounterMiddle2Bottom)
+  [52,65]   a_move(cook1, manLettuceDispenser)
+  [65,71]   a_pick_up(cook1, lettuce1)
+  [71,87]   a_move(cook1, manKnife4)
+  [87,91]   a_drop(cook1, lettuce1)
+  [91,102]  a_chop(cook1, lettuce1, knife4)
+  [103,109] a_pick_up(cook1, lettuce1)
+  [109,122] a_move(cook1, manCounterMiddle2Top)
+  [110,120] a_arrange(cook2, tomato1, plate4)
+  [122,122] a_arrange(cook1, lettuce1, plate4)
+  [132,142] a_move(cook1, manCounterMiddle2Bottom)
+  [142,148] a_pick_up(cook1, plate4)
+  [148,156] a_move(cook1, manDeliver)
+  [156,161] a_give(cook1, client1, plate4)
+  \end{anmlcode}
+  \captionof{lstlisting}{Low-Level actions for the task \texttt{order\_tomato\_lettuce\_salad} using the robustness@2 heuristic}
+\end{figure}
 
 \subsection{Acting}
 \label{sec:evaluation-acting}
@@ -270,13 +273,13 @@ Similarly, \verb|cook1| stands waiting between time 22 and 52 before transportin
 In this section, we evaluate the impact of the robustness heuristic and the task preparations on acting.
 We use the environment ``tutorial level'' in the ``Full Hier. + Dur'' domain with the following tasks:
 \begin{itemize}
-  \item \verb|[0,200] contains order_po_lettuce_tomato_salad(client1);|
-  \item \verb|[100,300] contains order_po_lettuce_tomato_salad(client2);|
-  \item \verb|[150,350] contains order_po_lettuce_tomato_salad(client3);|
+  \item \verb|[0,200] contains order_lettuce_tomato_salad(client1);|
+  \item \verb|[100,300] contains order_lettuce_tomato_salad(client2);|
+  \item \verb|[150,350] contains order_lettuce_tomato_salad(client3);|
 \end{itemize}
 
 Each task is received by the Activity Manager at the start of the temporal interval it is contained in.
-We chose the task \verb|order_po_lettuce_tomato_salad|, as it is more complex than the simple salad and provides enough opportunity for parallelization.
+We chose the task \verb|order_lettuce_tomato_salad|, as it is more complex than the simple salad and provides enough opportunity for parallelization.
 The burger could give a more representative result, but simulating it by hand is not feasible.
 The temporal intervals were chosen such that a solution exists, but it is not possible to have each cook fulfill an order sequentially on their own.
 
@@ -288,7 +291,7 @@ We consider four different configurations:
   \item robustness: the robustness heuristic is used for generating a plan for each task
 \end{itemize}
 
-Acting is simulated by hand, by adding the optimal plans for the second and third tasks consecutively without replanning or repair.
+Acting is simulated using an oracle approach: we manually add the optimal sequence of actions for the second and third tasks consecutively without replanning or repair.
 This measures the ability of the configurations to find a plan without replanning or repair.
 Since representative action durations are used, the durations for each action may be different.
 We therefore use the optimal durations that are calculated with the makespan@2 heuristic for the first task.
@@ -308,9 +311,10 @@ All of the configurations succeed in this manual evaluation with optimal task ad
 The makespan configuration represents the optimal configuration when not allowing preparations.
 It has the highest margin for each task and the highest average margin.
 It also has the shortest overall makespan.
-The second best configuration is using the preparations with a lower margin for each task but a high margin for the second task.
-The total makespan is also longer.
-The robustness configuration has a higher margin than the preparations for the first task, but is lower for all others.
+The preparations have the second shortest overall makespan.
+This configuration has lower margins for each task but a smaller standard deviation for the average margin.
+The robustness configuration has a higher margin than the preparations for the first and second tasks but is much lower for task 3.
+Therefore the average is a little higher, but the standard deviation is almost doubled.
 The total makespan is also only 3 time points lower than failure.
 The default configuration has the lowest margins and reaches the deadline for task 3 just on time.
 
@@ -319,10 +323,10 @@ The default configuration has the lowest margins and reaches the deadline for ta
   \begin{tabular}{lrrrrrr}
                 & success & \multicolumn{3}{c}{margin}  & avg margin     & total makespan  \\
                 &         &  task 1 & task 2  & task 3  &                &  \\ \hline
-  default       & yes     & $25$    & $32$    &  $0$    & $19$           & $350$     \\
-  makespan      & yes     & $87$    & $87$    &  $44$   & $72.7$         & $306$       \\
-  preparations  & yes     & $25$    & $62$    &  $19$   & $35.3$         & $331$    \\
-  robustness    & yes     & $39$    & $46$    &  $3$    & $29.3$         & $347$ \\
+  default       & yes     & $25$    & $32$    &  $0$    & $19\pm16.8$           & $350$     \\
+  makespan      & yes     & $87$    & $87$    &  $44$   & $72.7\pm24.8$         & $306$       \\
+  preparations  & yes     & $25$    & $42$    &  $16$   & $27.7\pm13.2$         & $323$    \\
+  robustness    & yes     & $39$    & $46$    &  $3$    & $29.3\pm23.1$         & $347$ \\
   \end{tabular}
   \caption{Produce two burgers}
   \label{tab:eval-acting}
