@@ -364,5 +364,5 @@ knife4.loc := taKnife4;
 /** TASKS **/
 
 [start, start+200] contains {
-  order_po_lettuce_tomato_salad(client1);
+  order_lettuce_tomato_salad(client1);
 };

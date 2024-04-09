@@ -349,5 +349,5 @@ pan2.loc := taPan2;
 /** TASKS **/
 
 [start, start+400] contains {
-  order_po_lettuce_tomato_burger(client1);
+  order_lettuce_tomato_burger(client1);
 };

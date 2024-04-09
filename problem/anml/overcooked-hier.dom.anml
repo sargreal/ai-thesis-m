@@ -517,7 +517,7 @@ action m_deliver(Tableware t, Client cl) {
 
 // Partial Order
 
-action order_po_lettuce_salad(Client cl/*, Lettuce l, Tableware t*/) {
+action order_lettuce_salad(Client cl/*, Lettuce l, Tableware t*/) {
   motivated;
   :decomposition {
     constant Lettuce l;
@@ -535,7 +535,7 @@ action order_po_lettuce_salad(Client cl/*, Lettuce l, Tableware t*/) {
   };
 };
 
-action order_po_lettuce_tomato_salad(Client cl/*, Lettuce l, Tomato to, Tableware t*/) {
+action order_lettuce_tomato_salad(Client cl/*, Lettuce l, Tomato to, Tableware t*/) {
   motivated;
   // duration :in [0, 600];
   :decomposition {
@@ -559,7 +559,7 @@ action order_po_lettuce_tomato_salad(Client cl/*, Lettuce l, Tomato to, Tablewar
   };
 };
 
-action order_po_lettuce_tomato_cucumber_salad(Client cl/*, Lettuce l, Tomato to, Cucumber cu, Tableware t*/) {
+action order_lettuce_tomato_cucumber_salad(Client cl/*, Lettuce l, Tomato to, Cucumber cu, Tableware t*/) {
   motivated;
   :decomposition {
     constant Lettuce l;
@@ -588,7 +588,7 @@ action order_po_lettuce_tomato_cucumber_salad(Client cl/*, Lettuce l, Tomato to,
   };
 };
 
-action order_po_lettuce_tomato_burger(Client cl) {
+action order_lettuce_tomato_burger(Client cl) {
   motivated;
   :decomposition {
     constant BurgerBun bb;
@@ -620,82 +620,5 @@ action order_po_lettuce_tomato_burger(Client cl) {
     end(t_arr_l) <= start(t_del);
     end(t_arr_to) <= start(t_del);
     end(t_arr_b) <= start(t_del);
-  };
-};
-
-// Total Order
-
-
-action order_to_lettuce_salad(Client cl/*, Lettuce l, Tableware t*/) {
-  motivated;
-  :decomposition {
-    constant Lettuce l;
-    constant Tableware t;
-    [all] contains ordered(
-      m_prepare_tableware(t),
-      m_chop(l),
-      m_arrange(l, t),
-      m_deliver(t, cl)
-    );
-  };
-};
-
-action order_to_lettuce_tomato_salad(Client cl/*, Lettuce l, Tomato to, Tableware t*/) {
-  motivated;
-  // duration :in [0, 600];
-  :decomposition {
-    constant Lettuce l;
-    constant Tomato to;
-    constant Tableware t;
-    [all] contains ordered(
-      m_prepare_tableware(t),
-      m_chop(l),
-      m_arrange(l, t),
-      m_chop(to),
-      m_arrange(to, t),
-      m_deliver(t, cl)
-    );
-  };
-};
-
-action order_to_lettuce_tomato_cucumber_salad(Client cl/*, Lettuce l, Tomato to, Cucumber cu, Tableware t*/) {
-  motivated;
-  :decomposition {
-    constant Lettuce l;
-    constant Tomato to;
-    constant Cucumber cu;
-    constant Tableware t;
-    [all] contains ordered(
-      m_prepare_tableware(t),
-      m_chop(l),
-      m_arrange(l, t),
-      m_chop(to),
-      m_arrange(to, t),
-      m_chop(cu),
-      m_arrange(cu, t),
-      m_deliver(t, cl)
-    );
-  };
-};
-
-action order_to_lettuce_tomato_burger(Client cl) {
-  motivated;
-  :decomposition {
-    constant Lettuce l;
-    constant BurgerBun bb;
-    constant Tomato to;
-    constant Beef b;
-    constant Tableware t;
-    [all] contains ordered(
-      m_prepare_tableware(t),
-      m_arrange(bb, t),
-      m_chop(l),
-      m_arrange(l, t),
-      m_chop(to),
-      m_arrange(to, t),
-      m_fry(b),
-      m_arrange(b, t),
-      m_deliver(t, cl)
-    );
   };
 };

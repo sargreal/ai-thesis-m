@@ -348,6 +348,6 @@ pan2.loc := taPan2;
 
 /** TASKS **/
 
-[start, end] contains ordered(order_po_lettuce_tomato_burger(client1));
-// [start, end] contains unordered(order_po_lettuce_tomato_burger(client1),order_po_lettuce_tomato_burger(client2));
+[start, end] contains ordered(order_lettuce_tomato_burger(client1));
+// [start, end] contains unordered(order_lettuce_tomato_burger(client1),order_lettuce_tomato_burger(client2));
 
