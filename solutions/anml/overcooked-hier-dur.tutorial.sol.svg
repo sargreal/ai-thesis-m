@@ -1,0 +1,147 @@
+<svg width="4000" height="1850" xmlns="http://www.w3.org/2000/svg">
+<rect x="0" y="0" width="4000" height="1850" fill="white" />
+<g transform="translate(50,50)">
+  <rect x="0" y="0" width="3950" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m1-order_po_lettuce_salad(client1)</text>
+</g>
+<g transform="translate(2100,100)">
+  <rect x="0" y="0" width="900" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m1-m_arrange(lettuce5, plate5)</text>
+</g>
+<g transform="translate(50,100)">
+  <rect x="0" y="0" width="2000" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_prepare_tableware(plate5)</text>
+</g>
+<g transform="translate(50,150)">
+  <rect x="0" y="0" width="2000" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_transport_to(plate5, counterMiddle2)</text>
+</g>
+<g transform="translate(1850,200)">
+  <rect x="0" y="0" width="200" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_drop(cook2, plate5)</text>
+</g>
+<g transform="translate(50,200)">
+  <rect x="0" y="0" width="1300" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_fetch(cook2, plate5)</text>
+</g>
+<g transform="translate(1050,250)">
+  <rect x="0" y="0" width="300" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_pick_up(cook2, plate5)</text>
+</g>
+<g transform="translate(2500,150)">
+  <rect x="0" y="0" width="500" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_arrange(cook2, lettuce5, plate5)</text>
+</g>
+<g transform="translate(3000,100)">
+  <rect x="0" y="0" width="1000" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m1-m_deliver(plate5, client1)</text>
+</g>
+<g transform="translate(3750,150)">
+  <rect x="0" y="0" width="250" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_give(cook1, client1, plate5)</text>
+</g>
+<g transform="translate(3000,150)">
+  <rect x="0" y="0" width="350" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_fetch(cook1, plate5)</text>
+</g>
+<g transform="translate(3050,200)">
+  <rect x="0" y="0" width="300" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_pick_up(cook1, plate5)</text>
+</g>
+<g transform="translate(50,250)">
+  <rect x="0" y="0" width="1000" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_get_to(cook2, manPlateDispenser)</text>
+</g>
+<g transform="translate(650,300)">
+  <rect x="0" y="0" width="400" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_move(cook2, manPlateDispenser)</text>
+</g>
+<g transform="translate(50,350)">
+  <rect x="0" y="0" width="2050" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_chop(lettuce5)</text>
+</g>
+<g transform="translate(1550,400)">
+  <rect x="0" y="0" width="550" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_chop(cook1, lettuce5, knife3)</text>
+</g>
+<g transform="translate(50,400)">
+  <rect x="0" y="0" width="1500" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_transport_to(lettuce5, taKnife3)</text>
+</g>
+<g transform="translate(1350,450)">
+  <rect x="0" y="0" width="200" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_drop(cook1, lettuce5)</text>
+</g>
+<g transform="translate(50,450)">
+  <rect x="0" y="0" width="600" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_fetch(cook1, lettuce5)</text>
+</g>
+<g transform="translate(350,500)">
+  <rect x="0" y="0" width="300" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_pick_up(cook1, lettuce5)</text>
+</g>
+<g transform="translate(2100,150)">
+  <rect x="0" y="0" width="350" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_fetch(cook2, lettuce5)</text>
+</g>
+<g transform="translate(2150,200)">
+  <rect x="0" y="0" width="300" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_pick_up(cook2, lettuce5)</text>
+</g>
+<g transform="translate(3350,150)">
+  <rect x="0" y="0" width="400" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_get_to(cook1, manDeliver)</text>
+</g>
+<g transform="translate(3350,200)">
+  <rect x="0" y="0" width="400" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_move(cook1, manDeliver)</text>
+</g>
+<g transform="translate(50,500)">
+  <rect x="0" y="0" width="250" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_get_to(cook1, manLettuceDispenser)</text>
+</g>
+<g transform="translate(50,550)">
+  <rect x="0" y="0" width="250" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_move(cook1, manLettuceDispenser)</text>
+</g>
+<g transform="translate(1350,200)">
+  <rect x="0" y="0" width="500" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_get_to(cook2, manCounterMiddle2Top)</text>
+</g>
+<g transform="translate(1350,250)">
+  <rect x="0" y="0" width="500" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_move(cook2, manCounterMiddle2Top)</text>
+</g>
+<g transform="translate(650,450)">
+  <rect x="0" y="0" width="700" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_get_to(cook1, manKnife3)</text>
+</g>
+<g transform="translate(650,500)">
+  <rect x="0" y="0" width="700" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_move(cook1, manKnife3)</text>
+</g>
+<g transform="translate(2100,200)">
+  <rect x="0" y="0" width="50" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_get_to(cook2, manKnife3)</text>
+</g>
+<g transform="translate(2100,250)">
+  <rect x="0" y="0" width="50" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_move(cook2, manKnife3)</text>
+</g>
+<g transform="translate(2450,150)">
+  <rect x="0" y="0" width="50" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_get_to(cook2, manCounterMiddle2Top)</text>
+</g>
+<g transform="translate(2450,200)">
+  <rect x="0" y="0" width="50" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_move(cook2, manCounterMiddle2Top)</text>
+</g>
+<g transform="translate(3000,200)">
+  <rect x="0" y="0" width="50" height="40" style="fill: lightgray; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">m2-m_get_to(cook1, manCounterMiddle2Top)</text>
+</g>
+<g transform="translate(3000,250)">
+  <rect x="0" y="0" width="50" height="40" style="fill: lightgreen; stroke: black; stroke-width: 1px;" />
+  <text x="5" y="20" font-family="Verdana" font-size="12" fill="black">a_move(cook1, manCounterMiddle2Top)</text>
+</g>
+</svg>
