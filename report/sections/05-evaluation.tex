@@ -232,7 +232,7 @@ The overall timeline for high-level actions is shown for each cook in Figure \re
 This result shows that the tasks are split between the two cooks.
 One prepares the plate, chops and arranges the lettuce and delivers the salad, while the other one chops and arranges the tomato.
 Some of the high-level actions like the arranging of the tomato take very long.
-The low-level actions reveal that \verb|cook2| remains at \verb|manCounterMiddle2Bottom| between time 52 and 110, but only places the lettuce on the plate at time 110.
+The low-level actions reveal that \verb|cook2| remains at \verb|manCounterMiddle2Top| between time 52 and 110, but only places the lettuce on the plate at time 110.
 Similarly, \verb|cook1| stands waiting between time 22 and 52 before transporting the lettuce.
 
 \bild{fig:eval-robustness}{robustness-tomato-salad}{High-level actions divided by cook for the task \texttt{order\_tomato\_lettuce\_salad} using the robustness@2 heuristic}{16}
@@ -242,24 +242,24 @@ Similarly, \verb|cook1| stands waiting between time 22 and 52 before transportin
   [0,2]     a_move(cook1, manPlateDispenser)
   [0,10]    a_move(cook2, manTomatoDispenser)
   [2,8]     a_pick_up(cook1, plate4)
-  [8,18]    a_move(cook1, manCounterMiddle2Bottom)
+  [8,18]    a_move(cook1, manCounterMiddle2Top)
   [10,16]   a_pick_up(cook2, tomato1)
   [16,29]   a_move(cook2, manKnife3)
   [18,22]   a_drop(cook1, plate4)
   [29,33]   a_drop(cook2, tomato1)
   [33,44]   a_chop(cook2, tomato1, knife3)
   [45,51]   a_pick_up(cook2, tomato1)
-  [51,52]   a_move(cook2, manCounterMiddle2Bottom)
+  [51,52]   a_move(cook2, manCounterMiddle2Top)
   [52,65]   a_move(cook1, manLettuceDispenser)
   [65,71]   a_pick_up(cook1, lettuce1)
   [71,87]   a_move(cook1, manKnife4)
   [87,91]   a_drop(cook1, lettuce1)
   [91,102]  a_chop(cook1, lettuce1, knife4)
   [103,109] a_pick_up(cook1, lettuce1)
-  [109,122] a_move(cook1, manCounterMiddle2Top)
+  [109,122] a_move(cook1, manCounterMiddle2Bottom)
   [110,120] a_arrange(cook2, tomato1, plate4)
   [122,122] a_arrange(cook1, lettuce1, plate4)
-  [132,142] a_move(cook1, manCounterMiddle2Bottom)
+  [132,142] a_move(cook1, manCounterMiddle2Top)
   [142,148] a_pick_up(cook1, plate4)
   [148,156] a_move(cook1, manDeliver)
   [156,161] a_give(cook1, client1, plate4)

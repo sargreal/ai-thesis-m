@@ -50,10 +50,10 @@ tutorialLocations = {
   "manKnife4": (11,7),
   "manCounterLeftBottom": (3,1),
   "manCounterRightBottom": (9,1),
-  "manCounterMiddle1Top": (4,3),
-  "manCounterMiddle1Bottom": (4,5),
-  "manCounterMiddle2Top": (10,3),
-  "manCounterMiddle2Bottom": (10,5),
+  "manCounterMiddle1Bottom": (4,3),
+  "manCounterMiddle1Top": (4,5),
+  "manCounterMiddle2Bottom": (10,3),
+  "manCounterMiddle2Top": (10,5),
 }
 
 tutorialWalkable = [

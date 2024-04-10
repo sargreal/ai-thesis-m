@@ -1,4 +1,4 @@
-/** Map B or complex Burgers Environment **/
+/** Tutorial Environment **/
 
 forall(Ingredient i) {arrangetime(i) := 10; };
 forall(Carryable c) {droptime(c) := 4; };
@@ -23,8 +23,6 @@ instance ToolArea taKnife1,taKnife2,taKnife3,taKnife4;
 instance ArrangeArea counterLeftBottom,counterRightBottom,counterMiddle1,counterMiddle2;
 instance StorageArea lettuceDispenser,tomatoDispenser,cucumberDispenser,plateDispenser;
 
-//Floors
-
 // Manipulation Areas <-> Placement Areas
 connected(counterMiddle1,manCounterMiddle1Top) := true;
 connected(counterMiddle1,manCounterMiddle1Bottom) := true;
@@ -43,7 +41,7 @@ connected(taKnife2,manKnife2) := true;
 connected(taKnife3,manKnife3) := true;
 connected(taKnife4,manKnife4) := true;
 
-// Distancesdistance(manLettuceDispenser,manTomatoDispenser) := 1;
+// Distances
 distance(manLettuceDispenser,manTomatoDispenser) := 1;
 distance(manLettuceDispenser,manPlateDispenser) := 3;
 distance(manLettuceDispenser,manDeliver) := 5;
@@ -364,19 +362,4 @@ knife4.loc := taKnife4;
 
 /** TASKS **/
 
-// Scenario 1
-[start, start+150] contains {order_lettuce_salad(client1);};
-[start+100, start+250] contains {order_lettuce_salad(client2);};
-// [start+200, start+350] contains {order_lettuce_salad(client3);};
-
-
-// Scenario 2
-// [start, start+150] contains {order_lettuce_salad(client1);};
-// [start+75, start+225] contains {order_lettuce_salad(client2);};
-// [start+150, start+300] contains {order_lettuce_salad(client3);};
-
-
-// Scenario 3
-// [start, start+150] contains {order_lettuce_salad(client1);};
-// [start+50, start+200] contains {order_lettuce_salad(client2);};
-// [start+100, start+250] contains {order_lettuce_salad(client3);};
+[start, start+150] contains order_lettuce_salad(client1);
