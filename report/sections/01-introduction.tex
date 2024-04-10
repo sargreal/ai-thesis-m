@@ -1,15 +1,68 @@
 \section{Introduction}\label{sec:introduction}
 
+If you think of everyday life, planning is required in many different environments.
+Be it that you go on vacation and need to plan the trip and attractions to visit, in a warehouse where different parcels need to be moved to different trucks or in a restaurant where several meals must be prepared and served.
+While humans often naively solve those problems, it becomes very complex in large scenarios like warehouses.
+Additionally, with the increasing automation using robots, it is not possible to plan and manage this manually.
 
-\subsection{Problem Statement}
+\ac{AI} planning techniques \citep{ghallabAutomatedPlanningTheory2004}, which have already been introduced in the first wave of \ac{AI} \citep{fikesSTRIPSNewApproach1971}, are a way to automate these problems.
+There are many different ways to represent and solve planning problems and only some of these representations allow the specification of a specific domain.
+For example, the representation of time is very crucial in many problems, but not all representations or planning systems support it.
 
-Most planning algorithms are doing a strict separation between planning and execution.
-While that is fine in most domains, it does not work everywhere.
+Planning techniques can be divided broadly into classical planning, neoclassical planning and control strategies.
+Classical planning uses a set of actions that can be performed and finds a sequence of actions to achieve a goal state.
+Neoclassical planning introduces new ways of representing and solving planning problems, such as with a \ac{CSP}.
+Control strategies such as \ac{HTN} planning allow domain designers to define more strictly which actions are allowed and how they can be used.
+In \ac{HTN} planning specifically, the problem is instead represented using high-level tasks -- similar to recipes in a cookbook -- that can be decomposed into subtasks or actions that can be performed directly.
+This reduces the search space a planning algorithm has to consider and may also guide the algorithm to more preferable plans.
+
+In recent years, \ac{ML} techniques, specifically \ac{RL}, is used more often to solve some of these planning problems.
+However, while \ac{ML} is a helpful tool to optimize planning in a specific domain, it may introduce several problems.
+First, it cannot be verified that the \ac{ML} algorithm acts accordingly and consistently.
+Next, \ac{ML} systems have to be trained in each environment with a significant amount of data and compute time which may not be available.
+And lastly, even if an \ac{ML} system has been trained in the environment, that does not entail that it performs as well in new problem instances.
+
+On the contrary, algorithmic approaches to planning are verifiable and can be used in many different domains.
+However, most planning algorithms assume a strict separation between planning and execution.
+This is especially relevant in dynamic domains where not all tasks are known initially or uncontrollable events may occur.
 Using online planning, a planner can dynamically receive domain updates and adjust the plan accordingly.
-Most variants of online planning consider the case of plan repair or replanning in the case of failures.
-In a dynamic domain it is however very common to receive additional tasks that do sometimes need to be executed in a given time window.
-While replanning approaches may help in the integration of these additional tasks, they will in especially strict deadlines fail, due to the previous tasks being executed too lazy.
-To achieve better success rates, it is necessary to consider the case of new tasks being inserted in the future already during planning.
+Then the individual actions can then be executed in the domain using acting.
+Most variants of online planning consider plan repair or replanning in the case of a planning or action failure.
+However, it is very common to receive additional tasks that sometimes need to be executed in a given time window.
+While replanning approaches may help in the integration of these additional tasks, they will fail for especially strict deadlines, if the previous tasks were executed too lazily.
+To achieve better success rates, an online planning algorithm has to consider the possibility of new, additional tasks being inserted in the future.
 
-The problem considered is therefore a planning domain with temporal constraints, a stream of tasks with deadlines and a hierarchical definition of the domain.
-Given this problem, the goal is to create adaptations of the planning algorithm that increase the success rate of the execution of a plan in the case of shorter deadlines in the stream of tasks.
+
+\subsection{The Game ``Overcooked!''}\label{sec:introduction-domain}
+
+We consider the game ``Overcooked!'' and its sequel ``Overcooked!2'' developed by Ghost Town Games and Ltd. and Team 17 as an example of a dynamic domain throughout this work.
+Both games are very similar, so we do not differentiate between them and call our domain \textit{Overcooked}.
+The game models a restaurant kitchen with many simplifications that make the plan abstraction easier and more directly applicable.
+The core part of the game focuses on collaboration and can be played with up to four players.
+The players are given a small number of recipes in each level, for example, a lettuce salad with tomatoes or a burger with a patty, tomatoes and lettuce.
+The ingredients often need to be prepared (e.g. by chopping or frying them), then arranged on a plate and finally delivered to a conveyor belt that represents the clients.
+During playing, multiple challenges may occur: A fire may break out that has to be extinguished or players may be separated, preventing them from passing ingredients directly to one another.
+In the latter case, ingredients are passed by placing them on a counter or throwing them over obstacles between cooks for preparation and arranging.
+Additionally, the orders are not known in advance but are received during play and have a strict deadline.
+The goal of the game is to successfully finish as many orders as possible; when a deadline is missed it counts as a penalty.
+This game is a perfect playground for evaluating and improving planning approaches, as the game poses challenges similar to real life while offering many optional features that challenge the planning domain creation and planning algorithms.
+With an appropriate interaction layer, the game may also be used to test acting approaches without the need for a physical robot.
+As the game has the option for up to four players, the game can be used to evaluate planning for parallel actions when all cooks are supervised by a single planner, or in a multi-agent setting with possible human-robot interaction. 
+To appropriately fulfill tasks, the agent(s) need to be able to receive tasks during execution.
+The Overcooked \ac{AI} Benchmark \citep{carrollUtilityLearningHumans2019} uses a simplified version of the game and is used for the evaluation of human-\ac{AI} collaboration.
+
+\subsection{Problem Statement and Overview}
+\label{sec:introduction-problem}
+
+
+We consider the planning problem in a domain with temporal constraints and an a-priori unknown stream of tasks with deadlines.
+The goal of this work is to achieve higher success rates in the case of shorter deadlines in the stream of tasks by interleaving new tasks with currently executing tasks.
+We propose a robustness heuristic and the insertion of preparations to achieve this goal in the context of \ac{HTN} planning.
+The results show that our robustness heuristic results in at most a small improvement, while the insertion of preparations can optimally result in a higher success rate.
+
+We first introduce relevant background information on classical and \ac{HTN} planning as well as the concepts of online planning and acting in Section \ref{sec:background}.
+Then we go over the work related to our problem in Section \ref{sec:related-work}.
+% We give an overview of our definition for the domain \textit{Overcooked} in Section \ref{sec:approach-domain} and continue with an Actor Model that supports a stream of tasks in Section \ref{sec:approach-acting}.
+We introduce our approach with the robustness heuristic and preparation insertion together with the application domain and the actor model with a stream of tasks in Section \ref{sec:approach}.
+We then evaluate our approach in the domain \textit{Overcooked} in Section \ref{sec:evaluation} and discuss the evaluation and our approach in Section \ref{sec:discussion}.
+Finally, we conclude this work in Section \ref{sec:conclusion} with a summary and an outlook.

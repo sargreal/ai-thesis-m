@@ -40,10 +40,8 @@ iter, runtime, planning-time, anml-file, opened-states, generated-states, fast-f
 3, 10.791, 10.788, problem/anml/overcooked-hier-dur.tutorial-tomato-salad.pb.anml, 64, 101, 423, 34, 188, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:robust:ord-dec:soca, full, ff, no-ae
 4, 276.294, 276.292, problem/anml/overcooked-hier-dur.burger-deadline.pb.anml, 1480, 1547, 10034, 56, 330, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:robust:ord-dec:soca, full, ff, no-ae
 4, 16.563, 16.561, problem/anml/overcooked-hier-dur.tutorial-tomato-salad.pb.anml, 146, 191, 798, 31, 173, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:robust:ord-dec:soca, full, ff, no-ae
-0, 44.987, 44.905, problem/anml/overcooked-hier-dur.burger-deadline.pb.anml, 56, 126, 386, 50, 358, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:ord-dec:robust:soca, full, ff, no-ae
 0, TIMEOUT, 1000.003, problem/anml/overcooked-hier-dur.tutorial-salads.pb.anml, 21292, 21336, 133589, -, -, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:ord-dec:robust:soca, full, ff, no-ae
 0, 13.588, 13.585, problem/anml/overcooked-hier-dur.tutorial-tomato-salad.pb.anml, 44, 85, 229, 42, 199, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:ord-dec:robust:soca, full, ff, no-ae
-1, TIMEOUT, 1000.101, problem/anml/overcooked-hier-dur.burger-deadline.pb.anml, 3636, 3711, 16881, -, -, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:ord-dec:robust:soca, full, ff, no-ae
 1, 13.407, 13.405, problem/anml/overcooked-hier-dur.tutorial-tomato-salad.pb.anml, 33, 76, 255, 33, 185, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:ord-dec:robust:soca, full, ff, no-ae
 2, 13.393, 13.391, problem/anml/overcooked-hier-dur.tutorial-tomato-salad.pb.anml, 32, 74, 213, 32, 199, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:ord-dec:robust:soca, full, ff, no-ae
 3, 10.374, 10.373, problem/anml/overcooked-hier-dur.tutorial-tomato-salad.pb.anml, 38, 80, 267, 36, 192, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:ord-dec:robust:soca, full, ff, no-ae
@@ -84,3 +82,8 @@ iter, runtime, planning-time, anml-file, opened-states, generated-states, fast-f
 2, 12.773, 12.77, problem/anml/overcooked-hier-dur.tutorial-salad.pb.anml, 20, 44, 155, 20, 97, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:ord-dec:robust:soca, full, ff, no-ae
 3, 11.397, 11.393, problem/anml/overcooked-hier-dur.tutorial-salad.pb.anml, 23, 50, 156, 23, 115, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:ord-dec:robust:soca, full, ff, no-ae
 4, 9.701, 9.699, problem/anml/overcooked-hier-dur.tutorial-salad.pb.anml, 21, 45, 147, 21, 96, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:ord-dec:robust:soca, full, ff, no-ae
+0, TIMEOUT, 1000.134, problem/anml/overcooked-hier-dur.burger-deadline.pb.anml, 4989, 5086, 28117, -, -, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:ord-dec:robust:soca, full, ff, no-ae
+1, TIMEOUT, 1000.237, problem/anml/overcooked-hier-dur.burger-deadline.pb.anml, 4351, 4414, 28300, -, -, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:ord-dec:robust:soca, full, ff, no-ae
+2, 29.131, 29.128, problem/anml/overcooked-hier-dur.burger-deadline.pb.anml, 68, 156, 419, 68, 339, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:ord-dec:robust:soca, full, ff, no-ae
+3, TIMEOUT, 1000.097, problem/anml/overcooked-hier-dur.burger-deadline.pb.anml, 4809, 4874, 21092, -, -, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:ord-dec:robust:soca, full, ff, no-ae
+4, 28.042, 28.04, problem/anml/overcooked-hier-dur.burger-deadline.pb.anml, 74, 166, 472, 72, 327, earliest:threats:hier-fifo:ogf:abs:lcf, dfs:ord-dec:robust:soca, full, ff, no-ae

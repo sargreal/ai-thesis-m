@@ -1,3 +1,20 @@
 \begin{abstract}
 
+  % Planning in dynamic domains is challenging
+  HTN planning in a dynamic domain with a-priori unknown tasks and uncontrollable changes is a challenging problem.
+  % Interleaving
+  In particular, challenges arise, when the unknown tasks include deadlines as it will in some cases require interleaving a new task with an already existing plan.
+  % Overcooked 
+  We introduce a hierarchical domain definition of the game ``Overcooked!'' as an example of a dynamic domain with a stream of tasks.
+  There the task is to fulfill dish orders with strict deadlines using up to four cooks.
+  % Stream of Tasks
+  We refine the actor model of the HTN planning system FAPE to support a stream of tasks.
+  We aim to solve the problem of handling the stream of tasks by introducing two methods that optimize plans by anticipating the addition of new tasks.
+  % robustness heuristic and preparation insertion
+  First, we present a new heuristic that evaluates the robustness of a plan in the case of action delays that may arise when interleaving the current plan with a new task.
+  Second, we propose a method that inserts preparations for possible future tasks into the current plan by using the hierarchal domain definition.
+  % Results
+  We find that our robustness heuristic only distributes some of the tasks between actors in the domain but does incentivize plans that are robust enough for the insertion of new tasks.
+  Our preparation insertions achieve the interleaving of tasks and will succeed more likely in the case of tasks that have stricter deadlines. 
+  Both approaches cannot outperform the optimal solution that is acquired by optimizing the overall makespan.
 \end{abstract}

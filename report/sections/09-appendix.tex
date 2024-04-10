@@ -1,7 +1,11 @@
 %
 \appendix
 
-\section{Overcooked!2 Domain Definition}
+\section{Supplementary Material}
+
+\todo[inline]{describe whats on the CD and reference git repos}
+
+\section{Overcooked Domain Definition}
 \label{app:domain}
 
 This domain definition is only a partial implementation of the game, focusing on the most important parts.
@@ -85,7 +89,7 @@ type Nori < Ingredient;
 type BurgerBun < Ingredient;
 \end{anmlcode}
 
-The Ingredient has three inner \todo{Better naming?} subtypes Choppable, Boilable and Fryable.
+The Ingredient has three inner subtypes Choppable, Boilable and Fryable.
 A Choppable has the fluent chopped, a Boilable has the fluent boiled and a Frayable has the fluent fryed.
 The leaf subtypes of Choppable are Shrimp, Fish, Lettuce, Tomato and Cucumber.
 The only leaf subtype for Boilable is Rice.
@@ -116,7 +120,7 @@ type Fryable < Ingredient with {
 type Beef < Fryable;
 \end{anmlcode}
 
-In the Language ANML it is not possible to inherit multiple types, so it is not possible to have an ingredient that is both choppable and fryable.
+In \ac{ANML} it is not possible to inherit multiple types, so it is not possible to have an ingredient that is both choppable and fryable.
 
 The Domain further contains several constant functions.
 
@@ -302,8 +306,8 @@ action a_fry(Cook c, Fryable f, Pan p) {
 
 \subsection{Methods}
 
-Methods are used in HTN to define hierarchical decompositions of Tasks.
-In ANML these use the same action keyword, but contain one or many \verb|:decomposition| blocks.
+Methods are used in \ac{HTN} to define hierarchical decompositions of Tasks.
+In \ac{ANML} these use the same action keyword, but contain one or many \verb|:decomposition| blocks.
 
 The method $m\_get\_to$ is an abstraction of $a\_move$, and has two decompositions.
 The first is used when a person is already at the desired location, and the other one defines that they have to move there.
@@ -323,7 +327,11 @@ action m_get_to(Person p, ManArea to) {
 };
 \end{anmlcode}
 
-\section{Environment Definition}
+\section{Environment Definitions}
 \label{app:environments}
 
-\todo{Appendix Environments}
+\subsection{Tutorial Level}
+\anmlFile{../problem/anml/overcooked-hier-dur.tutorial.pb.anml}{The \textit{Overcooked} environment ``tutorial level''}{}
+
+\subsection{Complex Map}
+\anmlFile{../problem/anml/overcooked-hier-dur.complex.pb.anml}{The \textit{Overcooked} environment ``complex map''}{}

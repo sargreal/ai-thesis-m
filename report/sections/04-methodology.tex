@@ -2,34 +2,37 @@
 
 % Problem definition
 
-We formulate the planning problem in the domain ``Overcooked'' as a temporal HTN planning problem in the language ANML in Section \ref{sec:approach-domain}.
+We formulate the planning problem in the domain \textit{Overcooked} as a temporal HTN planning problem in \ac{ANML} in Section \ref{sec:approach-domain}.
 We rely on acting to be able to respond to tasks that are received after the beginning of execution.
-The architecture for acting in FAPE \cite{bit-monnotTemporalHierarchicalModels2016a} is extended to handle this stream of tasks (see Section \ref{sec:approach-acting}).
+The architecture for acting in \ac{FAPE} \cite{bit-monnotTemporalHierarchicalModels2016a} is extended to handle this stream of tasks (see Section \ref{sec:approach-acting}).
 
-The particular problem to solve is that the received tasks have associated deadlines, that may prove impossible to achieve.
+The particular problem to solve is that the received tasks have associated deadlines, which may prove impossible to achieve when simply solving tasks in sequence.
 The goal is to optimize the current plans, such that the new tasks can be inserted successfully.
 We consider two options for solving this optimization problem:
 
 \begin{enumerate}
-    \item In Section \ref{sec:approach-robustness} we introduce a heuristic for the robustness of a plan. This is expected to increase the ability to insert a new task at a later time point
+    \item In Section \ref{sec:approach-robustness} we introduce a heuristic for the robustness of a plan. 
+    This is expected to increase the ability to insert a new task at a later point in time
     \item In Section \ref{sec:approach-preparation} we then introduce a preparation algorithm that uses the hierarchical domain definition to determine which tasks can be prepared given a set of possible tasks that may be received.
 \end{enumerate}
 
-\subsection{Domain Definition}
+\subsection{\textit{Overcooked} Domain Definition}
 \label{sec:approach-domain}
 
-In this Section, we define the ``Overcooked'' domain in the language ANML \cite{smithANMLLanguage2008} that is used by FAPE.
-We only present an overview and the relevant decisions here, the full domain is available in Appendix \ref{app:domain}.
+In this Section, we define the \textit{Overcooked} domain in \ac{ANML} \cite{smithANMLLanguage2008} that is used by FAPE.
+We only present an overview and the relevant decisions here.
+The full domain is available in Appendix \ref{app:domain}.
 
+\todo{Hierarchy?}
 The constants of the domain such as cooks or ingredients are defined as a type hierarchy.
-FAPE does not support multiple inheritance, so an ingredient cannot be choppable and fryable at the same time.
+\ac{FAPE} does not support multiple inheritance, so an ingredient cannot be choppable and fryable at the same time.
 We add relevant fluents to the types such as the location of an ingredient.
 
 We define the durations of actions as constant functions so that they can be set for each problem and also be changed between different instances.
 Additionally, all of our actions are task-dependent (marked by the keyword \verb|motivated|), unless stated otherwise.
 
 
-We define 7 low-level actions listed in Table \ref{tab:approach-domain-basic-actions}.
+We define seven low-level actions listed in Table \ref{tab:approach-domain-basic-actions}.
 All low-level actions are prefixed with \verb|a_| to differentiate them from high-level actions with the same name.
 The low-level actions include only the necessary arguments to specify the action, the variables necessary for the completion are included as constants in the action.
 For instance the action \verb|a_drop| only specifies a person that drops something it carries.
@@ -44,7 +47,7 @@ The new location of the carryable is defined as the placement area that is conne
     \verb|a_chop(Cook,Choppable,Knife)| & \verb|a_boil(Boilable,Pot)| \\
     \verb|a_fry(Fryable,Pan)|
   \end{tabular}
-  \caption{Low-level actions in the domain ``Overcooked''}
+  \caption{Low-level actions in the domain \textit{Overcooked}}
   \label{tab:approach-domain-basic-actions}
 \end{table}
 
@@ -61,7 +64,7 @@ The new location of the carryable is defined as the placement area that is conne
 \end{figure}
 
 We define the action \verb|a_move(Person,ManArea)| only with a target, to reduce the planning cost spent on it.
-It is then like a teleportation from the current area to the destination, but the duration can be set using \verb|distance(ManArea,ManArea)|.
+The action behaves like a teleportation from the current area to the destination, but the duration can be set using \verb|distance(ManArea,ManArea)|.
 If some duration is not defined, it is not possible to move between those locations.
 This duration can then be the cost of moving between these areas.
 We also consider two modifications of the action \verb|a_move|.
@@ -81,16 +84,14 @@ A cook is not directly necessary for the actions \verb|a_boil| and \verb|a_fry|.
     \verb|m_prepare_tableware(Tableware)| & \verb|m_arrange(Ingredient,Tableware)| \\
     \verb|m_deliver(Tableware,Client)|
   \end{tabular}
-  \caption{High-level actions in the domain ``Overcooked''}
+  \caption{High-level actions in the domain \textit{Overcooked}}
   \label{tab:approach-domain-combined-actions}
 \end{table}
 
-We define 9 high-level totally-ordered actions listed in Table \ref{tab:approach-domain-combined-actions} that define all possible interactions required by an order.
+We define nine high-level totally-ordered actions listed in Table \ref{tab:approach-domain-combined-actions} that define all possible interactions required by an order.
 The two actions \verb|m_get_to| and \verb|m_fetch| require a specific cook or person, while the other actions abstract from a specific cook.
 
-We use several common patterns to define these actions.
-\todo{do we use more?}
-First, all of these high-level actions have a first empty decomposition that only includes the actions post conditions.
+We use a common pattern in \ac{HTN} problems, which is that all of the high-level actions have a first empty decomposition that only includes the actions post conditions.
 For example, the action \verb|m_get_to| has as the first decomposition the persistence assertion that the person is at the target area (see Listing \ref{lst:approach-default}).
 
 \begin{figure}
@@ -106,7 +107,7 @@ For example, the action \verb|m_get_to| has as the first decomposition the persi
 As we have previously defined that the actions \verb|a_boil| and \verb|a_fry| do not require a cook, we need to enforce that the processed ingredient is picked up before it becomes overcooked.
 This is done by adding a time constraint on the subtasks.
 For the action \verb|m_fry|, this time constraint is \verb|end(fetch) <= end(fry) + 30|, meaning that the ingredient must be picked up at most 30 time steps after the end of frying (see Listing \ref{lst:approach-fry}).
-FAPE does not allow using functions here, so the time, until something is overcooked has to be fixed here.
+\ac{FAPE} does not allow using functions here, so the time, until something is overcooked has to be fixed here.
 We use the value 30.
 
 \begin{figure}
@@ -133,17 +134,17 @@ We use the value 30.
     \verb|order_lettuce_tomato_cucumber_salad(Client)|  \\
     \verb|order_lettuce_tomato_burger(Client)|
   \end{tabular}
-  \caption{Orders in the domain ``Overcooked''. These are also high-level actions}
+  \caption{Orders in the domain \textit{Overcooked} which are considered to be high-level actions.}
   \label{tab:approach-domain-orders}
 \end{table}
 
 
-Last, we define the orders, that have as subtasks the high-level actions that are needed to fulfill a specific order (see Table \ref{tab:approach-domain-orders}).
+Lastly, we define the orders that have as subtasks the high-level actions that are needed to fulfill a specific order (see Table \ref{tab:approach-domain-orders}).
 The orders are all partially-ordered.
 While it is possible to define the orders in total order, that is not an interesting problem to solve under the condition that tasks are received dynamically.
 If all tasks are totally-ordered, it is not beneficial to use different cooks as the subtasks still need to be executed sequentially.
 
-For instance, the order \verb|order_lettuce_tomato_salad| must prepare a plate, a lettuce and a tomato must each be chopped and arranged on the plate, then the plate can be delivered to the client (see Listing \ref{lst:approach-order}).
+For instance, the order \verb|order_lettuce_tomato_salad| must prepare one plate, one lettuce and one tomato must each be chopped and arranged on the plate, then the plate can be delivered to the client (see Listing \ref{lst:approach-order}).
 We enforce the constraints that before something can be arranged, the plate has to be prepared, lettuce and tomato have to be chopped before they are arranged, and finally, everything has to be arranged before the plate can be delivered.
 
 \begin{figure}
@@ -179,37 +180,37 @@ We enforce the constraints that before something can be arranged, the plate has 
 \label{sec:approach-acting}
 
 The core element around which this thesis is built is that tasks may be received during the execution of a plan, so during the acting phase.
-This has been considered in RAE \citep{ghallabAutomatedPlanningActing2016}, but has not been implemented in the FAPE planner \citep{bit-monnotTemporalHierarchicalModels2016a}.
-We extend the theoretical Actor Model in FAPE (see Figure \ref{fig:background-acting-fape}) with a task stream connecting the Activity Manager to other actors or users (see Figure \ref{fig:approach-acting-architecture}).
-Technically this interaction exists in FAPE already through the message $newgoal(g)$, but was not made explicit in the architecture.
+This has been considered in \ac{RAE} \citep{ghallabAutomatedPlanningActing2016}, but has not been implemented in the \ac{FAPE} planner \citep{bit-monnotTemporalHierarchicalModels2016a}.
+We extend the theoretical actor model in \ac{FAPE} (see Figure \ref{fig:background-acting-fape}) with a task stream connecting the activity manager to other actors or users (see Figure \ref{fig:approach-acting-architecture}).
+Technically, this interaction exists in \ac{FAPE} already through the message $newgoal(g)$, but was not made explicit in the architecture.
 
 
-\bild{fig:approach-acting-architecture}{architecture}{Architecture of FAPE with a Stream of Tasks}{12}
+\bild{fig:approach-acting-architecture}{architecture}{Architecture of \ac{FAPE} with a Stream of Tasks}{12}
 
-The interactions between the components are implemented as in FAPE using message passing, with each component being a state machine.
+The interactions between the components are implemented as in \ac{FAPE} using message passing, with each component being a state machine.
 The observation database and the execution of skills are not considered in this work, as no interaction with a platform was introduced.
 For more details on that see \cite{bit-monnotTemporalHierarchicalModels2016a}.
 
 \subsubsection{Stream of Tasks}
 
-Each task that is managed by the Activity Manager is received through the stream of tasks.
-A task in this stream has an optional deadline $t_{deadline}$ and is received by the Activity Manager at a specific time $t_{receive}$.
+Each task that is managed by the activity manager is received through the stream of tasks.
+A task in this stream has an optional deadline $t_{deadline}$ and is received by the activity manager at a specific time $t_{receive}$.
 The task is a temporally qualified ground task $\langle[t_{receive},t_{deadline}] \tau(r_1,\dots,r_n)\rangle$.
 If no deadline is specified, it is $max(\mathbb{N})$.
-Specifically, the task is sent to the Activity Manager using the message $newtask(t)$.
+Specifically, the task is sent to the activity manager using the message $newtask(t)$.
 
 \subsubsection{Activity Manager}
 
-The Activity Manager is the core component of this model, managing all interactions between the other components.
-It is a state machine with the states IDLE, WAITING\_FOR\_PLAN and DISPATCHING.
+The activity manager is the core component of this model, managing all interactions between the other components.
+It is a state machine with the states IDLE, \mbox{WAITING\_FOR\_PLAN} and DISPATCHING.
 In the idle state, it is waiting for tasks to be submitted.
 This is also the initial state.
-It switches from the idle state to the planning state when receiving a task.
-A planning request is sent to the Planner component, and the activity manager waits until a plan has been found.
-Once a plan has been found, the state switches to dispatching, where the plan is continuously dispatched to the available skills.
-When the plan has been fully executed, the state switches back to idle.
+It switches from IDLE to WAITING\_FOR\_PLAN when receiving a task.
+A planning request is sent to the planner component, and the activity manager waits until a plan has been found.
+Once a plan has been found, the state switches to DISPATCHING, where the plan is continuously dispatched to the available skills.
+When the plan has been fully executed, the state switches back to IDLE.
 
-The messages that are available to the Activity Manager are as follows:
+The messages that are available to the activity manager are as follows:
 \begin{itemize}
     \item Incoming:
     \begin{itemize}
@@ -225,7 +226,7 @@ The messages that are available to the Activity Manager are as follows:
     \end{itemize}
 \end{itemize}
 
-With these messages, the state machine of the Activity Manager is defined as follows.
+With these messages, the state machine of the activity manager is defined as follows.
 A visual representation of the state machine is shown in Figure \ref{fig:approach-activity-manager}.
 
 \begin{itemize}
@@ -237,11 +238,6 @@ A visual representation of the state machine is shown in Figure \ref{fig:approac
             \item send $planrequest(\phi)$
             \item switch state to WAITING\_FOR\_PLAN
         \end{enumerate}
-        % \item receive $dispatchsuccess(a)$:
-        % \begin{enumerate}
-        %     \item mark $a$ as executed
-        %     \item stay in state IDLE
-        % \end{enumerate}
     \end{itemize}
     \item WAITING\_FOR\_PLAN
     \begin{itemize}
@@ -290,7 +286,7 @@ A visual representation of the state machine is shown in Figure \ref{fig:approac
     \end{itemize}
 \end{itemize}
 
-\bild{fig:approach-activity-manager}{state_activity_manager}{State machine diagram of the Activity Manager component}{10}
+\bild{fig:approach-activity-manager}{state_activity_manager}{State machine diagram of the activity manager component}{10}
 
 % The receiving of new tasks may occur at any point during the execution, so there are 3 separate points where this may happen.
 % \begin{enumerate}
@@ -322,12 +318,12 @@ The planner uses the following messages:
     \end{itemize}
     \item Outgoing:
     \begin{itemize}
-        \item $newplan(\phi)$: Send a plan that is a solution back to the Activity Manager.
-        \item $noplan$: Indicate to the Activity Manager that no plan exists.
+        \item $newplan(\phi)$: Send a plan that is a solution back to the activity manager.
+        \item $noplan$: Indicate to the activity manager that no plan exists.
     \end{itemize}
 \end{itemize}
 
-The planner has only 2 different states, IDLE and PLANNING.
+The planner has only two different states, IDLE and PLANNING.
 If it receives a new $planrequest(\phi)$, it initiates a search asynchronously and moves to the PLANNING state.
 In the PLANNING state it waits for the search to complete.
 If a search finishes successfully, the planner sends a $newplan(\phi)$ message.
@@ -341,7 +337,7 @@ If the planner receives a new $planrequest(\phi)$ in the PLANNING state, any run
 We do not implement skills in the context of this work but introduce the basics as a reference.
 A skill breaks down the abstract definition of an action into direct manipulations of the environment.
 As such, skills are inherently specific to the planning domain.
-In the ``Overcooked'' domain, this results in 4 basic manipulations, that can be executed in the game.
+In the \textit{Overcooked} domain, this results in four basic manipulations, that can be executed in the game.
 
 \textbf{Movement}: The action \verb|a_move(Person p, ManArea to)| only describes a destination to go to and not the path to take. 
 A shortest path algorithm should be used to find a path that the person can walk until it is at the destination. 
@@ -368,7 +364,7 @@ However, the cooking state should be monitored to avoid overcooking.
 \subsection{Robustness Heuristic}
 \label{sec:approach-robustness}
 
-The robustness heuristic introduces a plan selection strategy that more likely chooses plans where the addition of new tasks in the plan is more likely to succeed.
+The robustness heuristic introduces a plan selection strategy that chooses plans where the addition of new tasks in the plan is more likely to succeed with a higher probability.
 Robustness is generally defined as follows.
 
 \begin{definition}[Robustness]
@@ -386,9 +382,9 @@ However, we allow delays for action time points, during planning or while execut
 When adding new tasks during the execution, it is not beneficial to have large margins between the tasks.
 Therefore, the robustness with respect to adding new tasks is determined by how likely it is that the addition of a new task is possible.
 
-Two cases must be considered: All decomposed actions of the added task will happen after the end of the current plan, or the decomposed actions are at least partially executed during the current plan.
+Two cases must be considered: all decomposed actions of the added task will happen after the end of the current plan, or the decomposed actions be at least partially executed during the current plan.
 In the first case, the success of adding the new task is more likely when the current plan has a shorter makespan.
-In the other case, the plan must be changed substantially.
+In the latter case, the plan must be changed substantially.
 Some existing actions must be pushed back, while the deadline for those tasks must still be fulfilled.
 This works best when there are fewer dependencies between actions, and when the makespan is shorter.
 
@@ -398,7 +394,7 @@ While the end time point of an action may also be delayed, that is not possible 
 Additionally, the end time point is automatically delayed when the start time point is delayed.
 
 \begin{definition}[Delay Perturbation]
-    A chronicle $\phi_1 = (\pi_1,\mathcal{F}_1,\mathcal{C}_1)$ can be changed into a chronicle $\phi_2 = (\pi_2,\mathcal{F}_2,\mathcal{C}_2)$ with a delay perturbation on an action $a \in \pi_1$ by an amount $x$ denoted as $\phi_1 \xrightarrow{a,x}_P \phi_2$ by the addition of a temporal constraint as follows, where $t^a_{start}$ is the starting time point of action $a$, $t^p_{start}$ is the starting time point of the temporal HTN Planning Problem and $mindelay(\phi_1,t^p_{start},t^a_{start})$ is the minimum delay between $t^p_{start}$ and $t^a_{start}$ in $\phi_1$.
+    A chronicle $\phi_1 = (\pi_1,\mathcal{F}_1,\mathcal{C}_1)$ can be changed into a chronicle $\phi_2 = (\pi_2,\mathcal{F}_2,\mathcal{C}_2)$ with a delay perturbation on an action $a \in \pi_1$ by an amount $x$ denoted as $\phi_1 \xrightarrow{a,x}_P \phi_2$ by the addition of a temporal constraint as follows, where $t^a_{start}$ is the starting time point of action $a$, $t^p_{start}$ is the starting time point of the temporal HTN Planning Problem, and $mindelay(\phi_1,t^p_{start},t^a_{start})$ is the minimum delay between $t^p_{start}$ and $t^a_{start}$ in $\phi_1$.
     \begin{align*}
         \pi_2 \leftarrow & \pi_1 \\
         \mathcal{F}_2 \leftarrow & \mathcal{F}_1 \\
@@ -417,7 +413,7 @@ Additionally, the end time point is automatically delayed when the start time po
 % Instead the robustness is calculated using pertubations similarly to the robustness in QCNs.
 
 A new robustness heuristic is then introduced, that is used for node selection during planning.
-A heuristic in FAPE includes the two functions $g(\pi)$ and $h(\pi)$ as it uses the A* search algorithm for node selection.
+A heuristic in \ac{FAPE} includes the two functions $g(\pi)$ and $h(\pi)$ as it uses the A* search algorithm for node selection.
 $g(\pi)$ describes the current cost and $h(\pi)$ describes the remaining cost of the plan.
 $h(\pi)$ can not be estimated for robustness and is therefore left at 0.
 
@@ -432,7 +428,7 @@ $h(\pi)$ can not be estimated for robustness and is therefore left at 0.
     h(\phi) &= 0
 \end{align}
 
-In Equation \ref{eq:approach-g-optimal}, $a$ and $x$ are arbitrarily chosen, to get the most representative outcome.
+In Equation \ref{eq:approach-g-optimal}, $a$ and $x$ are chosen, such that the outcome is representative.
 As it is infeasible to calculate this representative outcome, $a$ and $x$ are chosen randomly in practice, with $a$ being a randomly chosen action in $\pi$ and $x$ being a random variable using a half-normal distribution.
 The distribution variance is chosen as the minimum delay between the start of the action and the end of the plan.
 Additionally, $x$ is at least $1$, as else there would not be a perturbation.
@@ -460,10 +456,10 @@ This heuristic can then be included during planning.
 Preparing parts of a meal is a common strategy in restaurants to handle high loads.
 Due to the nature of the hierarchical plan, the essential subtasks for a task can be gathered.
 For instance, a salad requires that lettuce be chopped.  
-Lettuce can then be chopped when some cook has downtime in a plan.
+Lettuce can be chopped when some cook has downtime in a plan.
 Then, when an order for a salad is received, the lettuce only needs to be put on a plate and served.
 However, the preparations should remain within the bounds of the current plan.
-Otherwise, an unlimited amount of preparations could be inserted, which would first block the Acting Engine from receiving any new tasks and second would correspond to a restaurant that prepares all of the available ingredients even when there are only a few orders.
+Otherwise, an unlimited amount of preparations could be inserted, which would first block the activity manager from receiving any new tasks and second would correspond to a restaurant that prepares all of the available ingredients even when there are only a few orders.
 
 \begin{algorithm}[t]
     \caption{PREPARATIONS: Generation of possible preparations}
@@ -508,7 +504,7 @@ Knowing how often a specific preparation is included can be helpful when choosin
 
 
 \begin{example}
-  Suppose we have $\mathcal{T}_p = \{\mathtt{order\_lettuce\_tomato\_salad}\}$, \\ $\pi=\{\mathtt{m\_chop(lettuce1)}\}$ and the typed ground instances of the problem $D_{Plate}=\{plate1\}$, $D_{Lettuce}=\{lettuce1\}$, $D_{Tomato}=\{tomato1\}$.
+  Suppose we have $\mathcal{T}_p = \{\mathtt{order\_lettuce\_tomato\_salad}\}$, \\ $\pi=\{\mathtt{m\_chop(lettuce1)}\}$ and the typed ground instances of the problem $D_{Plate}=\{\mathtt{plate1}\}$, $D_{Lettuce}=\{\mathtt{lettuce1}\}$, $D_{Tomato}=\{\mathtt{tomato1}\}$.
   The task \verb|order_lettuce_tomato_salad| has only one action template, corresponding to Listing \ref{lst:approach-order}.
   The ground instances that can be prepared are then $\mathcal{T}_s=\{\mathtt{m\_prepare\_tableware(plate1)}, \mathtt{m\_chop(lettuce1)},\\ \mathtt{m\_chop(tomato1)}, \mathtt{m\_arrange(lettuce1)}, \mathtt{m\_arrange(tomato1)}\}$.
   Of these ground instances, $\mathtt{m\_chop(lettuce1)}$ cannot be prepared, as it is already included in $\pi$ and $\mathtt{m\_arrange(tomato1)}$ cannot be prepared, as the dependency $\mathtt{m\_chop(tomato1)}$ is not in $\pi$.
@@ -527,7 +523,7 @@ This procedure is repeated recursively until no plan is found.
 Then the last valid plan is returned.
 
 \begin{algorithm}[t]
-    \caption{PrepPSP: Planning with adding preparations}
+    \caption{PrepPSP: Planning with preparation insertion}
     \label{alg:methodology:prep-planning}
     \KwIn{$P = \langle \Sigma,\phi \rangle$; $\mathcal{T}_p$}
     \KwOut{$\phi'$}
@@ -546,12 +542,12 @@ Then the last valid plan is returned.
 \end{algorithm}
 
 The preparation insertion is similar to action insertion.
-While action insertion is used to support goals or preconditions of tasks using generative planning instead of HTN planning, preparation insertion supports possible future tasks.
+While action insertion is used to support goals or preconditions of tasks using generative planning instead of \ac{HTN} planning, preparation insertion supports possible future tasks.
 The properties of preparation insertion vary significantly compared to task insertion.
 
 
-We propose several concrete implementations of the non-deterministic choose method in algorithm \ref{alg:methodology:prep-planning}.
-We call these implementations preparation selection strategies.
+We propose several concrete implementations of the non-deterministic $choose$ method in algorithm \ref{alg:methodology:prep-planning}.
+We call these implementations preparation selection strategies:
 
 \begin{itemize}
   \item A random selection can be used as an approximation.
@@ -560,8 +556,9 @@ We call these implementations preparation selection strategies.
   \item The time and resources required for a preparation task can be used to find the best combination of tasks to insert.
   The time and resource usage should be calculated as a static analysis before planning.
   \item Only the most common preparations are used.
-    This prevents unnecessary further processing and it is unlikely that 
+    This prevents unnecessary further processing and preparations that are not necessary for most tasks are not prepared.
   \item A statistical or learning model of the environment can be used to predict the most likely tasks.
     Then the preparations can be chosen based on the likelihood of being necessary.
+  \item The previous preparation insertions should be taken into account, to not over-provision one task and under-provision other tasks.
   \item Further metrics can be included based on the domain, like e.g. the storage life of ingredients after being prepared.
 \end{itemize}

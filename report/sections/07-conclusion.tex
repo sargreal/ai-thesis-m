@@ -1,1 +1,40 @@
 \section{Conclusion}\label{sec:conclusion}
+
+In this work, we have presented a temporal \ac{HTN} domain definition for \textit{Overcooked}.
+This domain represents a challenging environment for planning, as it requires tasks that are partially ordered.
+We find that \ac{FAPE} cannot plan two dish orders at once, similar to the observation for classical planning in the same domain \citep{yuxinliuPlanningOvercookedGame2020}.
+
+Next, we have introduced an actor model that is an extension of \ac{FAPE}s actor model \citep{bit-monnotTemporalHierarchicalModels2016a}.
+This extension enables the explicit handling of a stream of tasks.
+We introduced two new strategies to anticipate the receiving of new tasks.
+
+First, we defined a robustness heuristic as a plan selection strategy.
+This heuristic is supposed to incentivize plans that have a shorter makespan and make the addition and interleaving of new tasks more successful.
+We find that it has a small impact on the load distribution between cooks in the \textit{Overcooked} domain.
+It is also able to find solutions when the makespan heuristic is not.
+We do however observe a high variance in the planning time for complex problems.
+
+Second, we define the concept of preparation insertion in \ac{HTN} planning.
+Due to the definition of subtasks in \ac{HTN} planning, we can find subtasks that can be prepared.
+We find that the insertion of preparations likely results in more successful executions compared to not using them.
+We also find that the success of this preparation insertion relies very much on the preparation selection strategy
+
+We identify several points for further research in this context:
+
+\begin{itemize}
+\item Our domain definition for \textit{Overcooked} can be extended to include more of the concepts in the game such as collisions, fires breaking out or washing of used dishes.
+Eventually, we believe that this domain can serve as a relevant benchmark for the combination of planning and acting.
+
+% Acting implementation not working
+\item Due to missing features in the \ac{FAPE} planner, the implementation of the actor framework is not fully working and was therefore not evaluated.
+This has to be further investigated, for instance by using a different planner or adding the missing features, in particular timeline splitting and action removal or the definition of existing actions in the planning problem, to \ac{FAPE}.
+
+% Plan Repair and Replanning
+\item While replanning in \ac{HTN} planning has already been evaluated, there do not exist any studies yet that focus on plan repair in \ac{HTN} planning.
+These two strategies should be further evaluated to find if the statements from classical planning apply to \ac{HTN} planning.
+\end{itemize}
+
+% Acting Competition
+Lastly, we have found that resources on acting are most of the time either theoretical or domain-dependent.
+We think that this may be connected to the fact that the \ac{IPC} only focuses on different planning variants, while most of the other competitions in this context are domain specific competitions and challenges that require a complete system with domain-dependent implementations.
+We suggest that it may be time for a middle ground with acting benchmarks and competitions that incentivize domain-independent systems.

@@ -1,30 +1,13 @@
 \section{Background}\label{sec:background}
 
 This section introduces concepts and definitions relevant to this work.
-Section \ref{sec:background-domain} introduces the applocation domain ``Overcooked'' that is used as a benchmark,
-Section \ref{sec:classical-planning} then introduces classical planning to illustrate the background of HTN planning.
-Then, Section \ref{sec:htn-planning} introduces HTN planning as an extension of Classical planning that is used in this work.
+Section \ref{sec:classical-planning} introduces classical planning to illustrate the background of \ac{HTN} planning.
+Then, Section \ref{sec:htn-planning} introduces \ac{HTN} planning as an extension of classical planning that is used in this work.
 Section \ref{sec:acting} concludes this section by introducing acting and online planning.
 
 % Since the Planner FAPE \citep{bit-monnotFAPEConstraintbasedPlanner2020} is used for the implementation and evaluation, the definitions from \cite{bit-monnotTemporalHierarchicalModels2016a} and \cite{bit-monnotFAPEConstraintbasedPlanner2020} are used as a base throughout the background and approach sections.
 % The definitions are additionally inspired by \cite{ghallabAutomatedPlanningTheory2004} and \cite{hollerGuidingSearchHTN2019}.
 % The Planning Domain Definition Language ANML is used to represent the Domain, as it is also used by FAPE.
-
-\subsection{Domain Overcooked}\label{sec:background-domain}
-
-The application domain is the game ``Overcooked'' developed by Ghost Town Games and Ltd. and Team 17.
-The game models a restaurant kitchen with many simplifications that make the plan abstraction easier and more directly applicable.
-The player is given a small number of recipes in each level, for example, a lettuce salad with tomatoes and a burger with a patty, tomatoes and lettuce.
-The ingredients often need to be prepared (e.g. by chopping or frying), then arranged on a plate and finally delivered to a conveyor belt that represents the clients.
-During playing, fire may break out that has to be extinguished or the players may be separated and can only pass ingredients by placing them on a counter or throwing them to the other cooks for them to prepare or arrange the ingredients.
-Additionally, the orders are not known in advance but are received during play and have a strict deadline.
-The goal of the game is to successfully finish as many orders as possible; when a deadline is missed it counts as a penalty.
-The core part of the game focuses on collaboration and can be played with up to 4 players.
-This game is a perfect playground for evaluating and improving planning approaches, as the game poses challenges similar to real life while offering many optional features that challenge the planning domain creation and planning algorithms.
-With an appropriate interaction layer, the game may also be used to test acting approaches without the need for a physical robot.
-As the game has the option for up to 4 players, the game can be used to evaluate planning for parallel actions when all cooks are supervised by a single planner, or in a multi-agent setting with possible human-robot interaction. 
-To appropriately fulfill tasks, the agent(s) need to be able to receive tasks during execution.
-The Overcooked AI Benchmark \citep{carrollUtilityLearningHumans2019} uses a simplified version of the game and is used for the evaluation of human-AI collaboration.
 
 % The Domain is defined in the DDL Language ANML.
 % In the following I will show the most important aspects of the domain that are also considered later.
@@ -34,7 +17,7 @@ The Overcooked AI Benchmark \citep{carrollUtilityLearningHumans2019} uses a simp
 
 Classical planning \citep{ghallabAutomatedPlanningTheory2004}, first introduced by STRIPS \citep{fikesSTRIPSNewApproach1971}, is the widely adopted approach to planning upon which most extensions and other planning approaches build.
 % While there are different ways of representing the problem in classical planning exist, they 
-A classical planning problem consists of a domain (in our case ``Overcooked'') and a specific planning problem, e.g., that a client needs to have a burger in the end.
+A classical planning problem consists of a domain (in our case \textit{Overcooked}) and a specific planning problem, e.g., that a client needs to have a burger in the end.
 The domain specifies variables and state transition functions, called actions, while the problem gives an initial state and a goal state.
 Then, a planner has to find a sequence of actions, called a plan $\pi$, that can transform the initial state to the goal state.
 The following definitions are based on \cite{ghallabAutomatedPlanningTheory2004} and \cite{hollerGuidingSearchHTN2019}.
@@ -55,7 +38,7 @@ The following definitions are based on \cite{ghallabAutomatedPlanningTheory2004}
 
 An action is an expression of the form $a(r_1,\dots,r_n)$ where $a$ is the action symbol and $r_1,\dots,r_n$ are terms (also called parameters).
 The parameters define the exact preconditions and effects of an action.
-Constant symbols $D$ are symbols that describe Objects in the domain such as a $Cook$ and are possible instantiations for terms $r$.
+Constant symbols $D$ are symbols that describe objects in the domain such as a $Cook$ and are possible instantiations for terms $r$.
 Typing is a commonly used extension for planning that organizes constants in the set $L$.
 A type $D_t \subseteq D$ restricts variables in actions to be of a specific type such as $Cooks$.
 Types can be composed of other types by union or intersection (e.g. $Persons=Cooks\cup Clients$)
@@ -69,22 +52,22 @@ Types can be composed of other types by union or intersection (e.g. $Persons=Coo
   \end{itemize}
 \end{definition}
 
-Given a Problem $P$, the task in classical planning is to find a sequence of actions $\pi = \{a_1,\dots,a_n\}$ that transform the initial state into the goal state.
+Given a problem $P$, the task in classical planning is to find a sequence of actions $\pi = \{a_1,\dots,a_n\}$ that transform the initial state into the goal state.
 The goal state $g$ only defines which propositional environment variables must be included in the final state, but other variables may be present as well.
 
 \subsection{HTN Planning}\label{sec:htn-planning}
 
-Hierarchical Task Network (HTN) planning is a planning paradigm that allows for the specification of complex tasks by the definition of subtasks.
+\acf{HTN} planning is a planning paradigm that allows for the specification of complex tasks by the definition of subtasks.
 Therefore it is viewed as a control strategy for planning \citep[chap.~11]{ghallabAutomatedPlanningTheory2004}.
-Generally, the goal in HTN planning is to decompose complex tasks into primitive executable actions.
-For instance, preparing a simple burger in ``Overcooked'' requires a bun, a burger patty and lettuce.
+Generally, the goal in \ac{HTN} planning is to decompose complex tasks into primitive executable actions.
+For instance, preparing a simple burger in \textit{Overcooked} requires a bun, a burger patty and lettuce.
 Each of these ingredients may involve multiple preparation steps like chopping or frying, that again can be grouped into subtasks themselves.
 Eventually, we are left with an executable sequence of simple steps to create the requested burger.
 This is conceptually different from classical planning, as it defines tasks to execute instead of a goal state to achieve.
 
 
-% The HTN planning paradigm was first introduced by \cite{erol1994htn} and has since been used in a variety of domains, including robotics \citep{ghallab1998pddl, nau2003shop2, cashmore2008htn, cashmore2015htn}, video games \citep{ontanon2015survey}, and natural language processing \citep{zettlemoyer2005learning, wang2006learning, wang2007learning, wang2008learning, wang2010learning, wang2011learning, wang2012learning, wang2013learning, wang2014learning, wang2015learning, wang2016learning, wang2017learning, wang2018learning, wang2019learning, wang2020learning}.
-% HTN Planning can be seen as a guided form of traditional planning, since the task structure is given.
+% The \ac{HTN} planning paradigm was first introduced by \cite{erol1994htn} and has since been used in a variety of domains, including robotics \citep{ghallab1998pddl, nau2003shop2, cashmore2008htn, cashmore2015htn}, video games \citep{ontanon2015survey}, and natural language processing \citep{zettlemoyer2005learning, wang2006learning, wang2007learning, wang2008learning, wang2010learning, wang2011learning, wang2012learning, wang2013learning, wang2014learning, wang2015learning, wang2016learning, wang2017learning, wang2018learning, wang2019learning, wang2020learning}.
+% \ac{HTN} Planning can be seen as a guided form of traditional planning, since the task structure is given.
 
 
 % \cite{hollerGuidingSearchHTN2019}:
@@ -103,8 +86,8 @@ There exist primitive tasks where $\tau$ is an action symbol and nonprimitive ta
 
 A task network $tn$ is called primitive if all of the task nodes refer to primitive tasks. 
 
-\begin{definition}[HTN Planning Domain]
-  An HTN planning domain is a tuple $\Sigma=\langle \mathcal{L}, \mathcal{O}, \mathcal{M}, \delta \rangle$.
+\begin{definition}[\ac{HTN} Planning Domain]
+  An \ac{HTN} planning domain is a tuple $\Sigma=\langle \mathcal{L}, \mathcal{O}, \mathcal{M}, \delta \rangle$.
   $\mathcal{L},\mathcal{O}$ are defined as in classical planning. 
   $\mathcal{M}$ is a set of methods $(\tau,tn), \tau \in \mathcal{O}$, where $\tau$ is nonprimitive, that describe possible decompositions from one task into a task network.
   % A task network $tn$ is a triple $(T,\prec,\alpha)$.
@@ -126,8 +109,8 @@ A task network $tn$ is called primitive if all of the task nodes refer to primit
   \label{def:htn-task-dec}
 \end{definition}
 
-\begin{definition}[HTN Planning Problem]
-  An HTN Planning Problem is defined as a tuple $P=\langle \Sigma, s_0, tn_I \rangle$.
+\begin{definition}[\ac{HTN} Planning Problem]
+  An \ac{HTN} Planning Problem is defined as a tuple $P=\langle \Sigma, s_0, tn_I \rangle$.
   \begin{itemize}
     \item $s_0 \subset L$ is the initial state.
     \item $tn_I$ is the initial task network, consisting of the tasks that must be executed.
@@ -137,18 +120,16 @@ A task network $tn$ is called primitive if all of the task nodes refer to primit
 \end{definition}
 
 
-% The search through an HTN Planning problem may be done in two conceptually different ways.
+% The search through an \ac{HTN} Planning problem may be done in two conceptually different ways.
 % A State-Based Search is the classical approach to solving planning problems.
 % A state expansion $f : (L,tn) \rightarrow 2^(L,tn)$ creates a new state for each decomposable task $t$ in the current task network $tn_i$.
 % A task is only decomposable if there exists a method $m = (c,tn) \in M$ such that $\delta(m)$
 % The planning is finished when all task names in the current task network $tn_i$ are primitive and there is a sequence of the tasks in $tn_i$ that is consistent with its ordering relations.
 
-The HTN planning problem is solved by decomposing the initial task network into an executable plan.
-Solving total order problems has double EXPTIME and EXPSPACE-hard complexity, while partial order problems are undecidable \citep{erolHTNPlanningComplexity1994}.
-\todo{reference for EXPTIME?}
+The \ac{HTN} planning problem is solved by decomposing the initial task network into an executable plan.
+\cite{erolHTNPlanningComplexity1994} find that solving total order problems has double EXPTIME and EXPSPACE-hard complexity \citep{papadimitriouComputationalComplexity2003}, while partial order problems are undecidable.
 
-
-\begin{definition}[HTN Planning Solution]
+\begin{definition}[\ac{HTN} Planning Solution]
   If $tn = (T,\prec,\alpha)$ is primitive, then a plan $\pi = \{a_1,\dots,a_n\}$ is a solution for $P$ if all of the following conditions hold:
   \begin{itemize}
     \item The actions in $\pi$ correspond to the tasks in $T$
@@ -180,21 +161,21 @@ Solving total order problems has double EXPTIME and EXPSPACE-hard complexity, wh
   \Else{\Return{FAIL}}
 \end{algorithm}
 
-There are two conceptually different approaches to arriving at a plan $\pi$ for an HTN Planning Problem. 
-First, the State-Space approach as in \cite{nauSHOPSimpleHierarchical1999} is shown in algorithm \ref{alg:background:shop}.
+There are two conceptually different approaches to arriving at a plan $\pi$ for an \ac{HTN} planning problem. 
+First, the \ac{SSP} approach as in \cite{nauSHOPSimpleHierarchical1999} is shown in algorithm \ref{alg:background:shop}.
 The search is executed as a forward search and is started with an initial state $s_0$.
 The first task in the task network is selected based on the ordering $\prec$ in the forward search.
 Primitive tasks are applied directly and change the state, nonprimitive tasks are decomposed and change the task network.
 The algorithm is then applied recursively for the new state and task network.
 
-Second, the Plan-Space approach as in \citet[chap.~5]{ghallabAutomatedPlanningTheory2004} is shown in algorithm \ref{alg:background:psp}.
+Second, the \ac{PSP} approach as in \citet[chap.~5]{ghallabAutomatedPlanningTheory2004} is shown in algorithm \ref{alg:background:psp}.
 The search problem here is abstracted from states and the search space consists of partial plans.
-In HTN planning, a task network that is not necessarily primitive is a partial plan.
+In \ac{HTN} planning, a task network that is not necessarily primitive is a partial plan.
 As such this approach is similar to constraint solving as it is a search over all possible solutions.
-The flaws shown in the algorithm may be unrefined tasks or causal threats \todo{Explain more?}.
+The flaws shown in the algorithm may be unrefined tasks or causal threats\footnote{During planning, causal links are added between actions to state that the cause of an action is the effect of another action, causal threats are then possible violations of these links.}.
 Resolvers are modifications of a partial task network, that resolve the possible flaws.
 They are chosen nondeterministically to expand the task network into a set of search nodes.
-The representation of $\delta$ in Plan-Space planning is often implemented using Constraint Satisfaction instead of direct manipulation of states \citep{georgievskiHTNPlanningOverview2015}.
+The representation of $\delta$ in \ac{PSP} is often implemented using Constraint Satisfaction instead of direct manipulation of states \citep{georgievskiHTNPlanningOverview2015}.
 
 \begin{algorithm}[t]
   \caption{PSP}
@@ -215,46 +196,46 @@ The representation of $\delta$ in Plan-Space planning is often implemented using
 
 
 
-% To create $\pi$ the HTN Planning Problem is formulated as a search.
+% To create $\pi$ the \ac{HTN} Planning Problem is formulated as a search.
 % The search may be done in two different ways.
 % State-Based Planning is similar to the classical approach of solving planning problems.
 % The alternative is Plan-Space Planning which uses Flaws and Resolvers.
-% In this case, the constraints defined by $\delta$ and $M$ are added to a dynamic CSP.
+% In this case, the constraints defined by $\delta$ and $M$ are added to a dynamic \ac{CSP}.
 % The current Search node is called a Partial Plan $\hat{\pi}$, and may contain Flaws.
-% If there are no Flaws left and the CSP is consistent, then $\hat{\pi}_i = \pi$.
+% If there are no Flaws left and the \ac{CSP} is consistent, then $\hat{\pi}_i = \pi$.
 % A Flaw can be one of:
 % \begin{itemize}
-%   \item Threat: There is a potential inconsistency in the CSP
-%   \item UnboundVariable: The domain of a variable in the CSP contains more than one value. This occurs when there are multiple possible instantiations of a task, method or action.
+%   \item Threat: There is a potential inconsistency in the \ac{CSP}
+%   \item UnboundVariable: The domain of a variable in the \ac{CSP} contains more than one value. This occurs when there are multiple possible instantiations of a task, method or action.
 %   \item UnmotivatedAction: An action is not part of a task decomposition. This may happend when a task is removed from the network during replanning.
 %   \item UnrefinedTask: A task is not yet decomposed.
 % \end{itemize}
 
-% HTN Planning problems can be defined in several languages, such as the SHOP syntax, supported by SHOP-Like planners, ANML Language - supported by the FAPE planner and HDDL Syntax which is expected to become the standard.
-% While these languages mostly support the same features, it is important to note that HDDL currently only supports a small subset of the PDDL syntax it is based on, primarily because the most HTN planners do not support temporal or resource planning.
-% The HDDL 2.1 proposal adds the support for Temporal planning, but there is currently no public system that supports this syntax.
+% \ac{HTN} Planning problems can be defined in several languages, such as the SHOP syntax, supported by SHOP-Like planners, ANML Language - supported by the FAPE planner and \ac{HDDL} Syntax which is expected to become the standard.
+% While these languages mostly support the same features, it is important to note that \ac{HDDL} currently only supports a small subset of the \ac{PDDL} syntax it is based on, primarily because the most \ac{HTN} planners do not support temporal or resource planning.
+% The \ac{HDDL} 2.1 proposal adds the support for Temporal planning, but there is currently no public system that supports this syntax.
 % The most expressive Syntax is the ANML-Language, which also supports dynamic fluents that change over time.
-% This Syntax is used throughout the whole thesis, as it supports Time for HTN Planning and is much less verbose than SHOP.
+% This Syntax is used throughout the whole thesis, as it supports Time for \ac{HTN} Planning and is much less verbose than SHOP.
 % The FAPE planner is therefore used as a basis for this work.
 
 \subsubsection{Temporal HTN Planning}\label{sec:temporal-htn-planning}
 
-Temporal HTN Planning includes explicit information about time in the domain.
+Temporal \ac{HTN} planning includes explicit information about time in the domain.
 This allows modeling task durations, concurrent execution, start points and deadlines for tasks.
-It is common to encode a planning problem as a CSP \citep[chap.~8]{ghallabAutomatedPlanningTheory2004}.
-\cite{stockHierarchicalHybridPlanning2015} introduced the notion of a MetaCSP, that solves several CSPs, in this case, one for variable bindings, and a Temporal Network managing the temporal constraints over time points.
-This approach is also used in FAPE \citep{bit-monnotTemporalHierarchicalModels2016a}.
-The main components required to model the Temporal HTN Planning Problem are introduced in the following paragraphs. 
+It is common to encode a planning problem as a \ac{CSP} \citep[chap.~8]{ghallabAutomatedPlanningTheory2004}.
+\cite{stockHierarchicalHybridPlanning2015} introduced the notion of a MetaCSP, that solves several \ac{CSP}s, in their case, one for variable bindings, and a \ac{STN} \\citep{dechterTemporalConstraintNetworks1991} managing the temporal constraints on time points.
+This approach is also used in \ac{FAPE} \citep{bit-monnotTemporalHierarchicalModels2016a}.
+The main components required to model the temporal \ac{HTN} planning problem are introduced in the following paragraphs. 
 
 
-Time is represented quantitatively using time points. % as in Simple Temporal Networks (STempN)  \citep{dechterTemporalConstraintNetworks1991}.
+Time is represented quantitatively using time points. % as in \ac{STN}  \citep{dechterTemporalConstraintNetworks1991}.
 A time point is designated by a temporal variable (e.g. $t_1$).
 Constraints over temporal variables can be expressed using the simple arithmetic operators $=,\leq,\geq$ to specify absolute  (e.g. $t_1 \geq 10$) or relative constraints (e.g. $t_1 + 5 \leq t_2$).
 The temporal variables are attached to events like the start of an action or an instant at which a condition must hold.
 
 A nontemporal variable $c \in D_t$ is a variable with a domain $dom(c) \subseteq D_t$.
 A numeric variable $i$ has a domain $dom(i) \subset \mathbb{N}$ which is a finite subset of integers.
-A constraint over a set of variables $\{v_1,\dots ,v_n \}$ is a pair $(\langle v_1, \dots, v_n \rangle, \gamma_R)$ where $\gamma_R \subseteq dom(v_1) \times \dots \times dom(v_n)$ is the relation of the constraint, giving the allowed values for the tuple of variables.
+A constraint over a set of variables $\{v_1,\dots,v_n \}$ is a pair $(\langle v_1, \dots, v_n \rangle, \gamma_R)$ where $\gamma_R \subseteq dom(v_1) \times \dots \times dom(v_n)$ is the relation of the constraint, giving the allowed values for the tuple of variables.
 $\gamma_R$ can be given as a table of allowed values or a function, e.g., $\textit{distance}(d, d') = \Delta$ is met when $\Delta$ is the distance between $d$ and $d'$.
 Numeric variables can also appear in temporal constraints.
 For instance $(\textit{distance}(d, d') = \Delta) \land (t_s + \Delta \leq t_e)$ describes a constraint that defines that the delay between $t_s$ and $t_e$ is equal to the distance $\Delta$ between $d$ and $d'$.
@@ -308,7 +289,7 @@ A timeline is consistent if there exists a consistent instantiation of it, and i
 
 
 \begin{definition}[Chronicle]
-  A chronicle is a triple $\phi = (\pi,\mathcal{F},\mathcal{C})$ where $\pi$ is a partial plan composed of action instances and unrefined tasks and $(\mathcal{F},\mathcal{C})$ is a set of timelines.
+  A chronicle is a triple $\phi = (\pi,\mathcal{F},\mathcal{C})$ where $\pi$ is a partial plan composed of action instances and unrefined tasks and $(\mathcal{F},\mathcal{C})$ is a set of timelines.\footnote{Technically it is a unification of timelines, but all background literature calls it a set of timelines.}
 \end{definition}
 The chronicle in \cite{bit-monnotFAPEConstraintbasedPlanner2020} is a temporal and hierarchical extension of partial plans in plan-space planning approaches \citep[chap.~5]{ghallabAutomatedPlanningTheory2004} and extends the notion of chronicles in \cite[sec.~4.2.4]{ghallabAutomatedPlanningActing2016} with the member $\pi$ to keep track of tasks and actions.
 Since there is no explicit task network, the partial plan uses the same symbol $\pi$ as in Definition \ref{def:htn-sol} for a set of actions and unrefined tasks.
@@ -318,10 +299,10 @@ Since there is no explicit task network, the partial plan uses the same symbol $
 % While there are no Methods, an Action with subtasks is equivalent to a method.
 % An Action Template defines the properties of an Action.
 
-Tasks, Methods and Actions are defined differently in FAPE compared to the common HTN Approach.
-Action Templates combine the notion of an Action and a Method.
+Tasks, methods and actions are defined differently in \ac{FAPE} compared to the common \ac{HTN} approach.
+Action templates combine the notion of an action and a method.
 Tasks $\mathcal{T}$ are no longer split between primitive and non-primitive tasks.
-\cite{bit-monnotTemporalHierarchicalModels2016a} argues that the distinction between primitive and nonprimitive tasks as well as Actions and Methods is only an artificial restriction and that it has no impact on the planning implementation.
+\cite{bit-monnotTemporalHierarchicalModels2016a} argues that the distinction between primitive and nonprimitive tasks as well as actions and methods is only an artificial restriction and that it has no impact on the planning implementation.
 
 \begin{definition}[Action Template]
   An action template is a tuple \\ $(head(A), task(A), dependent(A), subtasks(A), \mathcal{F}_A, \mathcal{C}_A)$ where
@@ -339,7 +320,7 @@ An action template is high-level, if $subtasks(A) \neq \varnothing$, otherwise i
 A method $(c,tn)$ is part of a high-level action template through $subtasks(A)$ and $\mathcal{C}_A$.
 A task is primitive, if there is only one action template $A$ that achieves it and that action template is primitive.
 
-\begin{definition}[Task Decomposition in FAPE]
+\begin{definition}[Task Decomposition in \ac{FAPE}]
   A chronicle $\phi_1 = (\pi_1,\mathcal{F}_1,\mathcal{C}_1)$ can be refined into a chronicle $\phi_2 = (\pi_2,\mathcal{F}_2,\mathcal{C}_2)$ by decomposing an unrefined task $\tau \in \pi_1$ with a new action instance $a$. This transformation is denoted $\phi_1 \xrightarrow{\tau,a}_D \phi_2$ and does the following modifications to $\phi_2$
   \begin{align*}
     \pi_2 \leftarrow & (\pi_1  \backslash \{\tau\}) \cup \{a\} \cup subtasks(a) \\
@@ -353,26 +334,26 @@ This decomposition definition is much more straightforward compared to Def. \ref
 Contrary to the traditional approach with methods, a high-level action instance $a$ is added to the partial plan, since it may also define state variable changes and may thus be required for the execution.
 The additional constraint $\{task(a) = \tau\}$ ensures that $a$ does refine $\tau$ correctly by unifying the parameters and time points of $a$ and $\tau$.
 
-\begin{definition}[Temporal HTN Planning Domain]
-  A temporal HTN planning domain is a tuple $\Sigma = \langle \mathcal{SV},\mathcal{O},\mathcal{A} \rangle$.
-  $\mathcal{O}$ is defined equivalently to the standard HTN Planning Domain.
+\begin{definition}[Temporal \ac{HTN} Planning Domain]
+  A temporal \ac{HTN} planning domain is a tuple $\Sigma = \langle \mathcal{SV},\mathcal{O},\mathcal{A} \rangle$.
+  $\mathcal{O}$ is defined equivalently to the standard \ac{HTN} Planning Domain.
   $\mathcal{SV}$ is a set of state variables.
   $\mathcal{A}$ is a set of action templates.
 \end{definition}
 
-\begin{definition}[Temporal HTN Planning Problem]
-  A temporal HTN planning problem is a pair $P = \langle \Sigma, \phi_0 \rangle$.
-  $\Sigma$ is a temporal HTN planning domain.
+\begin{definition}[Temporal \ac{HTN} Planning Problem]
+  A temporal \ac{HTN} planning problem is a pair $P = \langle \Sigma, \phi_0 \rangle$.
+  $\Sigma$ is a temporal \ac{HTN} planning domain.
   $\phi_0$ is the initial chronicle.
 \end{definition}
 
-While the definitions for Temporal HTN Planning in FAPE are quite different from HTN Planning, fundamentally it is very similar.
+While the definitions for temporal \ac{HTN} planning in \ac{FAPE} are quite different from \ac{HTN} planning, fundamentally they are very similar.
 A chronicle $\phi$ is a temporal extension of a task network $\langle T,\prec,\alpha \rangle$.
-The tasks $T$ are contained in $\pi$ and $\prec$ is contained in the constraints $\mathcal{C}$.
+The tasks $T$ are contained in $\pi$, and $\prec$ is contained in the constraints $\mathcal{C}$.
 $\alpha$ does not exist anymore, but the mapping from actions and tasks to their names is similar.
 
 
-\begin{definition}[Temporal HTN Planning Solution]
+\begin{definition}[Temporal \ac{HTN} Planning Solution]
   $\phi = (\pi,\mathcal{F},\mathcal{C})$ is a solution for $P$ if all of the following conditions hold:
   \begin{itemize}
     \item $\phi$ is reachable from $\phi_0$.
@@ -382,21 +363,21 @@ $\alpha$ does not exist anymore, but the mapping from actions and tasks to their
   \end{itemize}
 \end{definition}
 
-In temporal HTN planning, it is infeasible to use a State-Space Planning approach as actions might be required to be parallel and State-Space Planning cannot insert several actions at once.
-Therefore FAPE uses Plan-Space Planning as in algorithm \ref{alg:background:psp}.
+In temporal \ac{HTN} planning, it is infeasible to use a \ac{SSP} approach as actions might be required to be parallel and \ac{SSP} cannot insert several actions at once.
+Therefore \ac{FAPE} uses \ac{PSP} as in Algorithm \ref{alg:background:psp}.
 
-\subsubsection{Task insertion}
+\subsubsection{Task Insertion}
 
-HTN planning with task insertion \citep{geierDecidabilityHTNPlanning2011} is a formalism that lies between classical planning and HTN planning.
+\ac{HTN} planning with task insertion \citep{geierDecidabilityHTNPlanning2011} is a formalism that lies between classical planning and \ac{HTN} planning.
 The idea here is to allow the insertion of tasks into the task network during planning, without requiring them to be valid decompositions of compound tasks.
 This approach is helpful for example in domains where not all possible hierarchical tasks can be captured, and allows an agent to respond to unforeseen situations.
-Specifically with task insertion, HTN planning becomes decidable \citep{geierDecidabilityHTNPlanning2011} and removes the need for recursive methods \citep{bercherSurveyHierarchicalPlanning2019}. 
-Additionally, it allows the usage of classical planning heuristics in combination with HTN planning heuristics.
+Specifically with task insertion, \ac{HTN} planning becomes decidable \citep{geierDecidabilityHTNPlanning2011} and removes the need for recursive methods \citep{bercherSurveyHierarchicalPlanning2019}. 
+Additionally, it allows the usage of classical planning heuristics in combination with \ac{HTN} planning heuristics.
 
-FAPE supports task insertion, however there it is called and defined as action insertion.
+\ac{FAPE} supports task insertion, however there it is called and defined as action insertion.
 The initial chronicle can define persistence assertions as the goals a planner needs to achieve.
-Tasks can be marked as insertable if it is not marked $dependent$ in the action template definition.
-There is then a separate plan modification called Action Insertion to add the action to the chronicle $\phi$ that is very similar to definition \ref{def:htn-task-dec-fape}:
+An action is insertable if it is not marked $dependent$ in the action template definition.
+There is then a separate plan modification action insertion to add the action to the chronicle $\phi$ that is very similar to Definition \ref{def:htn-task-dec-fape}.
 
 \begin{definition}[Action Insertion]
   A chronicle $\phi_1 = (\pi_1,\mathcal{F}_1,\mathcal{C}_1)$ can be refined into a chronicle $\phi_2 = (\pi_2,\mathcal{F}_2,\mathcal{C}_2)$ by inserting a free action instance $a$, i.e. $a$ is not task-dependent. This transformation is denoted $\phi_1 \xrightarrow{a}_I \phi_2$ and does the following modifications to $\phi_2$
@@ -424,10 +405,10 @@ Additionally, it is easier to evaluate if it is possible to insert an action tha
   \label{fig:background-acting-conceptual}
 \end{figure}
 
-The offline planning approach described in the previous sections does not yet describe how the plan will be executed in an environment like the game ``Overcooked'' and what happens if new tasks are received.
-In \cite{ghallabAutomatedPlanningActing2016} an Actor is described as a system that uses deliberation functions and an execution platform to interact with the external environment and other actors.
-In particular, deliberation functions describe an interaction between Acting, Planning and other deliberation functions such as Observing, Monitoring, Goal reasoning and Learning \citep{ingrandDeliberationAutonomousRobots2017} (see Figure \ref{fig:background-acting-conceptual}).
-Directly relevant for this use case are only Acting and Planning.
+The offline planning approach described in the previous sections does not yet describe how the plan will be executed in an environment like the game \textit{Overcooked} and what happens if new tasks are received.
+In \cite{ghallabAutomatedPlanningActing2016} an actor is described as a system that uses deliberation functions and an execution platform to interact with the external environment and other actors.
+In particular, deliberation functions describe an interaction between acting, planning and other deliberation functions such as observing, monitoring, goal reasoning and learning \citep{ingrandDeliberationAutonomousRobots2017} (see Figure \ref{fig:background-acting-conceptual}).
+Directly relevant for this use case are only acting and planning.
 
 
 
@@ -436,36 +417,38 @@ Acting is then defined as the decision on how to perform actions given by a plan
 It also involves reacting to unexpected states and triggering plan repairs or replanning in the online planning algorithm.
 Such an unexpected state is in our case the addition of new tasks during execution.
 
-The actor architecture of FAPE (see Figure \ref{fig:background-acting-fape}) implements this general model.
-The Activity Manager takes the role of both Acting and State Management and requests the Planner for updates.
-The Skills are concrete implementations of action executions that are selected by the Activity Manager.
-The Observation Database tracks changes in the environment and informs the Activity Manager that needs to decide if plan repair is necessary.
+The actor architecture of \ac{FAPE} (see Figure \ref{fig:background-acting-fape}) implements this general model.
+The activity manager takes the role of both acting and state management and requests the planner for updates.
+The skills are concrete implementations of action executions that are selected by the activity manager.
+The observation database tracks changes in the environment and informs the activity manager that needs to decide if plan repair is necessary.
+Additionally, \ac{FAPE} includes a dispatchable \ac{STN}, that allows marking time points as executed and incrementing the current time.
+When the current time is changed, all time points that are not executed have to take place after the current time.
+This allows to mark actions as executing or executed and the execution of some tasks is not possible anymore.
 
-
-\bild{fig:background-acting-fape}{background_acting_fape}{General architecture of FAPE for online planning and acting}{10}
+\bild{fig:background-acting-fape}{background_acting_fape}{General architecture of \ac{FAPE} for online planning and acting}{10}
 
 
 
 Online planning \citep[sec.~2.6.2]{ghallabAutomatedPlanningActing2016} is an algorithm that can update and refine a plan when a plan modification occurs.
 A plan modification in this case can be a failed action that has to be removed, a change in the environment or a new task.
-Online HTN planning \citep{dvorakPlanningActingTemporal2014} has to take the already executed actions and the task hierarchy into account.
-There are 2 possible procedures:
+Online \ac{HTN} planning \citep{dvorakPlanningActingTemporal2014} has to take the already executed actions and the task hierarchy into account.
+There are two possible procedures:
 \begin{itemize}
-  \item Replanning: Remove all pending actions and find an alternative plan.
-  \item Plan Repair: Remove the smallest set of problematic actions and find alternative decompositions.
+  \item Replanning: remove all pending actions and find an alternative plan.
+  \item Plan repair: remove the smallest set of problematic actions and find alternative decompositions.
   % \item Partial Decomposition: Only decompose tasks when they need to be executed.
 \end{itemize}
 
-While Replanning and Plan Repair will arrive at a successful plan if it exists, they have several different advantages and disadvantages.
-Replanning is a simple approach where a partial search of the initial problem is executed, while Plan Repair has to decide first which actions to remove and then execute a search.
-Plan Repair is often implemented as an additional local search around conflicting actions \citep{bajadaTemporalPlanQuality2014} while replanning can use the same search procedure.
-In the worst case, Plan Repair must remove all pending actions which is equal to replanning.
+While replanning and plan repair will arrive at a successful plan if it exists, they have several different advantages and disadvantages.
+Replanning is a simple approach where a partial search of the initial problem is executed, while plan repair has to decide first which actions to remove and then execute a search.
+Plan repair is often implemented as an additional local search around conflicting actions \citep{bajadaTemporalPlanQuality2014} while replanning can use the same search procedure.
+In the worst case, plan repair must remove all pending actions which is equal to replanning.
 When focusing on plan stability \citep{foxPlanStabilityReplanning2006}, plan repair will by design keep more of the same actions compared to replanning.
 % Partial Decomposition has only 
 
 % The initial versions of online planning for classical planning describe it as the generation of partial plans through subgoaling, limited horizon planning or sampling \citep{ghallabAutomatedPlanningActing2016}.
 
-% However, in the context of temporal HTN problems, partial solutions are not feasible as the plan-space planning does not directly allow for partial solutions.
+% However, in the context of temporal \ac{HTN} problems, partial solutions are not feasible as the plan-space planning does not directly allow for partial solutions.
 % Thus online planning is defined as the possibility of a planner to repair or replan.
 
 
@@ -473,13 +456,13 @@ When focusing on plan stability \citep{foxPlanStabilityReplanning2006}, plan rep
 
 % If there is no inconsistency, the plan search can be executed directly.
 % If planning fails like this, replanning is done.
-% Plan Repair is done by removing conflicting actions and then executing the plan search.
+% plan repair is done by removing conflicting actions and then executing the plan search.
 % If Repair fails, replanning is done.
 % Replanning is done by removing all pending actions and conflicting actions and then executing plan search.
 
 % describes that a planner can receive updates  and through acting plans are executed in a real world environment.
 % The challenges here include uncertainty in the environment, failure of actions and therefore replanning, and the need for real-time performance.
-% Replanning with HTN Planning is another challenge, since the hierarchy of tasks must be considered and replanning cannot be done trivially.
+% Replanning with \ac{HTN} Planning is another challenge, since the hierarchy of tasks must be considered and replanning cannot be done trivially.
 
 
 % There are different approaches to preforming acting, depending on the uncertainties in the environment.
@@ -489,10 +472,10 @@ When focusing on plan stability \citep{foxPlanStabilityReplanning2006}, plan rep
 % Then it is attempted to repair the plan. 
 % If that does not work, a full replanning is done.
 
-% There are different approaches to Plan Repair, the most prominent are to remove 
+% There are different approaches to plan repair, the most prominent are to remove 
 
-% Acting with a HTN Planner can be done similar, but requires more care, since the hierarchy does not enable a direct replanning.
-% \cite{desilvaHTNActingFormalism2018} has introduced a formalism and algorithm for HTN acting that contains the following steps:
+% Acting with a \ac{HTN} Planner can be done similar, but requires more care, since the hierarchy does not enable a direct replanning.
+% \cite{desilvaHTNActingFormalism2018} has introduced a formalism and algorithm for \ac{HTN} acting that contains the following steps:
 % A configuration represents the current state of the planning.
 % Primary Tasks are the tasks that can be executed, which requires that there are no tasks that precede them.
 % There are different possibilities for execution:

@@ -2,26 +2,27 @@
 
 In this section, we will discuss the results of the evaluation and thus the validity of our approach.
 Additionally, we will discuss the replan and repair approach, as that could not be evaluated. 
-Last, we go into some of the issues that we encountered with the system FAPE concerning acting.
+Lastly, we go into some of the issues that we encountered with the system \ac{FAPE} concerning acting.
 
-\todo[inline]{things missing in the domain}
-
-
-In comparison with the classical domain by \cite{yuxinliuPlanningOvercookedGame2020}, our domain definition in HTN is significantly slower, especially when optimizing for the makespan.
-However, this comparison is not completely representative due to several reasons.
-First, the action durations of the PDDL domain were not given.
+In comparison with the classical domain by \cite{yuxinliuPlanningOvercookedGame2020}, our domain definition in \ac{HTN} is significantly slower, especially when optimizing for the makespan.
+However, this comparison is not completely representative for several reasons.
+First, the action durations of the \ac{PDDL} domain were not given.
 Second, the exact environment and goal they used are not available, so they might not have used as many ingredient instances as we have or only planned a burger with lettuce.
-Additionally, our domain definition does not allow chopping a steak into a burger patty before frying it, due to the limitation of single inheritance in FAPE.
-% Planning using the fully hierarchical domain proves to be more efficient than a partial hierarchy.
+Additionally, our domain definition does not allow chopping a steak into a burger patty before frying it, due to the limitation of single inheritance in \ac{FAPE}.
 
+The \textit{Overcooked} domain we define in \ref{sec:approach-domain}, is also not a complete representation of the game ``Overcooked!''.
+For instance, we do not define collisions between cooks in our domain and allow placing multiple ingredients in the same place.
+Next, we also do not implement the washing of dishes after clients have finished their meal, or fire breaking out when some ingredient gets overcooked.
+Another crucial mechanic in the game is throwing ingredients.
+As such, many more problems need to be solved in the \textit{Overcooked} domain before a planning actor can play the game.
 
 The robustness heuristic we introduced does not perform as well as we had proposed.
 While it succeeds at parallelizing tasks, it has arbitrary waiting times included.
-This problem comes probably from the fact that many options for variable bindings are kept in place for too long.
+This problem likely comes from the fact that many options for variable bindings are kept in place for too long.
 During planning, the timelines are created incrementally.
 When threats occur between timelines, the timelines are separated.
 When the variable bindings are then resolved to be ground, these separations are kept in place and cannot be changed anymore.
-Through the robustness heuristic, some of the variable bindings are resolved earlier, but not enough.
+Through the robustness heuristic, some of the variable bindings are resolved sooner, but not soon enough.
 
 Additionally, the heuristic results in a high variance for the planning time and the makespan.
 This variance is most likely related to the low value of 10 we chose for $n$ and $m$.
@@ -31,71 +32,73 @@ This high variance and increase in heuristic evaluation makes this implementatio
 
 The informative value of the acting evaluation is very low, as it was done manually and only on a single example.
 In our example, we observe that the default approach can only succeed in adding the other tasks if it finds the optimal plan as there is no margin to the deadline of the third task.
-The approach with the robustness heuristic also has only a very small margin for the last task, and is therefore also not likely to succeed.
+The approach with the robustness heuristic also has only a very small margin for the last task and is therefore also not likely to succeed.
 The preparations approach on the other hand has higher and more stable margins compared to the robustness heuristic.
-We can observe that at least 4 preparations can be inserted.
-Here we have also added preparations after the second task has been inserted.
+We can observe that at least four preparations can be inserted.
+Here we further added preparations after the second task has been inserted.
 Overall, both approaches are far from the optimal plan that can be achieved without preparations.
 We have used the makespan heuristic for the optimal plan, as that can find the shortest plan possible.
 
-As we have again used an oracle approach for the task preparations, we can observe that the selection of preparations is very important.
+As we have again used an oracle approach for the task preparations, it can be observed that the selection of preparations is very important.
 In this case, we have inserted two preparations of a plate, one preparation of a tomato and one preparation of a lettuce.
-This is exactly what is needed for future tasks, but depending on the preparation selection strategy, it could also be the case that up to 4 preparations of plates were inserted.
-These plates would not be needed then too much time is spent on preparing the plates so that the third or even the last task could not be finished anymore.
+This is exactly what is needed for future tasks, but depending on the preparation selection strategy, it could also be the case that up to four preparations of plates were inserted.
+As these plates are not required, too much time would be spent on preparing the plates so that the third or even the second task could not be finished anymore.
 
 With plan repair or replanning, we may be able to resolve some of the issues that arise with initially nonoptimal plans.
-As their implementation could not be finished due to technical issues, we can not evaluate it.
+As the implementation of these components was out of scope for this work and they are not implemented in FAPE, we can not evaluate it.
 We could for instance not find a solution with the default approach for the addition of task 2, when the deadline is 260 instead of 300.
-Then we could remove at least the arrange and deliver tasks to create more usable space for cook2.
+With replanning, we could remove at least the arrange and deliver tasks to create more usable space for cook2.
 On the other hand, it could also be enough to delay those two tasks to have cook2 perform a transport for task 3 before delivering the salad for task 2.
 Additionally, plan repair and replanning may be required for preparations, if for example too many task preparations were added to the plan but not yet executed.
 These could be removed to find a solution for the new task first, and then again add some preparations.
 
-The time required for planning is another problem in a dynamic environment with deadlines such as overcooked.
-When the planner requires as in our evaluations 10 seconds for a simple task and over 30 seconds for a more complex task, this valuable time is now missing to complete it before the deadline.
-We can argue that FAPE is not an optimized system, and could be much faster if it was implemented in a low-level language like C or Rust or used the best CSP solvers.
-However, the fact remains that the performance does not scale well as HTN planning is an undecidable problem.
+The time required for planning is another problem in a dynamic environment with deadlines such as \textit{Overcooked}.
+When the planner requires -- as in our evaluations -- 10 seconds for a simple task and over 30 seconds for a more complex task, this valuable time is now missing to complete it before the deadline.
+We can argue that \ac{FAPE} is not an optimized system, and could be much faster if it was implemented in a low-level language like C or Rust, or used the best \ac{CSP} solvers.
+However, the fact remains that the performance does not scale well as \ac{HTN} planning is an undecidable problem.
 As such it may be beneficial to consider an approach similar to online planning, where the plan is refined when the task has to be executed in the coming time.
-FAPE does propose a similar approach, where the exact domain is unclear until a robot has used some kind of environment perception, which then modifies the environment or adds respective task decompositions.
+\ac{FAPE} does propose a similar approach, where the exact domain is unclear until a robot has used some kind of environment perception, which then modifies the environment or adds respective task decompositions.
 
-We selected FAPE, as it checked all of our boxes regarding the problem, specifically temporal HTN planning and acting.
-As the acronym FAPE means ``flexible acting and planning engine'', this suggests that it does support acting natively.
+We selected \ac{FAPE}, as it promised to fulfill all requirements regarding the problem at hand, specifically temporal \ac{HTN} planning and acting.
+As the acronym \ac{FAPE} means ``flexible acting and planning engine'', this suggests that it does support acting natively.
 However, this is not true anymore, as they have removed most of the code regarding acting as it was domain-dependent.
 Therefore most of the acting architecture had to be rebuilt while keeping it domain-independent.
-Plan repair was not implemented and only replanning was done in FAPE. This replanning also only consisted of re-executing the planning process with updated goals.
-This procedure ignores the context of HTN, where some actions have been executed already, and cannot be changed later.
+Plan repair was not implemented and only replanning was done in \ac{FAPE}.
+This replanning also only consisted of re-executing the planning process with updated goals.
+This procedure ignores the context of \ac{HTN}, where some actions have been executed already, and cannot be changed later.
 As such, the removal of a task from a chronicle was not implemented.
 While they describe that problem as theoretically simple, it is complex in implementation, as variables cannot be removed from constraint satisfaction problems easily and references to the variables may consist in many different places.
-Additionally, constraints resolved in an STN will remain there and cannot be changed trivially.
+Additionally, constraints resolved in an \ac{STN} will remain there and cannot be changed trivially.
 
-Another issue with the current implementation of FAPE is, that the timelines were too rigid.
+Another issue of the current implementation of \ac{FAPE} is, that the timelines were too rigid.
 When a new task is added to an existing chronicle, the timelines only allow the addition of new changes after the first or before the last change.
 This operation may however be necessary such as in the case of Figure \ref{fig:eval-acting-default}, where the subtask \verb|prep(plate2)| of the second task has to be added before the subtask \verb|arrange(lettuce1)| of task 1.
 With these restrictions, it was therefore not possible to implement our goal of interleaving plans appropriately.
 
 The issues regarding the timelines and replanning could be resolved by defining executed, executing and pending actions including their hierarchy in the problem, instead of directly changing the implementation.
-\todo{unsure about this}
+However, as we have already stated, adding this current plan as a problem in \ac{FAPE} could not be achieved naively.
 
 \cite{bit-monnotTemporalHierarchicalModels2016a} argues that qualitative time points in planning have the only benefit of creating instantaneous action effects.
-We disagree with this notion and propose that representing the temporal constraint problem using a qualitative constraint network (QCN) with Allen's interval algebra may have several benefits. \todo{reference for allen and QCN?}
-First, the representation as a QCN allows a more intuitive definition of the constraints compared to time points.
-Next, a QCN leaves options for different concrete instantiations open, similar to the CSP for variable bindings.
+We disagree with this notion and propose that representing the temporal constraint problem using a \ac{QCN} \citep{ligozatQualitativeSpatialTemporal2013} with the Interval Algebra \citep{allenMaintainingKnowledgeTemporal1983a} may have several benefits.
+First, the representation as a \ac{QCN} allows a more intuitive definition of the constraints compared to time points.
+Next, a \ac{QCN} leaves options for different concrete instantiations open, similar to the \ac{CSP} for variable bindings.
 The search does not have to resolve these unknowns until necessary, therefore reducing the search space.
-Lastly, explicit durations and deadlines can still be used by enforcing additional constraints on the QCN.
+Lastly, explicit durations and deadlines can still be used by enforcing additional constraints on the \ac{QCN}.
+On a side note, there already exists an approach for evaluating the robustness of a \ac{QCN} \citep{wehnerRobustVsFast2023} that could be used as a replacement for our implementation of the robustness heuristic.
 
-% HTN Repair/Replanning (only classical planning was considered before it was removed from the code). 
+% \ac{HTN} Repair/Replanning (only classical planning was considered before it was removed from the code). 
 % Removal of actions and tasks from a plan.
 % The use of STNUs for contingent time points - technically implemented, but not documented how to use them.
 % The insertion of timelines in between an existing timeline is not supported.
 
 
-% FAPE included only some parts of the theoretical actor model as a domain-specific implementation that was removed in the stable release.
+% \ac{FAPE} included only some parts of the theoretical actor model as a domain-specific implementation that was removed in the stable release.
 % It was only supported to add new goals before starting dispatching.
 % Additionally replanning and plan repair were only considered in non-hierarchical domains.
 
 % The modification of an existing and already resolved plan poses a challenge in several aspects.
 % The timelines for all instances are already resolved.
-% In the FAPE planner it is not possible to insert a state change between timelines, but only after or before them.
+% In the \ac{FAPE} planner it is not possible to insert a state change between timelines, but only after or before them.
 % This is especially problematic, since then a task with a tight deadline cannot be inserted when an instance needs to be used earlier.
 
-% It has to be mentioned that Fape is not the most performant HTN planner, but besides CHIMP the only one supporting all required features.
+% It has to be mentioned that Fape is not the most performant \ac{HTN} planner, but besides CHIMP the only one supporting all required features.
