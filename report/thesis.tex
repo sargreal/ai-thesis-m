@@ -10,8 +10,6 @@
 \pagenumbering{Roman}
 \tableofcontents
 \newpage
-\listoftodos[]
-\newpage
 \listoffigures
 \newpage
 \listoftables
@@ -23,7 +21,7 @@
 \fancyhead[LO]{\footnotesize\sc\nouppercase{Abbreviations}}
 \input{abbreviations/abbreviations.tex}
 \newpage
-\fancyhead[LO]{\footnotesize\sc\nouppercase{\leftmark}}
+\fancyhead[LO]{\footnotesize\sc\nouppercase{Abstract}}
 \setcounter{page}{1}
 \pagenumbering{arabic}
 %
@@ -31,6 +29,7 @@
 %
 \input{sections/00-abstract.tex}
 \newpage
+\fancyhead[LO]{\footnotesize\sc\nouppercase{\leftmark}}
 %
 \input{sections/01-introduction.tex}
 \newpage

@@ -3,331 +3,35 @@
 
 \section{Supplementary Material}
 
-\todo[inline]{describe whats on the CD and reference git repos}
+If you have received this thesis in printed form, you will find a CD with supplementary material at the end.
+If you have received this thesis in a digital form, you can access the supplementary material in the git repositories \href{https://github.com/sargreal/fape}{github.com/sargreal/fape} (changes to \ac{FAPE}) and \href{https://github.com/sargreal/ai-thesis-m}{github.com/sargreal/ai-thesis-m} (thesis, problem files and evaluation).
 
-\section{Overcooked Domain Definition}
+The contents of the CD are as follows:
+\begin{itemize}
+  \item thesis: 
+  \begin{itemize}
+    \item problem: 
+    \begin{itemize}
+      \item anml: anml problem files.
+      \item hddl: initial implementation of the \textit{Overcooked} domain in HDDL2.1
+    \end{itemize}
+    \item report: contains all latex files and figures used to write this thesis
+    \item evaluation: evaluation files in csv format and an jupyter notebook that was used for calculating mean and standard deviations
+    \item scripts: several scripts that were used to automate tasks such as planning, acting and visualization of solutions
+    \item solutions: several raw solutions and visualizations to the planning and acting problems
+    \item fape-planning-assembly-1.0.jar: the exact version of fape that was used for the evaluations
+  \end{itemize}
+  \item fape: our adapted version of fape including \verb|changes.diff| that is a git diff file describing all changes we made to the planner
+\end{itemize}
+
+\section{\textit{Overcooked} Domain Definition}
 \label{app:domain}
 
 This domain definition is only a partial implementation of the game, focusing on the most important parts.
 
+\anmlFile{../problem/anml/overcooked-hier-dur.dom.anml}{The \textit{Overcooked} domain}{}
 
-\subsection{Types}
-The Domain overcooked2 contains several types in a hierarchy.
-
-The first Base Type is $Area$.
-This Type is used for specifying the location of an item or person. There are two types of Locations, Manipulation Areas and Occupation Areas.
-Occupation Areas can only contain items, and Persons can only be in Manipulation Areas.
-The Occupation Area is divided into StorageArea where Ingredients are stored and Placement Areas where Ingredients or Plates may be placed.
-The Placement Areas have an additional division into Tool Areas where the ingredients are processed and Arrange Areas where processed Ingredients may be arranged on a plate.
-
-\begin{anmlcode}
-type Area;
-type ManArea < Area;
-type OccupationArea < Area with {
-  fluent boolean occupied;
-};
-type StorageArea < OccupationArea;
-type PlArea < OccupationArea;
-type ArrangeArea < PlArea;
-type ToolArea < PlArea;
-type NavArea < Area;
-\end{anmlcode}
-
-The second base type is $Person$.
-A person has the associated fluents location, carrying and busy.
-A person is may carry only one item at a time and is busy when they are operating a Tool.
-Cook and Client are the two subtypes of a Person.
-
-\begin{anmlcode}
-type Person with {
-  fluent (NavArea or ManArea) loc;
-  fluent boolean carrying;
-  fluent boolean busy;
-};
-
-type Cook < Person;
-type Client < Person;
-\end{anmlcode}
-
-The third base Type is $Tool$. A tool has an associated constant location and a fluent processing that describes if the tool is is use.
-There are three subtypes Knife, Pot and Pan defined.
-
-\begin{anmlcode}
-type Tool with {
-  constant PlArea loc;
-  fluent boolean processing;
-};
-
-type Knife < Tool;
-type Pot < Tool;
-type Pan < Tool;
-\end{anmlcode}
-
-The forth and final base type is $Carryable$.
-A carryable has an associated fluent location that may be of the different types Occupation Area, Person or Tableware.
-The Carryable has the subtypes Tableware and Ingredient, a tableware has the subtype Plate.
-
-\begin{anmlcode}
-type Carryable with {
-  fluent (OccupationArea or Person or Tableware) loc;
-};
-
-type Tableware < Carryable;
-type Plate < Tableware;
-\end{anmlcode}
-
-An Ingredient has the associated fluent arranged that describes if the ingredient is arranged on a tableware.
-The Ingrediant has two leaf subtypes Nori and BurgerBun.
-
-\begin{anmlcode}
-type Ingredient < Carryable with {
-  fluent boolean arranged;
-  fluent boolean prepared;
-};
-
-type Nori < Ingredient;
-type BurgerBun < Ingredient;
-\end{anmlcode}
-
-The Ingredient has three inner subtypes Choppable, Boilable and Fryable.
-A Choppable has the fluent chopped, a Boilable has the fluent boiled and a Frayable has the fluent fryed.
-The leaf subtypes of Choppable are Shrimp, Fish, Lettuce, Tomato and Cucumber.
-The only leaf subtype for Boilable is Rice.
-The only leaf subtype for Fryable is Beef.
-
-\begin{anmlcode}
-type Choppable < Ingredient with {
-  fluent boolean chopped;
-};
-
-type Shrimp < Choppable;
-type Fish < Choppable;
-type Lettuce < Choppable;
-type Tomato < Choppable;
-type Cucumber < Choppable;
-
-type Boilable < Ingredient with {
-  fluent boolean boiled;
-};
-
-type Rice < Boilable;
-
-
-type Fryable < Ingredient with {
-  fluent boolean fryed;
-};
-
-type Beef < Fryable;
-\end{anmlcode}
-
-In \ac{ANML} it is not possible to inherit multiple types, so it is not possible to have an ingredient that is both choppable and fryable.
-
-The Domain further contains several constant functions.
-
-The boolean function connected of an Occupation Area and a Manipulation Area describes if Objects in the Occupation Areas can be manipulated from the Manipulation Area.
-The integer function distance of two Manipulation Areas describes the distance measured in timepoints between these Manipulation Areas.
-The rest of the functions describe the time it takes to perform a specific action.
-These functions are arrangetime, droptime, pickuptime, givetime, choptime, boiltime and frytime.
-The functions can have different values for each instance of the relevant Ingredient, Carryable, Choppable or Boilable.
-
-\begin{anmlcode}
-constant boolean connected(OccupationArea a, ManArea b);
-constant integer distance(ManArea a, ManArea b);
-
-constant integer arrangetime(Ingredient i);
-constant integer droptime(Carryable c);
-constant integer pickuptime(Carryable c);
-constant integer givetime(Carryable c);
-constant integer choptime(Choppable c);
-constant integer boiltime(Boilable b);
-constant integer frytime(Fryable f);
-\end{anmlcode}
-
-
-\subsection{Base Actions}
-The Domain then contains several base actions, these have the prefix $a\_$.
-
-The action $a\_move$ makes a person move from its current Manipulation Area to the target Manipulation Area.
-The duration of the action equals the distance between the current and target Manipulation Area.
-This action is implemented like a teleportation, actual routing is not included as it unnecessarily increases the search space.
-
-\begin{anmlcode}
-action a_move(Person p, ManArea to) {
-  motivated;
-  constant ManArea from;
-  duration := distance(from, to);
-  from != to;
-  [all] {
-    p.loc == from :-> to;
-  };
-};
-\end{anmlcode}
-
-The action $a\_arrange$ makes a Person arrange an Ingredient on a Tableware.
-The duration equals the arrangetime of the Ingredient.
-The Person needs to be in the Manipulation Area connected to where the Tableware is, and the Ingredient has to be carried by the Person at the start of the action.
-
-\begin{anmlcode}
-action a_arrange(Person p, Ingredient i, Tableware t) {
-  motivated;
-  duration := arrangetime(i);
-  constant ArrangeArea pl;
-  constant ManArea man;
-  connected(pl, man);
-  [all] {
-    t.loc == pl;
-    p.loc == man;
-    i.loc == p :-> t;
-    p.carrying == true :-> false;
-    i.arranged == false :-> true;
-  };
-};
-\end{anmlcode}
-
-The action $a\_drop$ makes a Person drop a Carryable onto the connected Placement Area.
-The duration of the action equals the droptime of the Carryable.
-The Carryable has to be carried by the person at the start of the action.
-
-\begin{anmlcode}
-action a_drop(Person p, Carryable ca) {
-  motivated;
-  duration := droptime(ca);
-  constant PlArea pl;
-  constant ManArea man;
-  connected(pl, man);
-  [all] {
-    p.loc == man;
-    ca.loc == p :-> pl;
-    p.carrying == true :-> false;
-  };
-};
-\end{anmlcode}
-
-The action $a\_pick\_up$ makes a Person pick up a Carryable from the connected Occupation Area Area.
-The duration of the action equals the pickuptime of the Carryable.
-The Carryable has to be on the connected Occupation Area at the start of the action.
-
-\begin{anmlcode}
-action a_pick_up(Person p, Carryable ca) {
-  motivated;
-  duration := pickuptime(ca);
-  constant OccupationArea oc;
-  constant ManArea man;
-  connected(oc, man);
-  [all] {
-    p.loc == man;
-    ca.loc == oc :-> p; 
-    p.carrying == false :-> true;
-  };
-};
-\end{anmlcode}
-
-The action $a\_give$ makes a person give a Carryable to another Person.
-The duration equals the givetime of the Carryable.
-The two persons have to be in the same Manipulation Area and the Carryable has to be carried by the first person at the start of the action.
-
-\begin{anmlcode}
-action a_give(Person p1, Person p2, Carryable c) {
-  motivated;
-  duration := givetime(c);
-  constant ManArea m;
-  [all] {
-    p1.loc == m;
-    p2.loc == m;
-    p1.carrying == true :-> false;
-    p2.carrying == false :-> true;
-    c.loc == p1 :-> p2;
-  };
-};
-\end{anmlcode}
-
-The action $a\_chop$ makes a person chop a Choppable using a Knife.
-The duration equals the choptime of the Choppable.
-The person has to be located in the connected Manipulation Area to the Tool Area where the Knife is located and the Choppable has to be at this Tool Area as well.
-
-\begin{anmlcode}
-action a_chop(Cook co, Choppable ch, Knife k) {
-  motivated;
-  duration := choptime(ch);
-  constant ManArea man;
-  constant ToolArea ta;
-  connected(ta, man);
-  k.loc == ta;
-  [all] {
-    co.loc == man;
-    ch.loc == ta;
-    k.processing == false :-> false;
-    co.busy == false :-> false;
-    co.carrying == false :-> false;
-    ch.chopped == false :-> true;
-  };
-};
-\end{anmlcode}
-
-The action $a\_boil$ is similar to $a\_chop$, with the main difference that the cook does not need to be at the same location as the pot during boiling.
-
-\begin{anmlcode}
-action a_boil(Cook c, Boilable b, Pot p) {
-  motivated;
-  duration := boiltime(b);
-  constant ManArea man;
-  connected(p.loc, man);
-  [start] c.loc == man;
-  [end] c.loc == man;
-  [all] {
-    b.loc == p.loc;
-    p.processing == false :-> false;
-    b.boiled == false :-> true;
-  };
-};
-\end{anmlcode}
-
-The action $a\_fry$ is equivalent to $a\_boil$, with the only differences that the ingredient is fryed and not boiled and a Pan is used instead of a Pot.
-
-\begin{anmlcode}
-action a_fry(Cook c, Fryable f, Pan p) {
-  motivated;
-  duration := frytime(f);
-
-  constant ManArea man;
-  connected(p.loc, man);
-
-  // Cook should be at the pot at the beginning and end
-  [start] c.loc == man;
-  [end] c.loc == man;
-
-  [all] {
-    f.loc == p.loc;
-    p.processing == false :-> false;
-    f.fryed == false :-> true;
-  };
-};
-\end{anmlcode}
-
-\subsection{Methods}
-
-Methods are used in \ac{HTN} to define hierarchical decompositions of Tasks.
-In \ac{ANML} these use the same action keyword, but contain one or many \verb|:decomposition| blocks.
-
-The method $m\_get\_to$ is an abstraction of $a\_move$, and has two decompositions.
-The first is used when a person is already at the desired location, and the other one defines that they have to move there.
-
-\begin{anmlcode}
-action m_get_to(Person p, ManArea to) {
-  motivated;
-  // Already there
-  :decomposition {
-    [all] p.loc == to;
-  };
-  :decomposition {
-    [all] contains ordered(
-      a_move(p, to)
-    );
-  };
-};
-\end{anmlcode}
-
-\section{Environment Definitions}
+\section{\textit{Overcooked} Environment Definitions}
 \label{app:environments}
 
 \subsection{Tutorial Level}

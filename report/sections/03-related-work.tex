@@ -2,13 +2,13 @@
 \label{sec:related-work}
 
 The game ``Overcooked!'' has seen some attraction as an application domain in recent years.
-Classical planning using \ac{PDDL} has been considered \citep{yuxinliuPlanningOvercookedGame2020} as well as Human-Robot Interaction \citep{bishopCHAOPTTestbedEvaluating2020,roseroTwoManyCooks2021}, Human-\ac{AI} Interaction with \ac{RL} \citep{carrollUtilityLearningHumans2019,charakornInvestigatingPartnerDiversification2020,knottEvaluatingRobustnessCollaborative2021,nalepkaInteractionFlexibilityArtificial2021,fontaineImportanceEnvironmentsHumanRobot2021,zhaoMaximumEntropyPopulationbased2023,sarkarPantheonrlMarlLibrary2022,ruhdorferMindsChefsUsing2023} and Bayesian Learning \citep{ribeiroAssistingUnknownTeammates2022}.
+Classical planning using the \ac{PDDL} has been considered \citep{yuxinliuPlanningOvercookedGame2020} as well as Human-Robot Interaction \citep{bishopCHAOPTTestbedEvaluating2020,roseroTwoManyCooks2021}, Human-\ac{AI} Interaction with \ac{RL} \citep{carrollUtilityLearningHumans2019,charakornInvestigatingPartnerDiversification2020,knottEvaluatingRobustnessCollaborative2021,nalepkaInteractionFlexibilityArtificial2021,fontaineImportanceEnvironmentsHumanRobot2021,zhaoMaximumEntropyPopulationbased2023,sarkarPantheonrlMarlLibrary2022,ruhdorferMindsChefsUsing2023} and Bayesian Learning \citep{ribeiroAssistingUnknownTeammates2022}.
 % Several bachelor theses at the TU Delft have focused this topic, also mostly concerned about human robot interaction \citep{ordonezcardenasFictionalCoPlayHumanAgent2022,vanveenCoupledModelbasedCooperative2022,vosTrainingHumanAIAgent2022,antonScriptedAIOvercooked2023,herbenEffectsHeuristicOptimisations2023,niemantsverdrietImprovementsImitationLearning2023}.
 The Overcooked \ac{AI} benchmark introduced by \cite{carrollUtilityLearningHumans2019} is however only concerned with cooperation and does not take more complex tasks into account.
 The domain only includes a single recipe that is supposed to be produced as often as possible.
 The \ac{RL} agents can not correspond to individual tasks, but can only continually perform a single task.
 Additionally, the agents need to be trained for each possible task, making the agents infeasible to support many different tasks.
-The bayesian learning approach is more flexible, as it can adjust online to the domain. 
+The Bayesian learning approach is more flexible, as it can adjust online to the domain. 
 It cannot however respond to individual tasks either.
 
 The \textit{Overcooked} planning problem is similar to dynamic pickup and delivery problems \citep{berbegliaDynamicPickupDelivery2010} as it also includes picking up objects and transporting them.

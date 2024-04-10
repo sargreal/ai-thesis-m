@@ -1,7 +1,7 @@
 \section{Experimental Evaluation}\label{sec:evaluation}
 
 The acting system, the robustness heuristic and the task preparations were implemented directly inside the system \ac{FAPE} \citep{bit-monnotTemporalHierarchicalModels2016a}.
-The statement that \ac{FAPE} supports acting \citep{dvorakPlanningActingTemporal2014,bit-monnotTemporalHierarchicalModels2016a,bit-monnotFAPEConstraintbasedPlanner2020} does not hold.
+The statements that \ac{FAPE} supports acting \citep{dvorakPlanningActingTemporal2014,bit-monnotTemporalHierarchicalModels2016a,bit-monnotFAPEConstraintbasedPlanner2020} do not hold.
 The acting implementation is not present in the current version of the system, and the original acting implementation was domain-dependent and only supported non-hierarchical problems.
 Additionally, the removal of actions from a chronicle is not implemented, which makes replanning and plan repair impossible.
 Lastly, when adding new tasks, they could not create actions during the current plan, as the timeline implementation does not allow splitting timelines to support a new timeline.
@@ -20,7 +20,7 @@ The evaluation was done in an LXC container with 12 Intel(R) Xeon(R) Gold 6334 C
 Planning in \ac{FAPE} is however a single-threaded process, so only one CPU core can be used.
 Each planning iteration was given 1000 seconds to complete.
 
-We consider four different variants of our domain definition:
+We consider four different variants of our \textit{Overcooked} domain definition:
 \begin{itemize}
   \item Fully hierarchical: All action templates are task-dependent and the duration of the action template \verb|a_move| is fixed at 5.
   \item Fully hierarchical with durations: All action templates are task-dependent and the duration of the action template \verb|a_move| is the shortest distance in the map calculated using the A* search algorithm. 
@@ -47,10 +47,10 @@ We consider four different variants of our domain definition:
 \subsection{Environments}
 
 We consider two environments in this evaluation.
-The formal environment definition is included in Appendix \ref{app:environments}.
+The complete environment definition is included in Appendix \ref{app:environments}.
 
 
-\bild{fig:eval-overcooked}{overcooked2_tutorial}{Overcooked!2 Tutorial level}{10}
+\bild{fig:eval-overcooked}{overcooked2_tutorial}{The tutorial level of ``Overcooked!2''}{10}{``Overcooked!2'' tutorial level}
 
 First, we consider the ``tutorial level'' of the ``Overcooked!2'' game shown in Figure \ref{fig:eval-overcooked}.
 The environment provides the three ingredients lettuce, tomato and cucumber, the tableware plate and the tool knife.
@@ -62,7 +62,7 @@ We define four possible arrange areas, two in the middle on each side and two on
 We chose this environment, as it contains all of the properties we consider and provides simple to complex tasks.
 Also, it is the first environment human players encounter when learning the game, so can serve as an example if the planning system is viable for this domain.
 
-\bild{fig:eval-mapB}{pddl_mapB}{Map}{10}
+\bild{fig:eval-mapB}{pddl_mapB}{Complex map for making burgers from \cite{yuxinliuPlanningOvercookedGame2020}}{10}{Complex map for making burgers}
 
 Second, we consider the ``complex map'' shown in Figure \ref{fig:eval-mapB} taken from \cite{yuxinliuPlanningOvercookedGame2020}.
 This environment is not from the official game but was introduced by them.
@@ -112,7 +112,7 @@ The makespan is however shorter for the partial hierarchy compared to the full h
     Part. hier.        & yes & $563.0s\pm 45.1$ & $3754\pm 0.0$   &  $227\pm 0.0$   \\
     Part. hier. + dur & yes & $628.0s\pm 16.9$ & $3744\pm 0.5$   &  $318\pm 0.0$            \\
   \end{tabular}
-  \caption{Produce one burger}
+  \caption[Results for producing one burger]{Results of \ac{TFD} and our different domain variations for producing one burger}
   \label{tab:eval-burger}
 \end{table}
 
@@ -131,11 +131,11 @@ TFD does consider more search nodes than \ac{FAPE}, as in the previous compariso
   Part. hier.       & no & $1000s+$ & 3800+    &  - \\
   Part. hier. + dur & no & $1000s+$ & 3071+    &  -          \\
   \end{tabular}
-  \caption{Produce two burgers}
+  \caption[Results for producing two burgers]{Results of \ac{TFD} and our different domain variations for producing two burgers}
   \label{tab:eval-burgers}
 \end{table}
 
-\subsection{Robustness Heuristic}
+\subsection{Robustness Heuristic vs Default and Makespan Heuristics}
 \label{sec:evaluation-robustness}
 
 In this section, we evaluate the robustness heuristic introduced in Section \ref{sec:approach-robustness}.
@@ -148,7 +148,7 @@ The depth-first search should always be at index 1 for fully hierarchical proble
 We choose $n=m=10$ for the robustness heuristic as a tradeoff between accuracy and feasibility.
 
 
-We compare the heuristic combinations in the following four different simple problems in the domain variant ``Fully hierarchichal with durations''.
+We compare the heuristic combinations in the following four different simple problems in the domain variant ``Fully hierarchical with durations''.
 This domain is chosen, as the previous evaluation showed that our partially hierarchical domain is not tractable and the durations are relevant for optimizations.
 The environment for the salads is the ``tutorial level'' (see Figure \ref{fig:eval-overcooked}).
 For the burger it is the ``complex map'' (see Figure \ref{fig:eval-mapB}).
@@ -237,7 +237,7 @@ Some of the high-level actions like the arranging of the tomato take very long.
 The low-level actions reveal that \verb|cook2| remains at \verb|manCounterMiddle2Top| between time 52 and 110, but only places the lettuce on the plate at time 110.
 Similarly, \verb|cook1| stands waiting between time 22 and 52 before transporting the lettuce.
 
-\bild{fig:eval-robustness}{robustness-tomato-salad}{High-level actions divided by cook for the task \texttt{order\_tomato\_lettuce\_salad} using the robustness@2 heuristic}{16}
+\bild{fig:eval-robustness}{robustness-tomato-salad}{High-level actions divided by cook for the task \texttt{order\_tomato\_lettuce\_salad} using the robustness@2 heuristic}{16}{High-level actions for a lettuce tomato salad using the robustness heuristic}
 
 \begin{figure}
   \begin{anmlcode}
@@ -266,10 +266,10 @@ Similarly, \verb|cook1| stands waiting between time 22 and 52 before transportin
   [148,156] a_move(cook1, manDeliver)
   [156,161] a_give(cook1, client1, plate4)
   \end{anmlcode}
-  \captionof{lstlisting}{Low-Level actions for the task \texttt{order\_tomato\_lettuce\_salad} using the robustness@2 heuristic}
+  \captionof{lstlisting}[Low-Level actions for a lettuce tomato salad using the robustness heuristic]{Low-Level actions for the task \texttt{order\_tomato\_lettuce\_salad} using the robustness@2 heuristic}
 \end{figure}
 
-\subsection{Acting}
+\subsection{Acting with Robustness Heuristic or Preparation Insertion}
 \label{sec:evaluation-acting}
 
 In this section, we evaluate the impact of the robustness heuristic and the task preparations on acting.
@@ -330,7 +330,7 @@ The default configuration has the lowest margins and reaches the deadline for ta
   preparations  & yes     & $25$    & $42$    &  $16$   & $27.7\pm13.2$         & $323$    \\
   robustness    & yes     & $39$    & $46$    &  $3$    & $29.3\pm23.1$         & $347$ \\
   \end{tabular}
-  \caption{Produce two burgers}
+  \caption{Results of the manual acting evaluation}
   \label{tab:eval-acting}
 \end{table}
 
@@ -338,7 +338,7 @@ The default configuration has the lowest margins and reaches the deadline for ta
 
 \begin{sidewaysfigure}
   \centering
-  \subfloat[Default FAPE]{\label{fig:eval-acting-default}\includegraphics[width=\linewidth]{images/Scenario3 tomato - default.pdf}} \\\medskip
+  \subfloat[Default FAPE, the first transport action only has a smaller height to show that it is overlapping with the arrange action]{\label{fig:eval-acting-default}\includegraphics[width=\linewidth]{images/Scenario3 tomato - default.pdf}} \\\medskip
   \subfloat[Makespan heuristic]{\label{fig:eval-acting-makespan}\includegraphics[width=\linewidth]{images/Scenario3 tomato - oracle_makespan.pdf}} \\\medskip
   \subfloat[Preparations, grey boxes represent inserted preparations]{\label{fig:eval-acting-preparations}\includegraphics[width=\linewidth]{images/Scenario3 tomato - preparations.pdf}} \\\medskip
   \subfloat[Robustness heuristic]{\label{fig:eval-acting-robustness}\includegraphics[width=\linewidth]{images/Scenario3 tomato - robustness.pdf}} \\\medskip

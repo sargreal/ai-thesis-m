@@ -23,6 +23,7 @@ During planning, the timelines are created incrementally.
 When threats occur between timelines, the timelines are separated.
 When the variable bindings are then resolved to be ground, these separations are kept in place and cannot be changed anymore.
 Through the robustness heuristic, some of the variable bindings are resolved sooner, but not soon enough.
+This is also the reason why cooks often just wait for several time steps for no apparent reason.
 
 Additionally, the heuristic results in a high variance for the planning time and the makespan.
 This variance is most likely related to the low value of 10 we chose for $n$ and $m$.
@@ -36,7 +37,7 @@ The approach with the robustness heuristic also has only a very small margin for
 The preparations approach on the other hand has higher and more stable margins compared to the robustness heuristic.
 We can observe that at least four preparations can be inserted.
 Here we further added preparations after the second task has been inserted.
-Overall, both approaches are far from the optimal plan that can be achieved without preparations.
+Overall, both approaches are far from the optimal plan without preparations.
 We have used the makespan heuristic for the optimal plan, as that can find the shortest plan possible.
 
 As we have again used an oracle approach for the task preparations, it can be observed that the selection of preparations is very important.

@@ -46,6 +46,8 @@
 \usepackage{subcaption}
 \usepackage{todonotes}
 \usepackage{rotating}
+\usepackage{substitutefont}
+\substitutefont{TS1}{aer}{cmr}
 
 
 % \theoremstyle{definition}
@@ -234,12 +236,12 @@ Abgabedatum:\\
 % #2 = Name des Bildes ohne Endung relativ zu images-Verzeichnis
 % #3 = Beschriftung
 % #4 = Breite des Bildes im Dokument in cm
-\newcommand{\bild}[4]{%
+\newcommand{\bild}[5]{%
   \begin{figure}[t]%
     \begin{center}%
       \includegraphics[width=#4cm]{images/#2}%
       \vskip -0.3cm%
-      \caption{#3}%
+      \caption[#5]{#3}%
       \vskip -0,2cm%
       \label{#1}%
     \end{center}%

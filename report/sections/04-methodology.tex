@@ -12,8 +12,8 @@ We consider two options for solving this optimization problem:
 
 \begin{enumerate}
     \item In Section \ref{sec:approach-robustness} we introduce a heuristic for the robustness of a plan. 
-    This is expected to increase the ability to insert a new task at a later point in time
-    \item In Section \ref{sec:approach-preparation} we then introduce a preparation algorithm that uses the hierarchical domain definition to determine which tasks can be prepared given a set of possible tasks that may be received.
+    This is expected to increase the ability to insert a new task at a later point in time.
+    \item In Section \ref{sec:approach-preparation} we then introduce preparation insertion as an algorithm that uses the hierarchical domain definition to determine which tasks can be prepared given a set of possible tasks that may be received.
 \end{enumerate}
 
 \subsection{\textit{Overcooked} Domain Definition}
@@ -21,9 +21,8 @@ We consider two options for solving this optimization problem:
 
 In this Section, we define the \textit{Overcooked} domain in \ac{ANML} \cite{smithANMLLanguage2008} that is used by FAPE.
 We only present an overview and the relevant decisions here.
-The full domain is available in Appendix \ref{app:domain}.
+The complete domain is available in Appendix \ref{app:domain}.
 
-\todo{Hierarchy?}
 The constants of the domain such as cooks or ingredients are defined as a type hierarchy.
 \ac{FAPE} does not support multiple inheritance, so an ingredient cannot be choppable and fryable at the same time.
 We add relevant fluents to the types such as the location of an ingredient.
@@ -38,6 +37,13 @@ The low-level actions include only the necessary arguments to specify the action
 For instance the action \verb|a_drop| only specifies a person that drops something it carries.
 The new location of the carryable is defined as the placement area that is connected to the manipulation area where the cook is during this action (see Listing \ref{lst:approach-constants}).
 
+
+We define the action \verb|a_move(Person,ManArea)| only with a target, to reduce the planning cost spent on it.
+The action behaves like a teleportation from the current area to the destination, but the duration can be set using \verb|distance(ManArea,ManArea)|.
+If some duration is not defined, it is not possible to move between those locations.
+This duration can then be the cost of moving between these areas.
+We also consider two modifications of the action \verb|a_move|.
+First, we can set the duration to a fixed amount, and second, we can make the action not task-dependent.
 
 \begin{table}
   \centering
@@ -62,13 +68,6 @@ The new location of the carryable is defined as the placement area that is conne
   \captionof{lstlisting}{Constant variables in the action \texttt{a\_drop}}
   \label{lst:approach-constants}
 \end{figure}
-
-We define the action \verb|a_move(Person,ManArea)| only with a target, to reduce the planning cost spent on it.
-The action behaves like a teleportation from the current area to the destination, but the duration can be set using \verb|distance(ManArea,ManArea)|.
-If some duration is not defined, it is not possible to move between those locations.
-This duration can then be the cost of moving between these areas.
-We also consider two modifications of the action \verb|a_move|.
-First, we can set the duration to a fixed amount, and second, we can make the action not task-dependent.
 
 The action \verb|a_chop(Cook,Choppable,Knife)| requires that the cook does not carry anything while chopping and is marked as busy so they cannot chop multiple things at once.
 Similarly, tools are marked as processing during the actions \verb|a_chop|,\verb|a_boil| and \verb|a_fry|.
@@ -134,7 +133,7 @@ We use the value 30.
     \verb|order_lettuce_tomato_cucumber_salad(Client)|  \\
     \verb|order_lettuce_tomato_burger(Client)|
   \end{tabular}
-  \caption{Orders in the domain \textit{Overcooked} which are considered to be high-level actions.}
+  \caption[Orders in the domain \textit{Overcooked}]{Orders in the domain \textit{Overcooked} which are considered to be high-level actions.}
   \label{tab:approach-domain-orders}
 \end{table}
 
@@ -185,7 +184,7 @@ We extend the theoretical actor model in \ac{FAPE} (see Figure \ref{fig:backgrou
 Technically, this interaction exists in \ac{FAPE} already through the message $newgoal(g)$, but was not made explicit in the architecture.
 
 
-\bild{fig:approach-acting-architecture}{architecture}{Architecture of \ac{FAPE} with a Stream of Tasks}{12}
+\bild{fig:approach-acting-architecture}{architecture}{Architecture of \ac{FAPE} with a Stream of Tasks}{12}{Architecture of FAPE with a Stream of Tasks}
 
 The interactions between the components are implemented as in \ac{FAPE} using message passing, with each component being a state machine.
 The observation database and the execution of skills are not considered in this work, as no interaction with a platform was introduced.
@@ -202,7 +201,7 @@ Specifically, the task is sent to the activity manager using the message $newtas
 \subsubsection{Activity Manager}
 
 The activity manager is the core component of this model, managing all interactions between the other components.
-It is a state machine with the states IDLE, \mbox{WAITING\_FOR\_PLAN} and DISPATCHING.
+It is a state machine with the states IDLE,  WAITING\_FOR\_PLAN and DISPATCHING.
 In the idle state, it is waiting for tasks to be submitted.
 This is also the initial state.
 It switches from IDLE to WAITING\_FOR\_PLAN when receiving a task.
@@ -286,7 +285,6 @@ A visual representation of the state machine is shown in Figure \ref{fig:approac
     \end{itemize}
 \end{itemize}
 
-\bild{fig:approach-activity-manager}{state_activity_manager}{State machine diagram of the activity manager component}{10}
 
 % The receiving of new tasks may occur at any point during the execution, so there are 3 separate points where this may happen.
 % \begin{enumerate}
@@ -298,7 +296,9 @@ A visual representation of the state machine is shown in Figure \ref{fig:approac
 The insertion of a new task $t = \langle[t_{receive},t_{deadline}] \tau\rangle$ is handled by the plan modification Task Addition:
 
 \begin{definition}[Task Addition]
-    A chronicle $\phi_1 = (\pi_1,\mathcal{F}_1,\mathcal{C}_1)$ can be extended to a chronicle $\phi_2 = (\pi_2,\mathcal{F}_2,\mathcal{C}_2)$ by inserting a new temporally qualified task instance $t = \langle[t_{receive},t_{deadline}] \tau\rangle$. This transformation is denoted $\phi_1 \xrightarrow{t}_I \phi_2$ and does the following modifications to $\phi_2$
+    A chronicle $\phi_1 = (\pi_1,\mathcal{F}_1,\mathcal{C}_1)$ can be extended to a chronicle $\phi_2 = (\pi_2,\mathcal{F}_2,\mathcal{C}_2)$ by inserting a new temporally qualified task instance \\
+    $t = \langle[t_{receive},t_{deadline}] \tau\rangle$.
+    This transformation is denoted $\phi_1 \xrightarrow{t}_I \phi_2$ and does the following modifications to $\phi_2$
   \begin{align*}
     \pi_2 \leftarrow & \pi_1 \cup \{\tau\} \\
     \mathcal{F}_2 \leftarrow & \mathcal{F}_1 \cup \{t\} \\
@@ -306,6 +306,7 @@ The insertion of a new task $t = \langle[t_{receive},t_{deadline}] \tau\rangle$ 
   \end{align*}
 \end{definition}
 
+\bild{fig:approach-activity-manager}{state_activity_manager}{State machine diagram of the activity manager component}{10}{State machine of the activity manager component}
 \subsubsection{Planner Component}
 
 The planner component executes the planning algorithm, and on failure tries first repairing and then replanning.
@@ -450,7 +451,7 @@ This heuristic can then be included during planning.
     g(\phi) \approx \frac{1}{n} \sum_{i=1}^{n} \hat{g}(\phi,m)
 \end{align}
 
-\subsection{Preparation insertion}
+\subsection{Preparation Insertion}
 \label{sec:approach-preparation}
 
 Preparing parts of a meal is a common strategy in restaurants to handle high loads.
@@ -504,11 +505,24 @@ Knowing how often a specific preparation is included can be helpful when choosin
 
 
 \begin{example}
-  Suppose we have $\mathcal{T}_p = \{\mathtt{order\_lettuce\_tomato\_salad}\}$, \\ $\pi=\{\mathtt{m\_chop(lettuce1)}\}$ and the typed ground instances of the problem $D_{Plate}=\{\mathtt{plate1}\}$, $D_{Lettuce}=\{\mathtt{lettuce1}\}$, $D_{Tomato}=\{\mathtt{tomato1}\}$.
+  Suppose we have 
+  \begin{align*}
+    \mathcal{T}_p &= \{\mathtt{order\_lettuce\_tomato\_salad}\} \\
+    \pi&=\{\mathtt{m\_chop(lettuce1)}\} \\
+    &\text{and the typed ground instances of the problem} \\
+    D_{Plate}&=\{\mathtt{plate1}\}, D_{Lettuce}=\{\mathtt{lettuce1}\}, D_{Tomato}=\{\mathtt{tomato1}\}
+  \end{align*}
   The task \verb|order_lettuce_tomato_salad| has only one action template, corresponding to Listing \ref{lst:approach-order}.
-  The ground instances that can be prepared are then $\mathcal{T}_s=\{\mathtt{m\_prepare\_tableware(plate1)}, \mathtt{m\_chop(lettuce1)},\\ \mathtt{m\_chop(tomato1)}, \mathtt{m\_arrange(lettuce1)}, \mathtt{m\_arrange(tomato1)}\}$.
+  The ground instances that can be prepared are then 
+  \begin{align*}
+    \mathcal{T}_s=&\{\mathtt{m\_prepare\_tableware(plate1)}, \mathtt{m\_chop(lettuce1)}, \mathtt{m\_chop(tomato1)},\\ 
+    &\mathtt{m\_arrange(lettuce1)}, \mathtt{m\_arrange(tomato1)}\}
+  \end{align*}
   Of these ground instances, $\mathtt{m\_chop(lettuce1)}$ cannot be prepared, as it is already included in $\pi$ and $\mathtt{m\_arrange(tomato1)}$ cannot be prepared, as the dependency $\mathtt{m\_chop(tomato1)}$ is not in $\pi$.
-  So the final list of preparable tasks is $T_p=\{\mathtt{m\_prepare\_tableware(plate1)}, \mathtt{m\_chop(tomato1)},\\ \mathtt{m\_arrange(lettuce1)}\}$.
+  So the final list of preparable tasks is 
+  \begin{align*}
+    T_p=\{\mathtt{m\_prepare\_tableware(plate1)}, \mathtt{m\_chop(tomato1)}, \mathtt{m\_arrange(lettuce1)}\}
+  \end{align*}
 \end{example}
 
 To be able to use a preparation later, tasks need to have one possible decomposition that is fulfilled if all postconditions are met.

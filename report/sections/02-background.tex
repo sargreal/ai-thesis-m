@@ -2,8 +2,8 @@
 
 This section introduces concepts and definitions relevant to this work.
 Section \ref{sec:classical-planning} introduces classical planning to illustrate the background of \ac{HTN} planning.
-Then, Section \ref{sec:htn-planning} introduces \ac{HTN} planning as an extension of classical planning that is used in this work.
-Section \ref{sec:acting} concludes this section by introducing acting and online planning.
+Then, Section \ref{sec:htn-planning} introduces \ac{HTN} planning and temporal \ac{HTN} planning as an extension of classical planning that is used in this work.
+Section \ref{sec:acting} concludes this section by introducing the concepts of acting and online planning which are relevant for handling the dynamic domain.
 
 % Since the Planner FAPE \citep{bit-monnotFAPEConstraintbasedPlanner2020} is used for the implementation and evaluation, the definitions from \cite{bit-monnotTemporalHierarchicalModels2016a} and \cite{bit-monnotFAPEConstraintbasedPlanner2020} are used as a base throughout the background and approach sections.
 % The definitions are additionally inspired by \cite{ghallabAutomatedPlanningTheory2004} and \cite{hollerGuidingSearchHTN2019}.
@@ -17,10 +17,10 @@ Section \ref{sec:acting} concludes this section by introducing acting and online
 
 Classical planning \citep{ghallabAutomatedPlanningTheory2004}, first introduced by STRIPS \citep{fikesSTRIPSNewApproach1971}, is the widely adopted approach to planning upon which most extensions and other planning approaches build.
 % While there are different ways of representing the problem in classical planning exist, they 
-A classical planning problem consists of a domain (in our case \textit{Overcooked}) and a specific planning problem, e.g., that a client needs to have a burger in the end.
+A classical planning problem consists of a domain (for example \textit{Overcooked}) and a specific planning problem, e.g., that a client needs to have a burger in the end.
 The domain specifies variables and state transition functions, called actions, while the problem gives an initial state and a goal state.
 Then, a planner has to find a sequence of actions, called a plan $\pi$, that can transform the initial state to the goal state.
-The following definitions are based on \cite{ghallabAutomatedPlanningTheory2004} and \cite{hollerGuidingSearchHTN2019}.
+The following definitions are based on \citet[chap.~1,2]{ghallabAutomatedPlanningTheory2004} and \cite{hollerGuidingSearchHTN2019}.
 
 \begin{definition}[Classical Planning Domain]
   A classical planning domain is a tuple $\Sigma=\langle \mathcal{L}, \mathcal{O}, \delta \rangle$.
@@ -29,10 +29,10 @@ The following definitions are based on \cite{ghallabAutomatedPlanningTheory2004}
     \item $\mathcal{O}$ is a set of operator symbols.
     \item $\delta$ is a triple $(prec, add, del )$ of functions $f: \mathcal{O} \rightarrow 2^\mathcal{L}$ that define the state transitions of actions as preconditions $prec$ and effects $add, del$.
   \end{itemize}
-  An action symbol $a \in \mathcal{O}$ is applicable in a state $s \subseteq L$ iff $prec(a) \subseteq s$.
-  When it is applicable, the resulting state is defined by the function $\gamma: A \times 2^L \rightarrow 2^L$ with $\gamma(a,s) = (s~\backslash~del(a))~\cup~add(a)$. \\
+  An action symbol $a \in \mathcal{O}$ is \textnormal{applicable} in a state $s \subseteq L$ iff $prec(a) \subseteq s$.
+  When it is \textnormal{applicable}, the resulting state is defined by the function $\gamma: A \times 2^L \rightarrow 2^L$ with $\gamma(a,s) = (s~\backslash~del(a))~\cup~add(a)$. \\
   A plan $\pi = \{a_1,\dots,a_n\}$ is a sequence of actions.
-  $\pi$ is executable in a state $s_0$ iff all actions $a_1,\dots,a_n$ are applicable in $s_0,\dots,s_{n-1}$, where $s_k=\gamma(a_k,s_{k-1})$.
+  $\pi$ is \textnormal{executable} in a state $s_0$ iff all actions $a_1,\dots,a_n$ are \textnormal{applicable} in $s_0,\dots,s_{n-1}$, where $s_k=\gamma(a_k,s_{k-1})$.
   $s_n$ is then defined as the state produced by applying $\pi$ in state $s$, denoted as $\gamma(\pi,s)$.
 \end{definition}
 
@@ -59,11 +59,14 @@ The goal state $g$ only defines which propositional environment variables must b
 
 \acf{HTN} planning is a planning paradigm that allows for the specification of complex tasks by the definition of subtasks.
 Therefore it is viewed as a control strategy for planning \citep[chap.~11]{ghallabAutomatedPlanningTheory2004}.
-Generally, the goal in \ac{HTN} planning is to decompose complex tasks into primitive executable actions.
+Generally, the goal in \ac{HTN} planning is to decompose complex tasks into \textit{primitive} executable actions.
 For instance, preparing a simple burger in \textit{Overcooked} requires a bun, a burger patty and lettuce.
 Each of these ingredients may involve multiple preparation steps like chopping or frying, that again can be grouped into subtasks themselves.
-Eventually, we are left with an executable sequence of simple steps to create the requested burger.
+Eventually, we are left with an \textit{executable} sequence of simple steps to create the requested burger.
 This is conceptually different from classical planning, as it defines tasks to execute instead of a goal state to achieve.
+
+The basic notions of HTN planning are introduced in this section to serve as a basis for the definitions of temporal \ac{HTN} planning in Section \ref{sec:temporal-htn-planning}.
+The following definitions are based on \citet[chap.~11]{ghallabAutomatedPlanningTheory2004}, \cite{hollerGuidingSearchHTN2019} and \cite{bit-monnotTemporalHierarchicalModels2016a}.
 
 
 % The \ac{HTN} planning paradigm was first introduced by \cite{erol1994htn} and has since been used in a variety of domains, including robotics \citep{ghallab1998pddl, nau2003shop2, cashmore2008htn, cashmore2015htn}, video games \citep{ontanon2015survey}, and natural language processing \citep{zettlemoyer2005learning, wang2006learning, wang2007learning, wang2008learning, wang2010learning, wang2011learning, wang2012learning, wang2013learning, wang2014learning, wang2015learning, wang2016learning, wang2017learning, wang2018learning, wang2019learning, wang2020learning}.
@@ -73,7 +76,7 @@ This is conceptually different from classical planning, as it defines tasks to e
 % \cite{hollerGuidingSearchHTN2019}:
 
 Formally, a task is an expression of the form $\tau(r_1,\dots,r_n)$ where $\tau \in \mathcal{O}$ is a task symbol and $r_1,\dots,r_n$ are the parameters.
-There exist primitive tasks where $\tau$ is an action symbol and nonprimitive tasks.
+There exist \textit{primitive} tasks where $\tau$ is an action symbol and \textit{nonprimitive} tasks.
 
 \begin{definition}[Task Network]
   A task network is an acyclic digraph $tn = (T,\prec,\alpha)$.
@@ -84,12 +87,12 @@ There exist primitive tasks where $\tau$ is an action symbol and nonprimitive ta
   \end{itemize}
 \end{definition}
 
-A task network $tn$ is called primitive if all of the task nodes refer to primitive tasks. 
+A task network $tn$ is called \textit{primitive} if all of the task nodes refer to \textit{primitive} tasks. 
 
 \begin{definition}[\ac{HTN} Planning Domain]
-  An \ac{HTN} planning domain is a tuple $\Sigma=\langle \mathcal{L}, \mathcal{O}, \mathcal{M}, \delta \rangle$.
+  An \ac{HTN} planning domain is a tuple \\ $\Sigma=\langle \mathcal{L}, \mathcal{O}, \mathcal{M}, \delta \rangle$.
   $\mathcal{L},\mathcal{O}$ are defined as in classical planning. 
-  $\mathcal{M}$ is a set of methods $(\tau,tn), \tau \in \mathcal{O}$, where $\tau$ is nonprimitive, that describe possible decompositions from one task into a task network.
+  $\mathcal{M}$ is a set of methods $(\tau,tn), \tau \in \mathcal{O}$, where $\tau$ is \textnormal{nonprimitive}, that describe possible decompositions from one task into a task network.
   % A task network $tn$ is a triple $(T,\prec,\alpha)$.
   % $\prec \subseteq T \times T$ is a set of strict partial ordering relations between the task identifiers.
   % $\alpha : T \rightarrow A \cup C$ is a function mapping the task identifiers to task or action names.
@@ -124,16 +127,16 @@ A task network $tn$ is called primitive if all of the task nodes refer to primit
 % A State-Based Search is the classical approach to solving planning problems.
 % A state expansion $f : (L,tn) \rightarrow 2^(L,tn)$ creates a new state for each decomposable task $t$ in the current task network $tn_i$.
 % A task is only decomposable if there exists a method $m = (c,tn) \in M$ such that $\delta(m)$
-% The planning is finished when all task names in the current task network $tn_i$ are primitive and there is a sequence of the tasks in $tn_i$ that is consistent with its ordering relations.
+% The planning is finished when all task names in the current task network $tn_i$ are \textit{primitive} and there is a sequence of the tasks in $tn_i$ that is consistent with its ordering relations.
 
-The \ac{HTN} planning problem is solved by decomposing the initial task network into an executable plan.
+The \ac{HTN} planning problem is solved by decomposing the initial task network into an \textit{executable} plan.
 \cite{erolHTNPlanningComplexity1994} find that solving total order problems has double EXPTIME and EXPSPACE-hard complexity \citep{papadimitriouComputationalComplexity2003}, while partial order problems are undecidable.
 
 \begin{definition}[\ac{HTN} Planning Solution]
-  If $tn = (T,\prec,\alpha)$ is primitive, then a plan $\pi = \{a_1,\dots,a_n\}$ is a solution for $P$ if all of the following conditions hold:
+  If $tn = (T,\prec,\alpha)$ is \textnormal{primitive}, then a plan $\pi = \{a_1,\dots,a_n\}$ is a solution for $P$ if all of the following conditions hold:
   \begin{itemize}
     \item The actions in $\pi$ correspond to the tasks in $T$
-    \item $\pi$ is applicable in $s_0$
+    \item $\pi$ is \textnormal{executable} in $s_0$
     \item the total ordering $\{a_1,\dots,a_n\}$ satisfies the ordering in $\prec$
   \end{itemize}
   \label{def:htn-sol}
@@ -147,13 +150,13 @@ The \ac{HTN} planning problem is solved by decomposing the initial task network 
   \If{$tn = \varnothing$}{\Return{$\varnothing$}}
   $\tau \leftarrow$ first task in $tn$\;
   $tn' \leftarrow$ remaining tasks in $tn$\;
-  \If{$\tau$ is primitive and there is an action for $\tau$ applicable in $s$}{
+  \If{$\tau$ is \textnormal{primitive} and there is an action for $\tau$ \textnormal{applicable} in $s$}{
     nondeterministically choose an action $a$ for $\tau$\;
     $\pi \leftarrow$ SHOP($\gamma(s,a)$,$tn'$,$\Sigma$)\;
     \If{$\pi$ = FAIL}{\Return{FAIL}}
     \Return{cons(p,$\pi$)}
   }
-  \ElseIf{$\tau$ is not primitive and there is a decomposition of $\tau$ applicable in $s$}{
+  \ElseIf{$\tau$ is not \textnormal{primitive} and there is a decomposition of $\tau$ \textnormal{applicable} in $s$}{
     nondeterministically choose a decomposition $m$ of $\tau$ in $s$\;
     $tn \xrightarrow{\tau,m}_D tn'$\;
     \Return{SHOP($s$,$tn'$,$\Sigma$)}
@@ -165,12 +168,12 @@ There are two conceptually different approaches to arriving at a plan $\pi$ for 
 First, the \ac{SSP} approach as in \cite{nauSHOPSimpleHierarchical1999} is shown in algorithm \ref{alg:background:shop}.
 The search is executed as a forward search and is started with an initial state $s_0$.
 The first task in the task network is selected based on the ordering $\prec$ in the forward search.
-Primitive tasks are applied directly and change the state, nonprimitive tasks are decomposed and change the task network.
+\textit{primitive} tasks are applied directly and change the state, \textit{nonprimitive} tasks are decomposed and change the task network.
 The algorithm is then applied recursively for the new state and task network.
 
 Second, the \ac{PSP} approach as in \citet[chap.~5]{ghallabAutomatedPlanningTheory2004} is shown in algorithm \ref{alg:background:psp}.
 The search problem here is abstracted from states and the search space consists of partial plans.
-In \ac{HTN} planning, a task network that is not necessarily primitive is a partial plan.
+In \ac{HTN} planning, a task network that is not \textit{necessarily primitive} is a partial plan.
 As such this approach is similar to constraint solving as it is a search over all possible solutions.
 The flaws shown in the algorithm may be unrefined tasks or causal threats\footnote{During planning, causal links are added between actions to state that the cause of an action is the effect of another action, causal threats are then possible violations of these links.}.
 Resolvers are modifications of a partial task network, that resolve the possible flaws.
@@ -226,6 +229,7 @@ It is common to encode a planning problem as a \ac{CSP} \citep[chap.~8]{ghallabA
 \cite{stockHierarchicalHybridPlanning2015} introduced the notion of a MetaCSP, that solves several \ac{CSP}s, in their case, one for variable bindings, and a \ac{STN} \\citep{dechterTemporalConstraintNetworks1991} managing the temporal constraints on time points.
 This approach is also used in \ac{FAPE} \citep{bit-monnotTemporalHierarchicalModels2016a}.
 The main components required to model the temporal \ac{HTN} planning problem are introduced in the following paragraphs. 
+The definitions are based on \citet[chap.~14]{ghallabAutomatedPlanningTheory2004} and \citet{bit-monnotTemporalHierarchicalModels2016a}.
 
 
 Time is represented quantitatively using time points. % as in \ac{STN}  \citep{dechterTemporalConstraintNetworks1991}.
@@ -301,8 +305,8 @@ Since there is no explicit task network, the partial plan uses the same symbol $
 
 Tasks, methods and actions are defined differently in \ac{FAPE} compared to the common \ac{HTN} approach.
 Action templates combine the notion of an action and a method.
-Tasks $\mathcal{T}$ are no longer split between primitive and non-primitive tasks.
-\cite{bit-monnotTemporalHierarchicalModels2016a} argues that the distinction between primitive and nonprimitive tasks as well as actions and methods is only an artificial restriction and that it has no impact on the planning implementation.
+Tasks $\mathcal{T}$ are no longer split between \textit{primitive} and non-\textit{primitive} tasks.
+\cite{bit-monnotTemporalHierarchicalModels2016a} argues that the distinction between \textit{primitive} and \textit{nonprimitive} tasks as well as actions and methods is only an artificial restriction and that it has no impact on the planning implementation.
 
 \begin{definition}[Action Template]
   An action template is a tuple \\ $(head(A), task(A), dependent(A), subtasks(A), \mathcal{F}_A, \mathcal{C}_A)$ where
@@ -316,9 +320,9 @@ Tasks $\mathcal{T}$ are no longer split between primitive and non-primitive task
 \end{definition}
 
 The start and end time points of the action template and the subtasks are all left implicit.
-An action template is high-level, if $subtasks(A) \neq \varnothing$, otherwise it is primitive.
+An action template is high-level, if $subtasks(A) \neq \varnothing$, otherwise it is \textit{primitive}.
 A method $(c,tn)$ is part of a high-level action template through $subtasks(A)$ and $\mathcal{C}_A$.
-A task is primitive, if there is only one action template $A$ that achieves it and that action template is primitive.
+A task is \textit{primitive}, if there is only one action template $A$ that achieves it and that action template is \textit{primitive}.
 
 \begin{definition}[Task Decomposition in \ac{FAPE}]
   A chronicle $\phi_1 = (\pi_1,\mathcal{F}_1,\mathcal{C}_1)$ can be refined into a chronicle $\phi_2 = (\pi_2,\mathcal{F}_2,\mathcal{C}_2)$ by decomposing an unrefined task $\tau \in \pi_1$ with a new action instance $a$. This transformation is denoted $\phi_1 \xrightarrow{\tau,a}_D \phi_2$ and does the following modifications to $\phi_2$
@@ -330,7 +334,7 @@ A task is primitive, if there is only one action template $A$ that achieves it a
   \label{def:htn-task-dec-fape}
 \end{definition}
 
-This decomposition definition is much more straightforward compared to Def. \ref{def:htn-task-dec}, as it leaves the burden of constraint solving on the MetaCSP.
+This decomposition definition is much more straightforward compared to Definition \ref{def:htn-task-dec}, as it leaves the burden of constraint solving on the MetaCSP.
 Contrary to the traditional approach with methods, a high-level action instance $a$ is added to the partial plan, since it may also define state variable changes and may thus be required for the execution.
 The additional constraint $\{task(a) = \tau\}$ ensures that $a$ does refine $\tau$ correctly by unifying the parameters and time points of $a$ and $\tau$.
 
@@ -425,7 +429,7 @@ Additionally, \ac{FAPE} includes a dispatchable \ac{STN}, that allows marking ti
 When the current time is changed, all time points that are not executed have to take place after the current time.
 This allows to mark actions as executing or executed and the execution of some tasks is not possible anymore.
 
-\bild{fig:background-acting-fape}{background_acting_fape}{General architecture of \ac{FAPE} for online planning and acting}{10}
+\bild{fig:background-acting-fape}{background_acting_fape}{General architecture of \ac{FAPE} for online planning and acting}{10}{Actor Model of FAPE}
 
 
 
@@ -480,7 +484,7 @@ When focusing on plan stability \citep{foxPlanStabilityReplanning2006}, plan rep
 % Primary Tasks are the tasks that can be executed, which requires that there are no tasks that precede them.
 % There are different possibilities for execution:
 % Execution via reduction: A task is executed when it is reduced/decomposed using a method body
-% Execution via performing an action: A (primary) action can be executed if it is applicable.
+% Execution via performing an action: A (primary) action can be executed if it is \textit{applicable}.
 % Execution via replacement: A method body
 
 % Most of the approaches for do not cover the case of new targets explicitly, as it may be handled directly by the repair and replan approach.
